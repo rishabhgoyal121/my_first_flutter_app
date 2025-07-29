@@ -33,21 +33,41 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.orangeAccent),
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.indigoAccent,
-          foregroundColor: Colors.white
+          foregroundColor: Colors.white,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.indigoAccent,
             foregroundColor: Colors.white,
             textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+        ),
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.dark,
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.deepPurple,
+          foregroundColor: Colors.deepOrange
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.deepPurple,
+            foregroundColor: Colors.amberAccent,
+            textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12)
           )
         )
       ),
+      themeMode: ThemeMode.system,
       initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(),
-        '/about': (context) => AboutScreen()
+        '/about': (context) => AboutScreen(),
       },
     );
   }
