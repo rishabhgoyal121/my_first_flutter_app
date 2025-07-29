@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'about_screen.dart';
 import 'home_screen.dart';
+import 'login_screen.dart';
 
 void main() {
   runApp(MyApp());
@@ -64,10 +65,11 @@ class MyApp extends StatelessWidget {
         )
       ),
       themeMode: ThemeMode.system,
-      initialRoute: '/',
+      initialRoute: '/login',
       routes: {
         '/': (context) => HomeScreen(),
         '/about': (context) => AboutScreen(),
+        '/login': (context) => LoginScreen(),
       },
     );
   }
