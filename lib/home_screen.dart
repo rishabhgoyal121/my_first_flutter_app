@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'product.dart';
+import 'product_details_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -54,7 +55,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: Image.network(product.imageUri, width: 50, height: 50),
                 title: Text(product.title),
                 subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) =>ProductDetailsScreen(product: product)),
+                  );
+                },
               );
             },
           );
