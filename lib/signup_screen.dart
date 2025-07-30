@@ -59,9 +59,12 @@ class _SignupScreenState extends State<SignupScreen> {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Signing up $_username')),
+                      SnackBar(
+                        content: Text('Signing up $_username'),
+                        duration: Duration(seconds: 1),
+                      ),
                     );
-                    Future.delayed(const Duration(seconds: 1), () {
+                    Future.delayed(const Duration(seconds: 2), () {
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
