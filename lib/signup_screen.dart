@@ -172,6 +172,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           houseNumber: _houseNumber,
                           zipcode: _zipcode,
                           password: _password,
+                          lat: _lat,
+                          long: _long,
                         );
                         await userBox.add(user);
                         ScaffoldMessenger.of(context).showSnackBar(
