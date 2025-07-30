@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'db_helper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,19 +35,20 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    // TODO : implement login logic
-                    Navigator.pushReplacementNamed(context, '/');
+                    print('Validation passed');
+                    final navContext = context;
+                    try {
+                      await DBHelper.insertUser(email, password);
+                      print('User inserted');
+                      Navigator.pushReplacementNamed(navContext, '/');
+                    } catch (e) {
+                      print('Error: $e');
+                    }
                   }
                 },
                 child: Text('Login'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, '/signup');
-                },
-                child: Text('Don\'t have an account? Sign Up ->'),
               ),
             ],
           ),

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'about_screen.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox('users');
   runApp(MyApp());
 }
 
@@ -53,16 +57,16 @@ class MyApp extends StatelessWidget {
         ),
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.deepPurple,
-          foregroundColor: Colors.deepOrange
+          foregroundColor: Colors.deepOrange,
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.deepPurple,
             foregroundColor: Colors.amberAccent,
             textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12)
-          )
-        )
+            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          ),
+        ),
       ),
       themeMode: ThemeMode.system,
       initialRoute: '/login',
