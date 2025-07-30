@@ -162,31 +162,49 @@ class _SignupScreenState extends State<SignupScreen> {
 
                       try {
                         final userBox = Hive.box<User>('users');
-                        final user = User(
-                          firstName: _firstName,
-                          lastName: _lastName,
-                          email: _email,
-                          phone: _phone,
-                          city: _city,
-                          street: _street,
-                          houseNumber: _houseNumber,
-                          zipcode: _zipcode,
-                          password: _password,
-                          lat: _lat,
-                          long: _long,
-                        );
-                        await userBox.add(user);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content:
-                                Text('Signed up $_firstName $_lastName successfully.'),
-                          ),
-                        );
-                        Future.delayed(const Duration(seconds: 2), () {
-                          if (mounted) {
-                            Navigator.pushReplacementNamed(context, '/');
-                          }
-                        });
+                        final existingUser = userBox.values
+                            .cast<User?>()
+                            .firstWhere(
+                              (user) => user?.email == _email,
+                              orElse: () => null,
+                            );
+                        if (existingUser != null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Email already exists. Please use another email.',
+                              ),
+                            ),
+                          );
+                          return;
+                        } else {
+                          final user = User(
+                            firstName: _firstName,
+                            lastName: _lastName,
+                            email: _email,
+                            phone: _phone,
+                            city: _city,
+                            street: _street,
+                            houseNumber: _houseNumber,
+                            zipcode: _zipcode,
+                            password: _password,
+                            lat: _lat,
+                            long: _long,
+                          );
+                          await userBox.add(user);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Signed up $_firstName $_lastName successfully.',
+                              ),
+                            ),
+                          );
+                          Future.delayed(const Duration(seconds: 2), () {
+                            if (mounted) {
+                              Navigator.pushReplacementNamed(context, '/');
+                            }
+                          });
+                        }
                       } catch (e) {
                         ScaffoldMessenger.of(
                           context,
