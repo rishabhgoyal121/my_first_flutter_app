@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'db_helper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -40,7 +39,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (_formKey.currentState!.validate()) {
                     final navContext = context;
                     try {
-                      await DBHelper.insertUser(email, password);
                       Navigator.pushReplacementNamed(navContext, '/');
                     } catch (e) {
                       print('Error: $e');

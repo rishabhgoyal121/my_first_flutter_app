@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:hive/hive.dart';
 import 'package:geolocator/geolocator.dart';
-import 'dart:convert';
+import 'user.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -11,7 +11,7 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
-  int _id = 1;
+  // int _id = 1;
   String _firstName = '';
   String _lastName = '';
   String _email = '';
@@ -27,28 +27,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUsers();
     _getLocation();
-  }
-
-  Future<void> _fetchUsers() async {
-    try {
-      final response = await http.get(
-        Uri.parse('https://fakestoreapi.com/users'),
-      );
-      if (response.statusCode == 200) {
-        final List decoded = json.decode(response.body);
-        int lastId = decoded.isNotEmpty ? decoded.last['id'] as int : 0;
-        setState(() {
-          _id = lastId + 1;
-        });
-        print('lastId : $lastId');
-      } else {
-        print('Failed to fetch users : ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching users : $e');
-    }
   }
 
   Future<void> _getLocation() async {
@@ -182,55 +161,30 @@ class _SignupScreenState extends State<SignupScreen> {
                       );
 
                       try {
-                        final response = await http.post(
-                          Uri.parse('https://fakestoreapi.com/users'),
-                          headers: {'Content-type': 'application/json'},
-                          body: json.encode({
-                            "address": {
-                              "geolocation": {
-                                "lat": _lat?.toString() ?? "",
-                                "long": _long?.toString() ?? "",
-                              },
-                              "city": _city,
-                              "street": _street,
-                              "number": _houseNumber,
-                              "zipcode": _zipcode,
-                            },
-                            "email": _email,
-                            "password": _password,
-                            "name": {
-                              "firstname": _firstName,
-                              "lastname": _lastName,
-                            },
-                            "phone": _phone,
-                          }),
+                        final userBox = Hive.box<User>('users');
+                        final user = User(
+                          firstName: _firstName,
+                          lastName: _lastName,
+                          email: _email,
+                          phone: _phone,
+                          city: _city,
+                          street: _street,
+                          houseNumber: _houseNumber,
+                          zipcode: _zipcode,
+                          password: _password,
                         );
-
-                        if (response.statusCode == 201 ||
-                            response.statusCode == 200) {
-                          final data = json.decode(response.body);
-                          print('data is $data');
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Signed up $_firstName $_lastName successfully',
-                              ),
-                            ),
-                          );
-                          Future.delayed(const Duration(seconds: 2), () {
-                            if (mounted) {
-                              Navigator.pushReplacementNamed(context, '/');
-                            }
-                          });
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Sign up failed ${response.statusCode}',
-                              ),
-                            ),
-                          );
-                        }
+                        await userBox.add(user);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content:
+                                Text('Signed up $_firstName $_lastName successfully.'),
+                          ),
+                        );
+                        Future.delayed(const Duration(seconds: 2), () {
+                          if (mounted) {
+                            Navigator.pushReplacementNamed(context, '/');
+                          }
+                        });
                       } catch (e) {
                         ScaffoldMessenger.of(
                           context,

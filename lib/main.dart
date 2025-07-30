@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'user.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
@@ -7,7 +8,8 @@ import 'login_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
-  await Hive.openBox('users');
+  Hive.registerAdapter(UserAdapter());
+  await Hive.openBox<User>('users');
   runApp(MyApp());
 }
 
