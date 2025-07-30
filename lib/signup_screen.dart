@@ -2,29 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class User {
-  final int id;
-  final String username;
-  final String email;
-  final String password;
-
-  User({
-    required this.id,
-    required this.username,
-    required this.email,
-    required this.password,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'],
-      username: json['username'],
-      email: json['username'],
-      password: json['password'],
-    );
-  }
-}
-
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
   @override
@@ -36,8 +13,7 @@ class _SignupScreenState extends State<SignupScreen> {
   String _username = '';
   String _email = '';
   String _password = '';
-  List<User> _users = [];
-
+  int _id = 1;
   @override
   void initState() {
     super.initState();
@@ -51,10 +27,11 @@ class _SignupScreenState extends State<SignupScreen> {
       );
       if (response.statusCode == 200) {
         final List decoded = json.decode(response.body);
+        int lastId = decoded.isNotEmpty ? decoded.last['id'] as int : 0;
         setState(() {
-          _users = decoded.map((json) => User.fromJson(json)).toList();
+          _id = lastId + 1;
         });
-        print('Fetched users : $_users');
+        print('lastId : $lastId');
       } else {
         print('Failed to fetch users : ${response.statusCode}');
       }
