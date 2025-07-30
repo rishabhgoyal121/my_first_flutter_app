@@ -10,10 +10,11 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+  int _id = 1;
   String _username = '';
   String _email = '';
   String _password = '';
-  int _id = 1;
+
   @override
   void initState() {
     super.initState();
@@ -83,7 +84,7 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -92,16 +93,48 @@ class _SignupScreenState extends State<SignupScreen> {
                         duration: Duration(seconds: 1),
                       ),
                     );
-                    Future.delayed(const Duration(seconds: 2), () {
-                      if (mounted) {
+
+                    try {
+                      final response = await http.post(
+                        Uri.parse('https://fakestoreapi.com/users'),
+                        headers: {'Content-type': 'application/json'},
+                        body: json.encode({
+                          'id': _id,
+                          'username': _username,
+                          'email': _email,
+                          'password': _password,
+                        }),
+                      );
+
+                      if (response.statusCode == 201 ||
+                          response.statusCode == 200) {
+                        final data = json.decode(response.body);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text('Signed up $_username successfully'),
+                            content: Text(
+                              'Signed up $_username successfully',
+                            ),
                           ),
                         );
-                        Navigator.pushReplacementNamed(context, '/');
+                        Future.delayed(const Duration(seconds: 2), () {
+                          if (mounted) {
+                            Navigator.pushReplacementNamed(context, '/');
+                          }
+                        });
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Sign up failed ${response.statusCode}',
+                            ),
+                          ),
+                        );
                       }
-                    });
+                    } catch (e) {
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('Error : $e')));
+                    }
                   }
                 },
                 child: Text('Sign Up'),
