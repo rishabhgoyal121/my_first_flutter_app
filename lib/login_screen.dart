@@ -28,12 +28,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 onChanged: (val) => email = val,
                 validator: (val) => val!.isEmpty ? 'Enter Email' : null,
               ),
+              SizedBox(height: 16),
               TextFormField(
                 decoration: InputDecoration(labelText: 'Password'),
                 onChanged: (val) => password = val,
                 validator: (val) => val!.isEmpty ? 'Enter Password' : null,
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 40),
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
@@ -48,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
                 child: Text('Login'),
               ),
-              SizedBox(height: 16,),
+              SizedBox(height: 16),
               TextButton(
                 onPressed: () {
                   Navigator.pushNamed(context, '/signup');
