@@ -37,11 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ElevatedButton(
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    print('Validation passed');
                     final navContext = context;
                     try {
                       await DBHelper.insertUser(email, password);
-                      print('User inserted');
                       Navigator.pushReplacementNamed(navContext, '/');
                     } catch (e) {
                       print('Error: $e');
@@ -49,6 +47,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   }
                 },
                 child: Text('Login'),
+              ),
+              SizedBox(height: 16,),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/signup');
+                },
+                child: Text('Don\'t have an account? Sign up.'),
               ),
             ],
           ),

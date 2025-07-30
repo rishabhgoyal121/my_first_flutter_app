@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'about_screen.dart';
+import 'signup_screen.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
 
@@ -72,7 +72,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/login',
       routes: {
         '/': (context) => HomeScreen(),
-        '/about': (context) => AboutScreen(),
+        '/signup': (context) => SignupScreen(),
         '/login': (context) => LoginScreen(),
       },
     );
