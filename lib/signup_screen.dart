@@ -196,7 +196,6 @@ class _SignupScreenState extends State<SignupScreen> {
                               "number": _houseNumber,
                               "zipcode": _zipcode,
                             },
-                            "id": _id,
                             "email": _email,
                             "password": _password,
                             "name": {
@@ -204,7 +203,6 @@ class _SignupScreenState extends State<SignupScreen> {
                               "lastname": _lastName,
                             },
                             "phone": _phone,
-                            "__v": 0,
                           }),
                         );
 
