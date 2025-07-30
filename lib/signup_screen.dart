@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
 import 'dart:convert';
 
 class SignupScreen extends StatefulWidget {
@@ -11,14 +12,23 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
   int _id = 1;
-  String _username = '';
+  String _firstName = '';
+  String _lastName = '';
   String _email = '';
+  String _phone = '';
+  String _city = '';
+  String _street = '';
+  String _houseNumber = '';
+  String _zipcode = '';
   String _password = '';
+  double? _lat;
+  double? _long;
 
   @override
   void initState() {
     super.initState();
     _fetchUsers();
+    _getLocation();
   }
 
   Future<void> _fetchUsers() async {
@@ -41,6 +51,25 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+  Future<void> _getLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
+    }
+    if (permission == LocationPermission.deniedForever) return;
+
+    Position position = await Geolocator.getCurrentPosition(
+      locationSettings: LocationSettings(accuracy: LocationAccuracy.high),
+    );
+    setState(() {
+      _lat = position.latitude;
+      _long = position.longitude;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,10 +82,17 @@ class _SignupScreenState extends State<SignupScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Username'),
-                onSaved: (value) => _username = value ?? '',
+                decoration: InputDecoration(labelText: 'First name'),
+                onSaved: (value) => _firstName = value ?? '',
                 validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter Username' : null,
+                    value == null || value.isEmpty ? 'Enter First name' : null,
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                decoration: InputDecoration(labelText: 'Last name'),
+                onSaved: (value) => _lastName = value ?? '',
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Enter Last name' : null,
               ),
               SizedBox(height: 16),
               TextFormField(
@@ -89,7 +125,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     _formKey.currentState!.save();
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Signing up $_username'),
+                        content: Text('Signing up $_firstName $_lastName'),
                         duration: Duration(seconds: 1),
                       ),
                     );
@@ -100,7 +136,8 @@ class _SignupScreenState extends State<SignupScreen> {
                         headers: {'Content-type': 'application/json'},
                         body: json.encode({
                           'id': _id,
-                          'username': _username,
+                          'firstname': _firstName,
+                          'lastname': _lastName,
                           'email': _email,
                           'password': _password,
                         }),
@@ -109,10 +146,11 @@ class _SignupScreenState extends State<SignupScreen> {
                       if (response.statusCode == 201 ||
                           response.statusCode == 200) {
                         final data = json.decode(response.body);
+                        print('data is $data');
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text(
-                              'Signed up $_username successfully',
+                              'Signed up $_firstName $_lastName successfully',
                             ),
                           ),
                         );

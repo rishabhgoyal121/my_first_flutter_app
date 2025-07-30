@@ -79,3 +79,5 @@ macos/Flutter/GeneratedPluginRegistrant.swift
 *.sublime-project
 *.vscode/
 .flutter-plugins-dependencies
+
+windows/
