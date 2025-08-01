@@ -11,46 +11,58 @@ class ProductDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(product.title),),
-      body: Padding(padding: const EdgeInsets.all(16),
+      appBar: AppBar(
+        title: Text(product.title),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.shopping_cart),
+            onPressed: () {
+              Navigator.pushNamed(context, '/cart');
+            },
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Image.network(product.thumbnail, height: 200,),
+            Center(child: Image.network(product.thumbnail, height: 200)),
+            SizedBox(height: 16),
+            Text(
+              product.title,
+              style: Theme.of(context).textTheme.headlineLarge,
             ),
-            SizedBox(height: 16,),
-            Text(product.title, style: Theme.of(context).textTheme.headlineLarge,),
             SizedBox(height: 8),
             Text('\$${product.price.toStringAsFixed(2)}'),
             SizedBox(height: 16),
             Text(product.description),
             SizedBox(height: 16),
-            ElevatedButton(onPressed: () async{
-              final response = await http.put(
-                Uri.parse('https://dummyjson.com/carts/1'),
-                headers: {'Content-Type': 'application/json'},
-                body: json.encode({
-                  'merge': true,
-                  'userId': 1, // Assuming a user ID of 1 for demo purposes
-                  'products': [
-                    {
-                      'id': product.id,
-                      'quantity': 1,
-                    }
-                  ],
-                }),
-              );
-              if (response.statusCode == 200 || response.statusCode == 201) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Product added to cart')),
+            ElevatedButton(
+              onPressed: () async {
+                final response = await http.put(
+                  Uri.parse('https://dummyjson.com/carts/1'),
+                  headers: {'Content-Type': 'application/json'},
+                  body: json.encode({
+                    'merge': true,
+                    'userId': 1, // Assuming a user ID of 1 for demo purposes
+                    'products': [
+                      {'id': product.id, 'quantity': 1},
+                    ],
+                  }),
                 );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Failed to add product to cart')),
-                );
-              }
-            }, child: Text('Add to Cart'))
+                if (response.statusCode == 200 || response.statusCode == 201) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Product added to cart')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Failed to add product to cart')),
+                  );
+                }
+              },
+              child: Text('Add to Cart'),
+            ),
           ],
         ),
       ),

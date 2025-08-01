@@ -34,7 +34,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Products')),
+      appBar: AppBar(title: Text('Products'),
+      actions: [
+        IconButton(
+          icon: Icon(Icons.shopping_cart),
+          onPressed: () {
+            Navigator.pushNamed(context, '/cart');
+          },
+        ),
+      ],
+      ),
       body: FutureBuilder(
         future: productsFuture,
         builder: (context, snapshot) {

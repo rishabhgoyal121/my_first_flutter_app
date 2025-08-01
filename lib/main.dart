@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
+import 'cart_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,6 +72,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => HomeScreen(),
         '/signup': (context) => SignupScreen(),
         '/login': (context) => LoginScreen(),
+        '/cart': (context) => CartScreen(),
       },
     );
   }
