@@ -62,6 +62,37 @@ class _LoginScreenState extends State<LoginScreen> {
                           // TODO: Handle non-web storage if needed
                         }
 
+                        final addCartResponse = await http.post(
+                          Uri.parse('https://dummyjson.com/carts/add'),
+                          headers: {'Content-Type': 'application/json'},
+                          body: json.encode({
+                            'userId':
+                                1, // Assuming a user ID of 1 for demo purposes
+                            'products': [
+                              {
+                                'id':
+                                    1, // Assuming a product ID of 1 for demo purposes
+                                'quantity': 1,
+                              },
+                            ],
+                          }),
+                        );
+
+                        if (addCartResponse.statusCode == 200 ||
+                            addCartResponse.statusCode == 201) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Cart created successfully'),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to create cart'),
+                            ),
+                          );
+                        }
+
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Welcome ${data['username']}'),

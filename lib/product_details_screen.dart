@@ -27,10 +27,11 @@ class ProductDetailsScreen extends StatelessWidget {
             Text(product.description),
             SizedBox(height: 16),
             ElevatedButton(onPressed: () async{
-              final response = await http.post(
-                Uri.parse('https://dummyjson.com/carts/add'),
+              final response = await http.put(
+                Uri.parse('https://dummyjson.com/carts/1'),
                 headers: {'Content-Type': 'application/json'},
                 body: json.encode({
+                  'merge': true,
                   'userId': 1, // Assuming a user ID of 1 for demo purposes
                   'products': [
                     {
