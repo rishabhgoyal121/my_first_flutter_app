@@ -73,6 +73,36 @@ class _CartScreenState extends State<CartScreen> {
                             ),
                           ],
                         ),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () async {
+                            final deleteResponse = await http.put(
+                              Uri.parse('https://dummyjson.com/carts/1/'),
+                              headers: {'Content-Type': 'application/json'},
+                              body: json.encode({
+                                'merge': true,
+                                'userId': 1, // Assuming a user ID of 1 for demo purposes
+                                'products': cartItems.where((i) => i['id'] != item['id']).toList(),
+                              }),
+                            );
+                            if (deleteResponse.statusCode == 200) {
+                              setState(() {
+                                cartItems.removeAt(index);
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Item removed from cart'),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Failed to remove item'),
+                                ),
+                              );
+                            }
+                          },
+                        ),
                       );
                     },
                   ),
