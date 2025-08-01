@@ -15,7 +15,7 @@ class ProductDetailsScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Image.network(product.imageUri, height: 200,),
+              child: Image.network(product.thumbnail, height: 200,),
             ),
             SizedBox(height: 16,),
             Text(product.title, style: Theme.of(context).textTheme.headlineLarge,),

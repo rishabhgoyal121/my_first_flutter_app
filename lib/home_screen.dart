@@ -21,11 +21,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<List<Product>> fetchProducts() async {
     final response = await http.get(
-      Uri.parse('https://fakestoreapi.com/products'),
+      Uri.parse('https://dummyjson.com/products'),
     );
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      return data.map((json) => Product.fromJson(json)).toList();
+      final List<dynamic> data = json.decode(response.body)['products'];
+      final list = data.map((json) => Product.fromJson(json)).toList();
+      print(list);
+      return list;
     } else {
       throw Exception('Failed to load products');
     }
@@ -47,18 +49,23 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           final products = snapshot.data!;
+          print('hello');
+          print(products);
           return ListView.builder(
             itemCount: products.length,
             itemBuilder: (context, index) {
               final product = products[index];
               return ListTile(
-                leading: Image.network(product.imageUri, width: 50, height: 50),
+                leading: Image.network(product.thumbnail),
                 title: Text(product.title),
                 subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) =>ProductDetailsScreen(product: product)),
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ProductDetailsScreen(product: product),
+                    ),
                   );
                 },
               );
