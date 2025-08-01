@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:universal_html/html.dart' as html;
 import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
@@ -44,19 +46,35 @@ class _LoginScreenState extends State<LoginScreen> {
                       final response = await http.post(
                         Uri.parse('https://dummyjson.com/auth/login'),
                         headers: {'Content-type': 'application/json'},
-                        body: json.encode({'username': username, 'password': password}),
+                        body: json.encode({
+                          'username': username,
+                          'password': password,
+                        }),
                       );
                       if (response.statusCode == 200) {
                         final data = json.decode(response.body);
+                        if (kIsWeb) {
+                          html.document.cookie =
+                              'accessToken=${data['accessToken']}; path=/; max-age=3600';
+                          html.document.cookie =
+                              'refreshToken=${data['refreshToken']}; path=/; max-age=604800';
+                        } else {
+                          // TODO: Handle non-web storage if needed
+                        }
+
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Welcome ${data['username']}')),
+                          SnackBar(
+                            content: Text('Welcome ${data['username']}'),
+                          ),
                         );
                         Future.delayed(Duration(seconds: 1), () {
                           Navigator.pushReplacementNamed(navContext, '/');
                         });
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Login failed. Please try again.')),
+                          SnackBar(
+                            content: Text('Login failed. Please try again.'),
+                          ),
                         );
                       }
                     } catch (e) {
