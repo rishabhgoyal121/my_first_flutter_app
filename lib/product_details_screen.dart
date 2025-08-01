@@ -56,9 +56,7 @@ class ProductDetailsScreen extends StatelessWidget {
                 Provider.of<CartProvider>(
                   context,
                   listen: false,
-                ).addItem({'quantity': 1,
-                  ...product.toJson(),
-                });
+                ).addProduct({'quantity': 1, ...product.toJson()});
                 if (response.statusCode == 200 || response.statusCode == 201) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Product added to cart')),

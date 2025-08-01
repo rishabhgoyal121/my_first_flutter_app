@@ -20,7 +20,7 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
-    final cartItems = cartProvider.cartItems;
+    final cartItems = cartProvider.cart['products'] as List;
     // Calculate cart totals
     double cartTotal = 0;
     double cartDiscountedTotal = 0;
@@ -50,13 +50,13 @@ class _CartScreenState extends State<CartScreen> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Quantity: ${item['quantity']}'),
                             Text('Price: \$ ${item['price']}'),
+                            Text('Quantity: ${item['quantity']}'),
                             Text(
-                              'Total: \$ ${(item['total'] is num ? (item['total'] as num).toStringAsFixed(2) : '0.00')}',
+                              'Total: \$ ${item['total'].toStringAsFixed(2)}',
                             ),
                             Text(
-                              'Discounted Price: \$ ${(item['discountedTotal'] is num ? (item['discountedTotal'] as num).toStringAsFixed(2) : '0.00')}',
+                              'Discounted Price: \$ ${item['discountedTotal'].toStringAsFixed(2)}',
                             ),
                           ],
                         ),
@@ -76,7 +76,7 @@ class _CartScreenState extends State<CartScreen> {
                               }),
                             );
                             if (deleteResponse.statusCode == 200) {
-                              cartProvider.removeItem(item['id']);
+                              cartProvider.removeProduct(item['id']);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('Item removed from cart'),
