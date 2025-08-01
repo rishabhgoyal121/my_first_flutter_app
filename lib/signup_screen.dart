@@ -11,7 +11,6 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
-  int _id = 1;
   String _firstName = '';
   String _lastName = '';
   String _email = '';
@@ -27,28 +26,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUsers();
     _getLocation();
-  }
-
-  Future<void> _fetchUsers() async {
-    try {
-      final response = await http.get(
-        Uri.parse('https://fakestoreapi.com/users'),
-      );
-      if (response.statusCode == 200) {
-        final List decoded = json.decode(response.body);
-        int lastId = decoded.isNotEmpty ? decoded.last['id'] as int : 0;
-        setState(() {
-          _id = lastId + 1;
-        });
-        print('lastId : $lastId');
-      } else {
-        print('Failed to fetch users : ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching users : $e');
-    }
   }
 
   Future<void> _getLocation() async {
@@ -153,8 +131,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   decoration: InputDecoration(labelText: 'Zipcode'),
                   onSaved: (value) => _zipcode = value ?? '',
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return 'Please enter Zipcode';
+                    }
                     return null;
                   },
                 ),
@@ -183,7 +162,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                       try {
                         final response = await http.post(
-                          Uri.parse('https://fakestoreapi.com/users'),
+                          Uri.parse('https://dummyjson.com/users/add'),
                           headers: {'Content-type': 'application/json'},
                           body: json.encode({
                             "address": {
@@ -234,7 +213,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       } catch (e) {
                         ScaffoldMessenger.of(
                           context,
-                        ).showSnackBar(SnackBar(content: Text('Error : $e')));
+                        ).showSnackBar(SnackBar(content: Text('Error in signup : $e. Please try again later.')));
                       }
                     }
                   },

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'db_helper.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,7 +11,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  String email = '';
+  String username = '';
   String password = '';
 
   @override
@@ -24,9 +25,9 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Email'),
-                onChanged: (val) => email = val,
-                validator: (val) => val!.isEmpty ? 'Enter Email' : null,
+                decoration: InputDecoration(labelText: 'Username'),
+                onChanged: (val) => username = val,
+                validator: (val) => val!.isEmpty ? 'Enter Username' : null,
               ),
               SizedBox(height: 16),
               TextFormField(
@@ -40,8 +41,24 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (_formKey.currentState!.validate()) {
                     final navContext = context;
                     try {
-                      await DBHelper.insertUser(email, password);
-                      Navigator.pushReplacementNamed(navContext, '/');
+                      final response = await http.post(
+                        Uri.parse('https://dummyjson.com/auth/login'),
+                        headers: {'Content-type': 'application/json'},
+                        body: json.encode({'username': username, 'password': password}),
+                      );
+                      if (response.statusCode == 200) {
+                        final data = json.decode(response.body);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Welcome ${data['username']}')),
+                        );
+                        Future.delayed(Duration(seconds: 1), () {
+                          Navigator.pushReplacementNamed(navContext, '/');
+                        });
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Login failed. Please try again.')),
+                        );
+                      }
                     } catch (e) {
                       print('Error: $e');
                     }
