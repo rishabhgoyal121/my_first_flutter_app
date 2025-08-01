@@ -73,6 +73,31 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
                 },
+                trailing: IconButton(
+                  icon: Icon(Icons.add_shopping_cart),
+                  onPressed: () async {
+                    final response = await http.put(
+                      Uri.parse('https://dummyjson.com/carts/1'),
+                      headers: {'Content-Type': 'application/json'},
+                      body: json.encode({
+                        'merge': true,
+                        'userId': 1, // Assuming a user ID of 1 for demo purposes
+                        'products': [
+                          {'id': product.id, 'quantity': 1},
+                        ],
+                      }),
+                    );
+                    if (response.statusCode == 200 || response.statusCode == 201) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Product added to cart')),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to add product to cart')),
+                      );
+                    }
+                  },
+                ),
               );
             },
           );
