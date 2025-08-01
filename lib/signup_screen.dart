@@ -112,8 +112,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   decoration: InputDecoration(labelText: 'Street'),
                   onSaved: (value) => _street = value ?? '',
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return 'Please enter street';
+                    }
                     return null;
                   },
                 ),
@@ -122,8 +123,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   decoration: InputDecoration(labelText: 'House Number'),
                   onSaved: (value) => _houseNumber = value ?? '',
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return 'Please enter House Number';
+                    }
                     return null;
                   },
                 ),
@@ -132,8 +134,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   decoration: InputDecoration(labelText: 'Zipcode'),
                   onSaved: (value) => _zipcode = value ?? '',
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return 'Please enter Zipcode';
+                    }
                     return null;
                   },
                 ),
