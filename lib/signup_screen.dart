@@ -162,12 +162,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
                       try {
                         final userBox = Hive.box<User>('users');
-                        final existingUser = userBox.values
-                            .cast<User?>()
-                            .firstWhere(
-                              (user) => user?.email == _email,
-                              orElse: () => null,
-                            );
+                        final existingUser = userBox.get(_email);
                         if (existingUser != null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -191,7 +186,7 @@ class _SignupScreenState extends State<SignupScreen> {
                             lat: _lat,
                             long: _long,
                           );
-                          await userBox.add(user);
+                          await userBox.put(_email, user);
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(

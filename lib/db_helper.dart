@@ -1,13 +1,13 @@
 import 'package:hive/hive.dart';
+import 'user.dart';
 
 class DBHelper {
-  static Future<void> insertUser(String email, String password) async {
-    final box = Hive.box('users');
-    await box.put(email, password);
-  }
-
-  static Future<String?> getUserPassword(String email) async {
-    final box = Hive.box('users');
-    return box.get(email);
+  static Future<bool> getUser(String email, String password) async {
+    final box = Hive.box<User>('users');
+    final user = box.get(email);
+    if (user != null && user.password == password) {
+      return true;
+    }
+    return false;
   }
 }

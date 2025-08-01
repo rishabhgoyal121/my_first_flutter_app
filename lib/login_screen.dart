@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'db_helper.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -39,9 +40,31 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (_formKey.currentState!.validate()) {
                     final navContext = context;
                     try {
-                      Navigator.pushReplacementNamed(navContext, '/');
+                      final isValidUser = await DBHelper.getUser(
+                        email,
+                        password,
+                      );
+                      if (isValidUser) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Login Successful.')),
+                        );
+                        Future.delayed(const Duration(seconds: 1), () {
+                          if (mounted) {
+                            Navigator.pushReplacementNamed(navContext, '/');
+                          }
+                        });
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Invalid email or password.')),
+                        );
+                      }
                     } catch (e) {
                       print('Error: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Login failed. Please try again.'),
+                        ),
+                      );
                     }
                   }
                 },
