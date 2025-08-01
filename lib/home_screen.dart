@@ -25,9 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body)['products'];
-      final list = data.map((json) => Product.fromJson(json)).toList();
-      print(list);
-      return list;
+      return data.map((json) => Product.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load products');
     }
@@ -49,8 +47,6 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           final products = snapshot.data!;
-          print('hello');
-          print(products);
           return ListView.builder(
             itemCount: products.length,
             itemBuilder: (context, index) {
