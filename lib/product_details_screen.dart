@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'product.dart';
+import 'cart_provider.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final Product product;
@@ -51,6 +53,12 @@ class ProductDetailsScreen extends StatelessWidget {
                     ],
                   }),
                 );
+                Provider.of<CartProvider>(
+                  context,
+                  listen: false,
+                ).addItem({'quantity': 1,
+                  ...product.toJson(),
+                });
                 if (response.statusCode == 200 || response.statusCode == 201) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Product added to cart')),

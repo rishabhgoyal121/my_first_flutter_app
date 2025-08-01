@@ -77,7 +77,35 @@ class Product {
       images: List<String>.from(json['images'] ?? []),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id ?? 0,
+      'title': title ,
+      'description': description,
+      'category': category,
+      'price': price,
+      'discountPercentage': discountPercentage,
+      'rating': rating,
+      'stock': stock,
+      'tags': tags,
+      'brand': brand,
+      'sku': sku,
+      'weight': weight,
+      'dimensions': dimensions.toJson(),
+      'warrantyInformation': warrantyInformation,
+      'shippingInformation': shippingInformation,
+      'availabilityStatus': availabilityStatus,
+      'reviews': reviews.map((e) => e.toJson()).toList(),
+      'returnPolicy': returnPolicy,
+      'minimumOrderQuantity': minimumOrderQuantity,
+      'meta': meta.toJson(),
+      'thumbnail': thumbnail,
+      'images': images,
+    };
+  }
 }
+
 
 class Dimensions {
   final double width;
@@ -92,6 +120,13 @@ class Dimensions {
       height: (json['height'] as num).toDouble(),
       depth: (json['depth'] as num).toDouble(),
     );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'width': width,
+      'height': height,
+      'depth': depth,
+    };
   }
 }
 
@@ -119,6 +154,15 @@ class Review {
       reviewerEmail: json['reviewerEmail'],
     );
   }
+  Map<String, dynamic> toJson() {
+    return {
+      'rating': rating,
+      'comment': comment,
+      'date': date,
+      'reviewerName': reviewerName,
+      'reviewerEmail': reviewerEmail,
+    };
+  }
 }
 
 class Meta {
@@ -141,5 +185,13 @@ class Meta {
       barcode: json['barcode'],
       qrCode: json['qrCode'],
     );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'barcode': barcode,
+      'qrCode': qrCode,
+    };
   }
 }

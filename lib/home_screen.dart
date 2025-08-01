@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'product.dart';
 import 'product_details_screen.dart';
+import 'cart_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -87,6 +89,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       }),
                     );
+                    Provider.of<CartProvider>(
+                      context,
+                      listen: false,
+                    ).addItem({'quantity': 1, ...product.toJson()});
                     if (response.statusCode == 200 || response.statusCode == 201) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Product added to cart')),
