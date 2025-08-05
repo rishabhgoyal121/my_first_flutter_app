@@ -18,21 +18,26 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-    void addProduct(Map<String, dynamic> product) {
+  void addProduct(Map<String, dynamic> product) {
     final products = _cart['products'] as List;
     final index = products.indexWhere((p) => p['id'] == product['id']);
     if (index >= 0) {
       products[index]['quantity'] += product['quantity'];
-      products[index]['total'] = products[index]['price'] * products[index]['quantity'];
-      products[index]['discountedTotal'] = products[index]['total'] * (1 - (products[index]['discountPercentage'] ?? 0) / 100);
+      products[index]['total'] =
+          products[index]['price'] * products[index]['quantity'];
+      products[index]['discountedTotal'] =
+          products[index]['total'] *
+          (1 - (products[index]['discountPercentage'] ?? 0) / 100);
     } else {
       product['total'] = product['price'] * product['quantity'];
-      product['discountedTotal'] = product['total'] * (1 - (product['discountPercentage'] ?? 0) / 100);
+      product['discountedTotal'] =
+          product['total'] * (1 - (product['discountPercentage'] ?? 0) / 100);
       products.add(product);
     }
     _recalculateTotals();
     notifyListeners();
   }
+
   void removeProduct(int productId) {
     final products = _cart['products'] as List;
     products.removeWhere((p) => p['id'] == productId);
@@ -43,6 +48,12 @@ class CartProvider extends ChangeNotifier {
   void clearCart() {
     _cart['products'].clear();
     _recalculateTotals();
+    notifyListeners();
+  }
+
+  void setCart(Map<String, dynamic> cart) {
+    _cart.clear();
+    _cart.addAll(cart);
     notifyListeners();
   }
 

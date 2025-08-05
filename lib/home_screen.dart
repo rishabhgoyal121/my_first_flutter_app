@@ -22,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _checkAuth();
+    _loadCart();
     productsFuture = fetchProducts();
   }
 
@@ -45,6 +46,20 @@ class _HomeScreenState extends State<HomeScreen> {
           Navigator.pushReplacementNamed(context, '/login');
         });
       }
+    }
+  }
+
+  Future<void> _loadCart() async {
+    String? cartJson;
+    if (kIsWeb) {
+      cartJson = html.window.localStorage['cart'];
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      cartJson = prefs.getString('cart');
+    }
+    if (cartJson != null && cartJson.isNotEmpty) {
+      final cartData = json.decode(cartJson);
+      Provider.of<CartProvider>(context, listen: false).setCart(cartData);
     }
   }
 
@@ -124,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ).addProduct({'quantity': 1, ...product.toJson()});
                     if (response.statusCode == 200 ||
                         response.statusCode == 201) {
-                          final cartProvider = Provider.of<CartProvider>(
+                      final cartProvider = Provider.of<CartProvider>(
                         context,
                         listen: false,
                       );
