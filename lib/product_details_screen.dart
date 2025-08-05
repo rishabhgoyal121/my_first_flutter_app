@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:universal_html/html.dart' as html;
 import 'dart:convert';
 import 'product.dart';
 import 'cart_provider.dart';
@@ -58,6 +61,18 @@ class ProductDetailsScreen extends StatelessWidget {
                   listen: false,
                 ).addProduct({'quantity': 1, ...product.toJson()});
                 if (response.statusCode == 200 || response.statusCode == 201) {
+                  final cartProvider = Provider.of<CartProvider>(
+                    context,
+                    listen: false,
+                  );
+                  final cartJson = json.encode(cartProvider.cart);
+                  if (kIsWeb) {
+                    html.window.localStorage['cart'] = cartJson;
+                  } else {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setString('cart', cartJson);
+                  }
+
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Product added to cart')),
                   );

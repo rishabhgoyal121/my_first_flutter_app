@@ -122,11 +122,19 @@ class _HomeScreenState extends State<HomeScreen> {
                       context,
                       listen: false,
                     ).addProduct({'quantity': 1, ...product.toJson()});
-                    print(
-                      'add product called with product: ${product.toJson()}',
-                    );
                     if (response.statusCode == 200 ||
                         response.statusCode == 201) {
+                          final cartProvider = Provider.of<CartProvider>(
+                        context,
+                        listen: false,
+                      );
+                      final cartJson = json.encode(cartProvider.cart);
+                      if (kIsWeb) {
+                        html.window.localStorage['cart'] = cartJson;
+                      } else {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString('cart', cartJson);
+                      }
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('Product added to cart')),
                       );
