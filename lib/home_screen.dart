@@ -77,15 +77,40 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    int cartCount = context.watch<CartProvider>().cart['totalQuantity'];
     return Scaffold(
       appBar: AppBar(
         title: Text('Products'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.shopping_cart),
-            onPressed: () {
-              Navigator.pushNamed(context, '/cart');
-            },
+          Stack(
+            alignment: Alignment.topRight,
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/cart');
+                },
+                icon: Icon(Icons.shopping_cart),
+              ),
+              Positioned(
+                right: 8,
+                top: 4,
+                child: Container(
+                  padding: EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.yellowAccent,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '$cartCount',
+                    style: TextStyle(
+                      color: Colors.redAccent,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
