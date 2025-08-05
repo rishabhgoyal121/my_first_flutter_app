@@ -75,7 +75,8 @@ class _CartScreenState extends State<CartScreen> {
                                     .toList(),
                               }),
                             );
-                            if (deleteResponse.statusCode == 200) {
+                            if (deleteResponse.statusCode == 200 ||
+                                deleteResponse.statusCode == 301) {
                               cartProvider.removeProduct(item['id']);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(

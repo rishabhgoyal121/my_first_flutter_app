@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:universal_html/html.dart' as html;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
@@ -59,7 +60,15 @@ class _LoginScreenState extends State<LoginScreen> {
                           html.document.cookie =
                               'refreshToken=${data['refreshToken']}; path=/; max-age=604800';
                         } else {
-                          // TODO: Handle non-web storage if needed
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setString(
+                            'accessToken',
+                            data['accessToken'],
+                          );
+                          await prefs.setString(
+                            'refreshToken',
+                            data['refreshToken'],
+                          );
                         }
 
                         final addCartResponse = await http.post(
@@ -87,9 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Failed to create cart'),
-                            ),
+                            SnackBar(content: Text('Failed to create cart')),
                           );
                         }
 
