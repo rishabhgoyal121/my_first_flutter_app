@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_html/html.dart' as html;
 import 'dart:convert';
 import 'product.dart';
 import 'product_details_screen.dart';
@@ -18,7 +21,31 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _checkAuth();
     productsFuture = fetchProducts();
+  }
+
+  Future<void> _checkAuth() async {
+    if (kIsWeb) {
+      final cookies = html.document.cookie?.split('; ') ?? [];
+      final accessTokenCookie = cookies.firstWhere(
+        (cookie) => cookie.startsWith('accessToken='),
+        orElse: () => '',
+      );
+      if (accessTokenCookie.isEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacementNamed(context, '/login');
+        });
+      }
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('accessToken');
+      if (token == null || token.isEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacementNamed(context, '/login');
+        });
+      }
+    }
   }
 
   Future<List<Product>> fetchProducts() async {

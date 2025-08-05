@@ -74,7 +74,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      initialRoute: '/login',
+      initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(),
         '/signup': (context) => SignupScreen(),
