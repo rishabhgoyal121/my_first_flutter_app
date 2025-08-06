@@ -119,8 +119,8 @@ class _CartScreenState extends State<CartScreen> {
                       ElevatedButton(
                         onPressed: cartItems.isEmpty
                             ? null
-                            : () {
-                                orderProvider.addOrder(
+                            : () async{
+                                await orderProvider.addOrder(
                                   cartItems,
                                   cartTotal,
                                   cartDiscountedTotal,
