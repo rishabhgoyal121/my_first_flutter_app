@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'orders_screen.dart';
 import 'package:provider/provider.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
@@ -84,6 +85,7 @@ class MyApp extends StatelessWidget {
         '/signup': (context) => SignupScreen(),
         '/login': (context) => LoginScreen(),
         '/cart': (context) => CartScreen(),
+        '/orders': (context) => OrdersScreen(),
       },
     );
   }
