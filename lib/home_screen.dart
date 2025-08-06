@@ -16,14 +16,26 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Future<List<Product>> productsFuture;
+  List<Product> products = [];
+  bool isLoading = false;
+  bool hasMore = true;
+  int limit = 10;
+  int skip = 0;
+  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
     _checkAuth();
     _loadCart();
-    productsFuture = fetchProducts();
+    _scrollController = ScrollController()..addListener(_onScroll);
+    fetchProducts();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Future<void> _checkAuth() async {
@@ -59,19 +71,49 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     if (cartJson != null && cartJson.isNotEmpty) {
       final cartData = json.decode(cartJson);
-      Provider.of<CartProvider>(context, listen: false).setCart(cartData);
+      if (!mounted) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          Provider.of<CartProvider>(context, listen: false).setCart(cartData);
+        }
+      });
+      
     }
   }
 
-  Future<List<Product>> fetchProducts() async {
+  Future<void> fetchProducts() async {
+    if (isLoading || !hasMore) return;
+    if (!mounted) return;
+    setState(() => isLoading = true);
     final response = await http.get(
-      Uri.parse('https://dummyjson.com/products'),
+      Uri.parse('https://dummyjson.com/products?limit=$limit&skip=$skip'),
     );
+    if (!mounted) return;
     if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body)['products'];
-      return data.map((json) => Product.fromJson(json)).toList();
+      final data = json.decode(response.body);
+      final List<dynamic> newProducts = data['products'];
+      if (!mounted) return;
+      setState(() {
+        products.addAll(
+          newProducts.map((json) => Product.fromJson(json)).toList(),
+        );
+        skip += limit;
+        hasMore = newProducts.length == limit;
+        isLoading = false;
+      });
     } else {
+      if (!mounted) return;
+      setState(() => isLoading = false);
       throw Exception('Failed to load products');
+    }
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !isLoading &&
+        hasMore) {
+      fetchProducts();
     }
   }
 
@@ -114,84 +156,82 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: FutureBuilder(
-        future: productsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('no products found.'));
-          }
-
-          final products = snapshot.data!;
-          return ListView.builder(
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              final product = products[index];
-              return ListTile(
-                leading: Image.network(product.thumbnail),
-                title: Text(product.title),
-                subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ProductDetailsScreen(product: product),
+      body: products.isEmpty && isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              controller: _scrollController,
+              itemCount: products.length + (hasMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index == products.length) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: CircularProgressIndicator(),
                     ),
                   );
-                },
-                trailing: IconButton(
-                  icon: Icon(Icons.add_shopping_cart),
-                  onPressed: () async {
-                    final response = await http.put(
-                      Uri.parse('https://dummyjson.com/carts/1'),
-                      headers: {'Content-Type': 'application/json'},
-                      body: json.encode({
-                        'merge': true,
-                        'userId':
-                            1, // Assuming a user ID of 1 for demo purposes
-                        'products': [
-                          {'id': product.id, 'quantity': 1},
-                        ],
-                      }),
-                    );
-                    Provider.of<CartProvider>(
+                }
+                final product = products[index];
+                return ListTile(
+                  leading: Image.network(product.thumbnail),
+                  title: Text(product.title),
+                  subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
+                  onTap: () {
+                    Navigator.push(
                       context,
-                      listen: false,
-                    ).addProduct({'quantity': 1, ...product.toJson()});
-                    if (response.statusCode == 200 ||
-                        response.statusCode == 201) {
-                      final cartProvider = Provider.of<CartProvider>(
-                        context,
-                        listen: false,
-                      );
-                      final cartJson = json.encode(cartProvider.cart);
-                      if (kIsWeb) {
-                        html.window.localStorage['cart'] = cartJson;
-                      } else {
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setString('cart', cartJson);
-                      }
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Product added to cart')),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Failed to add product to cart'),
-                        ),
-                      );
-                    }
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ProductDetailsScreen(product: product),
+                      ),
+                    );
                   },
-                ),
-              );
-            },
-          );
-        },
-      ),
+                  trailing: IconButton(
+                    onPressed: () async {
+                      final response = await http.put(
+                        Uri.parse('https://dummyjson.com/carts/1'),
+                        headers: {'content-type': 'application/json'},
+                        body: json.encode({
+                          'merge': true,
+                          'userId': 1,
+                          'products': [
+                            {'id': product.id, 'quantity': 1},
+                          ],
+                        }),
+                      );
+
+                      if (response.statusCode == 200 ||
+                          response.statusCode == 201 ||
+                          response.statusCode == 301) {
+                        final cartProvider = Provider.of<CartProvider>(
+                          context,
+                          listen: false,
+                        );
+                        Provider.of<CartProvider>(
+                          context,
+                          listen: false,
+                        ).addProduct({'quantity': 1, ...product.toJson()});
+                        final cartJson = json.encode(cartProvider.cart);
+                        if (kIsWeb) {
+                          html.window.localStorage['cart'] = cartJson;
+                        } else {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setString('cart', cartJson);
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Product added to cart')),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to add product to cart'),
+                          ),
+                        );
+                      }
+                    },
+                    icon: Icon(Icons.add_shopping_cart),
+                  ),
+                );
+              },
+            ),
     );
   }
 }
