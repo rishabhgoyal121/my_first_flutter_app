@@ -23,6 +23,10 @@ class _HomeScreenState extends State<HomeScreen> {
   int skip = 0;
   late ScrollController _scrollController;
 
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _isSearching = false;
+
   @override
   void initState() {
     super.initState();
@@ -35,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -77,7 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
           Provider.of<CartProvider>(context, listen: false).setCart(cartData);
         }
       });
-      
     }
   }
 
@@ -108,6 +112,48 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> searchProducts(String query) async {
+    if (query.isEmpty) {
+      if (!mounted) return;
+      setState(() {
+        _searchQuery = '';
+        _isSearching = false;
+        products.clear();
+        skip = 0;
+        hasMore = true;
+      });
+      fetchProducts();
+      return;
+    }
+    if (!mounted) return;
+    setState(() {
+      isLoading = true;
+      _isSearching = true;
+      _searchQuery = query;
+    });
+    final response = await http.get(
+      Uri.parse('https://dummyjson.com/products/search?q=$query'),
+    );
+    if (response.statusCode == 200 ||
+        response.statusCode == 201 ||
+        response.statusCode == 301) {
+      final data = json.decode(response.body);
+      final List<dynamic> newProducts = data['products'];
+      if (!mounted) return;
+      setState(() {
+        products = newProducts.map((json) => Product.fromJson(json)).toList();
+        isLoading = false;
+        hasMore = false;
+      });
+    } else {
+      if (!mounted) return;
+      setState(() => isLoading = false);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('failed to search products')));
+    }
+  }
+
   void _onScroll() {
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 200 &&
@@ -122,8 +168,31 @@ class _HomeScreenState extends State<HomeScreen> {
     int cartCount = context.watch<CartProvider>().cart['totalQuantity'];
     return Scaffold(
       appBar: AppBar(
-        title: Text('Products'),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Search products...',
+                  border: InputBorder.none,
+                ),
+                textInputAction: TextInputAction.search,
+                onSubmitted: (value) => searchProducts(value),
+              )
+            : Text('Products'),
         actions: [
+          IconButton(
+            onPressed: () {
+              if (_isSearching) {
+                _searchController.clear();
+                searchProducts('');
+              } else {
+                if (!mounted) return;
+                setState(() => _isSearching = true);
+              }
+            },
+            icon: Icon(_isSearching ? Icons.close : Icons.search),
+          ),
           Stack(
             alignment: Alignment.topRight,
             children: [
