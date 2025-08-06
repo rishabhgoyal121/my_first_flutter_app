@@ -15,6 +15,15 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+enum SortOption {
+  ratingDesc,
+  ratingAsc,
+  priceAsc,
+  priceDesc,
+  discountDesc,
+  discountAsc,
+}
+
 class _HomeScreenState extends State<HomeScreen> {
   List<Product> products = [];
   bool isLoading = false;
@@ -26,6 +35,27 @@ class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   bool _isSearching = false;
+
+  SortOption? _selectedSort;
+
+  Map<String, String> _getSortParams(SortOption? sort) {
+    switch (sort) {
+      case SortOption.ratingAsc:
+        return {'sortBy': 'rating', 'order': 'asc'};
+      case SortOption.ratingDesc:
+        return {'sortBy': 'rating', 'order': 'desc'};
+      case SortOption.priceAsc:
+        return {'sortBy': 'price', 'order': 'asc'};
+      case SortOption.priceDesc:
+        return {'sortBy': 'price', 'order': 'desc'};
+      case SortOption.discountAsc:
+        return {'sortBy': 'discountPercentage', 'order': 'asc'};
+      case SortOption.discountDesc:
+        return {'sortBy': 'discountPercentage', 'order': 'desc'};
+      default:
+        return {};
+    }
+  }
 
   @override
   void initState() {
@@ -89,8 +119,16 @@ class _HomeScreenState extends State<HomeScreen> {
     if (isLoading || !hasMore) return;
     if (!mounted) return;
     setState(() => isLoading = true);
+
+    final sortParams = _getSortParams(_selectedSort);
+    final sortQuery = sortParams.isNotEmpty
+        ? '&sortBy=${sortParams['sortBy']}&order=${sortParams['order']}'
+        : '';
+
     final response = await http.get(
-      Uri.parse('https://dummyjson.com/products?limit=$limit&skip=$skip'),
+      Uri.parse(
+        'https://dummyjson.com/products?limit=$limit&skip=$skip$sortQuery',
+      ),
     );
     if (!mounted) return;
     if (response.statusCode == 200) {
@@ -163,6 +201,36 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _onSortSelected(SortOption? option) {
+    if (!mounted) return;
+    setState(() {
+      _selectedSort = option;
+      products.clear();
+      skip = 0;
+      hasMore = true;
+    });
+    fetchProducts();
+  }
+
+  String _sortOptionLabel(SortOption? option) {
+    switch (option) {
+      case SortOption.ratingAsc:
+        return 'Rating (Low to High)';
+      case SortOption.ratingDesc:
+        return 'Rating (High to Low)';
+      case SortOption.priceAsc:
+        return 'Price (Low to High)';
+      case SortOption.priceDesc:
+        return 'price (High to Low)';
+      case SortOption.discountAsc:
+        return 'Discount (Low to High)';
+      case SortOption.discountDesc:
+        return 'Discount (High to Low)';
+      default:
+        return 'Sort';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     int cartCount = context.watch<CartProvider>().cart['totalQuantity'];
@@ -181,6 +249,37 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             : Text('Products'),
         actions: [
+          PopupMenuButton<SortOption>(
+            icon: Icon(Icons.sort),
+            onSelected: _onSortSelected,
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: SortOption.ratingDesc,
+                child: Text('Rating (High to Low)'),
+              ),
+              PopupMenuItem(
+                value: SortOption.ratingAsc,
+                child: Text('Rating (Low to High)'),
+              ),
+              PopupMenuItem(
+                value: SortOption.priceAsc,
+                child: Text('Price (Low to High)'),
+              ),
+              PopupMenuItem(
+                value: SortOption.priceDesc,
+                child: Text('Price (High to Low)'),
+              ),
+              PopupMenuItem(
+                value: SortOption.discountDesc,
+                child: Text('Discount (High to Low)'),
+              ),
+              PopupMenuItem(
+                value: SortOption.discountDesc,
+                child: Text('Discount (Low to High)'),
+              ),
+            ],
+            tooltip: 'Sort',
+          ),
           IconButton(
             onPressed: () {
               if (_isSearching) {
