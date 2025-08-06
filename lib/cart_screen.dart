@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'cart_provider.dart';
+import 'order_provider.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -21,6 +22,7 @@ class _CartScreenState extends State<CartScreen> {
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
     final cartItems = cartProvider.cart['products'] as List;
+    final orderProvider = Provider.of<OrderProvider>(context);
     // Calculate cart totals
     double cartTotal = 0;
     double cartDiscountedTotal = 0;
@@ -112,6 +114,25 @@ class _CartScreenState extends State<CartScreen> {
                           fontWeight: FontWeight.bold,
                           color: Colors.green,
                         ),
+                      ),
+                      SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: cartItems.isEmpty
+                            ? null
+                            : () {
+                                orderProvider.addOrder(
+                                  cartItems,
+                                  cartTotal,
+                                  cartDiscountedTotal,
+                                );
+                                cartProvider.clearCart();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Order placed successfully'),
+                                  ),
+                                );
+                              },
+                        child: Text('Checkout'),
                       ),
                     ],
                   ),

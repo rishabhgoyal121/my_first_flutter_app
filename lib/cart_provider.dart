@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_html/html.dart' as html;
 
 class CartProvider extends ChangeNotifier {
   final Map<String, dynamic> _cart = {
@@ -45,10 +48,16 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void clearCart() {
+  void clearCart() async {
     _cart['products'].clear();
     _recalculateTotals();
     notifyListeners();
+    if (kIsWeb) {
+      html.window.localStorage.remove('cart');
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('cart');
+    }
   }
 
   void setCart(Map<String, dynamic> cart) {
