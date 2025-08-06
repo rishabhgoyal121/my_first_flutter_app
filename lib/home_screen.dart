@@ -33,7 +33,6 @@ class _HomeScreenState extends State<HomeScreen> {
   late ScrollController _scrollController;
 
   final TextEditingController _searchController = TextEditingController();
-  String _searchQuery = '';
   bool _isSearching = false;
 
   SortOption? _selectedSort;
@@ -154,7 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (query.isEmpty) {
       if (!mounted) return;
       setState(() {
-        _searchQuery = '';
         _isSearching = false;
         products.clear();
         skip = 0;
@@ -167,7 +165,6 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       isLoading = true;
       _isSearching = true;
-      _searchQuery = query;
     });
     final response = await http.get(
       Uri.parse('https://dummyjson.com/products/search?q=$query'),
@@ -210,25 +207,6 @@ class _HomeScreenState extends State<HomeScreen> {
       hasMore = true;
     });
     fetchProducts();
-  }
-
-  String _sortOptionLabel(SortOption? option) {
-    switch (option) {
-      case SortOption.ratingAsc:
-        return 'Rating (Low to High)';
-      case SortOption.ratingDesc:
-        return 'Rating (High to Low)';
-      case SortOption.priceAsc:
-        return 'Price (Low to High)';
-      case SortOption.priceDesc:
-        return 'price (High to Low)';
-      case SortOption.discountAsc:
-        return 'Discount (Low to High)';
-      case SortOption.discountDesc:
-        return 'Discount (High to Low)';
-      default:
-        return 'Sort';
-    }
   }
 
   @override
