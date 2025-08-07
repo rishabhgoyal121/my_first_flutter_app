@@ -7,11 +7,15 @@ import 'package:universal_html/html.dart' as html;
 import 'dart:convert';
 import 'product.dart';
 import 'cart_provider.dart';
+import 'add_to_cart_animation.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final Product product;
+  final GlobalKey cartIconKey = GlobalKey();
+  final GlobalKey<AddToCartAnimationState> _animationKey =
+      GlobalKey<AddToCartAnimationState>();
 
-  const ProductDetailsScreen({super.key, required this.product});
+  ProductDetailsScreen({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +24,7 @@ class ProductDetailsScreen extends StatelessWidget {
         title: Text(product.title),
         actions: [
           IconButton(
+            key: cartIconKey,
             icon: Icon(Icons.shopping_cart),
             onPressed: () {
               Navigator.pushNamed(context, '/cart');
@@ -32,8 +37,6 @@ class ProductDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(child: Image.network(product.thumbnail, height: 200)),
-            SizedBox(height: 16),
             Text(
               product.title,
               style: Theme.of(context).textTheme.headlineLarge,
@@ -43,6 +46,12 @@ class ProductDetailsScreen extends StatelessWidget {
             SizedBox(height: 16),
             Text(product.description),
             SizedBox(height: 16),
+            AddToCartAnimation(
+              key: _animationKey,
+              cartIconKey: cartIconKey,
+              child: Image.network(product.thumbnail, height: 200),
+              onAnimationComplete: () async {},
+            ),
             ElevatedButton(
               onPressed: () async {
                 final response = await http.put(
@@ -73,9 +82,8 @@ class ProductDetailsScreen extends StatelessWidget {
                     await prefs.setString('cart', cartJson);
                   }
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Product added to cart')),
-                  );
+                  _animationKey.currentState?.startAnimation();
+                  await Future.delayed(const Duration(milliseconds: 700));
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Failed to add product to cart')),

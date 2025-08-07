@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:my_first_flutter_app/add_to_cart_animation_small.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,6 +33,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int skip = 0;
   late ScrollController _scrollController;
 
+  final GlobalKey cartIconKey = GlobalKey();
+  List<GlobalKey<AddToCartAnimationState>> animationKeys = [];
+
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
 
@@ -63,6 +67,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadCart();
     _scrollController = ScrollController()..addListener(_onScroll);
     fetchProducts();
+    animationKeys = List.generate(
+      100,
+      (_) => GlobalKey<AddToCartAnimationState>(),
+    );
   }
 
   @override
@@ -279,6 +287,7 @@ class _HomeScreenState extends State<HomeScreen> {
             alignment: Alignment.topRight,
             children: [
               IconButton(
+                key: cartIconKey,
                 onPressed: () {
                   Navigator.pushNamed(context, '/cart');
                 },
@@ -323,7 +332,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
                 final product = products[index];
                 return ListTile(
-                  leading: Image.network(product.thumbnail),
+                  leading: AddToCartAnimation(
+                    key: animationKeys[index],
+                    onAnimationComplete: () {},
+                    cartIconKey: cartIconKey,
+                    child: Image.network(product.thumbnail),
+                  ),
                   title: Text(product.title),
                   subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
                   onTap: () {
@@ -337,6 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                   trailing: IconButton(
                     onPressed: () async {
+                      animationKeys[index].currentState?.startAnimation();
                       final response = await http.put(
                         Uri.parse('https://dummyjson.com/carts/1'),
                         headers: {'content-type': 'application/json'},
