@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
+import 'dart:convert';
 
 class CartProvider extends ChangeNotifier {
   final Map<String, dynamic> _cart = {
@@ -39,6 +40,7 @@ class CartProvider extends ChangeNotifier {
     }
     _recalculateTotals();
     notifyListeners();
+    _saveCartToLocalStorage();
   }
 
   void removeProduct(int productId) {
@@ -46,6 +48,7 @@ class CartProvider extends ChangeNotifier {
     products.removeWhere((p) => p['id'] == productId);
     _recalculateTotals();
     notifyListeners();
+    _saveCartToLocalStorage();
   }
 
   void clearCart() async {
@@ -64,6 +67,7 @@ class CartProvider extends ChangeNotifier {
     _cart.clear();
     _cart.addAll(cart);
     notifyListeners();
+    _saveCartToLocalStorage();
   }
 
   void _recalculateTotals() {
@@ -78,5 +82,15 @@ class CartProvider extends ChangeNotifier {
       0.0,
       (sum, p) => sum + (p["discountedTotal"] ?? 0.0),
     );
+  }
+
+  Future<void> _saveCartToLocalStorage() async {
+    final cartJson = json.encode(_cart);
+    if (kIsWeb) {
+      html.window.localStorage['cart'] = cartJson;
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('cart', cartJson);
+    }
   }
 }

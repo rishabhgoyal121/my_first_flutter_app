@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'cart_provider.dart';
 import 'order_provider.dart';
 import 'order_animation.dart';
+import 'cart_item_delete_animation.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -16,6 +17,7 @@ class CartScreen extends StatefulWidget {
 class _CartScreenState extends State<CartScreen> {
   bool _isPlacingOrder = false;
   bool _isOrderPlaced = false;
+  int? _deletingItemId;
 
   @override
   void initState() {
@@ -50,53 +52,77 @@ class _CartScreenState extends State<CartScreen> {
                     itemCount: cartItems.length,
                     itemBuilder: (context, index) {
                       final item = cartItems[index];
-                      return ListTile(
-                        leading: Image.network(item['thumbnail'], width: 50),
-                        title: Text(item['title']),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Price: \$ ${item['price']}'),
-                            Text('Quantity: ${item['quantity']}'),
-                            Text(
-                              'Total: \$ ${item['total'].toStringAsFixed(2)}',
-                            ),
-                            Text(
-                              'Discounted Price: \$ ${item['discountedTotal'].toStringAsFixed(2)}',
-                            ),
-                          ],
-                        ),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete),
-                          onPressed: () async {
-                            final deleteResponse = await http.put(
-                              Uri.parse('https://dummyjson.com/carts/1/'),
-                              headers: {'Content-Type': 'application/json'},
-                              body: json.encode({
-                                'merge': true,
-                                'userId':
-                                    1, // Assuming a user ID of 1 for demo purposes
-                                'products': cartItems
-                                    .where((i) => i['id'] != item['id'])
-                                    .toList(),
-                              }),
-                            );
-                            if (deleteResponse.statusCode == 200 ||
-                                deleteResponse.statusCode == 301) {
-                              cartProvider.removeProduct(item['id']);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Item removed from cart'),
-                                ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Failed to remove item'),
-                                ),
-                              );
-                            }
-                          },
+                      final isDeleting = _deletingItemId == item['id'];
+                      return CartItemDeleteAnimation(
+                        key: ValueKey(item['id']),
+                        isDeleting: isDeleting,
+                        onAnimationEnd: isDeleting
+                            ? () async {
+                                final deleteResponse = await http.put(
+                                  Uri.parse('https://dummyjson.com/carts/1/'),
+                                  headers: {'Content-Type': 'application/json'},
+                                  body: json.encode({
+                                    'merge': true,
+                                    'userId':
+                                        1, // Assuming a user ID of 1 for demo purposes
+                                    'products': List<Map<String, dynamic>>.from(
+                                      cartItems.where(
+                                        (item) => item['id'] != _deletingItemId,
+                                      ),
+                                    ),
+                                  }),
+                                );
+                                if (deleteResponse.statusCode == 200 ||
+                                    deleteResponse.statusCode == 301) {
+                                  // Defer the state update to avoid modifying the list during build
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    cartProvider.removeProduct(
+                                      _deletingItemId!,
+                                    );
+                                    setState(() {
+                                      _deletingItemId = null;
+                                    });
+                                  });
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Failed to remove item'),
+                                    ),
+                                  );
+                                  setState(() {
+                                    _deletingItemId = null;
+                                  });
+                                }
+                              }
+                            : null,
+                        child: ListTile(
+                          leading: Image.network(item['thumbnail'], width: 50),
+                          title: Text(item['title']),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Price: \$ ${item['price']}'),
+                              Text('Quantity: ${item['quantity']}'),
+                              Text(
+                                'Total: \$ ${item['total'].toStringAsFixed(2)}',
+                              ),
+                              Text(
+                                'Discounted Price: \$ ${item['discountedTotal'].toStringAsFixed(2)}',
+                              ),
+                            ],
+                          ),
+                          trailing: IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: isDeleting
+                                ? null
+                                : () {
+                                    setState(() {
+                                      _deletingItemId = item['id'];
+                                    });
+                                  },
+                          ),
                         ),
                       );
                     },
