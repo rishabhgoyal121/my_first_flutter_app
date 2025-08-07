@@ -33,6 +33,9 @@ class _CartScreenState extends State<CartScreen> {
     double cartTotal = 0;
     double cartDiscountedTotal = 0;
     for (var item in cartItems) {
+      // Skip the item being deleted from total calculation
+      if (_deletingItemId == item['id']) continue;
+
       final total = item['total'];
       final discountedTotal = item['discountedTotal'];
       cartTotal += total is num ? total.toDouble() : 0.0;
@@ -58,42 +61,74 @@ class _CartScreenState extends State<CartScreen> {
                         isDeleting: isDeleting,
                         onAnimationEnd: isDeleting
                             ? () async {
-                                final deleteResponse = await http.put(
-                                  Uri.parse('https://dummyjson.com/carts/1/'),
-                                  headers: {'Content-Type': 'application/json'},
-                                  body: json.encode({
-                                    'merge': true,
-                                    'userId':
-                                        1, // Assuming a user ID of 1 for demo purposes
-                                    'products': List<Map<String, dynamic>>.from(
-                                      cartItems.where(
+                                try {
+                                  // Get the current cart items before making any changes
+                                  final currentCartItems =
+                                      List<Map<String, dynamic>>.from(
+                                        cartItems,
+                                      );
+
+                                  // Prepare the remaining products for API call
+                                  final remainingProducts = currentCartItems
+                                      .where(
                                         (item) => item['id'] != _deletingItemId,
-                                      ),
-                                    ),
-                                  }),
-                                );
-                                if (deleteResponse.statusCode == 200 ||
-                                    deleteResponse.statusCode == 301) {
-                                  // Defer the state update to avoid modifying the list during build
-                                  WidgetsBinding.instance.addPostFrameCallback((
-                                    _,
-                                  ) {
-                                    cartProvider.removeProduct(
-                                      _deletingItemId!,
-                                    );
-                                    setState(() {
-                                      _deletingItemId = null;
-                                    });
-                                  });
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Failed to remove item'),
-                                    ),
+                                      )
+                                      .map(
+                                        (item) => {
+                                          'id': item['id'],
+                                          'quantity': item['quantity'],
+                                        },
+                                      )
+                                      .toList();
+
+                                  // Make API call first
+                                  final deleteResponse = await http.put(
+                                    Uri.parse('https://dummyjson.com/carts/1'),
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: json.encode({
+                                      'merge':
+                                          false, // Use false to replace entire cart
+                                      'userId': 1,
+                                      'products': remainingProducts,
+                                    }),
                                   );
+
+                                  // Always remove from local state regardless of API response
+                                  // This ensures the UI is consistent and the item doesn't reappear
+                                  cartProvider.removeProduct(_deletingItemId!);
+
                                   setState(() {
                                     _deletingItemId = null;
                                   });
+
+                                  // Show appropriate message based on API response
+                                  if (deleteResponse.statusCode != 200 &&
+                                      deleteResponse.statusCode != 301) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          'Item removed locally, but failed to sync with server',
+                                        ),
+                                        backgroundColor: Colors.orange,
+                                      ),
+                                    );
+                                  }
+                                } catch (e) {
+                                  // On any error, still remove locally and inform user
+                                  cartProvider.removeProduct(_deletingItemId!);
+                                  setState(() {
+                                    _deletingItemId = null;
+                                  });
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Item removed locally, but network error occurred',
+                                      ),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
                                 }
                               }
                             : null,

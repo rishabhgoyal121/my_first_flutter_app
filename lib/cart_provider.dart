@@ -15,6 +15,19 @@ class CartProvider extends ChangeNotifier {
     'totalQuantity': 0,
   };
 
+  bool _isInitialized = false;
+  bool get isInitialized => _isInitialized;
+
+  CartProvider() {
+    _initializeCart();
+  }
+
+  Future<void> _initializeCart() async {
+    await _loadCartFromLocalStorage();
+    _isInitialized = true;
+    notifyListeners();
+  }
+
   Map<String, dynamic> get cart => Map.unmodifiable(_cart);
 
   void setUserId(int userId) {
@@ -82,6 +95,27 @@ class CartProvider extends ChangeNotifier {
       0.0,
       (sum, p) => sum + (p["discountedTotal"] ?? 0.0),
     );
+  }
+
+  Future<void> _loadCartFromLocalStorage() async {
+    try {
+      String? cartJson;
+      if (kIsWeb) {
+        cartJson = html.window.localStorage['cart'];
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        cartJson = prefs.getString('cart');
+      }
+
+      if (cartJson != null) {
+        final Map<String, dynamic> savedCart = json.decode(cartJson);
+        _cart.clear();
+        _cart.addAll(savedCart);
+        notifyListeners();
+      }
+    } catch (e) {
+      print('Error loading cart from local storage: $e');
+    }
   }
 
   Future<void> _saveCartToLocalStorage() async {

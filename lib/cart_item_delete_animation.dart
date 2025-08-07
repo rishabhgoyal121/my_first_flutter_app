@@ -21,6 +21,7 @@ class _CartItemDeleteAnimationState extends State<CartItemDeleteAnimation>
   late AnimationController _controller;
   late Animation<double> _fade;
   late Animation<Offset> _slide;
+  late Animation<double> _size;
 
   @override
   void initState() {
@@ -29,11 +30,18 @@ class _CartItemDeleteAnimationState extends State<CartItemDeleteAnimation>
       duration: Duration(milliseconds: 400),
       vsync: this,
     );
-    _fade = Tween<double>(begin: 1, end: 0).animate(_controller);
+    _fade = Tween<double>(
+      begin: 1,
+      end: 0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Interval(0.0, 0.7)));
     _slide = Tween<Offset>(
       begin: Offset.zero,
       end: Offset(1, 0),
-    ).animate(_controller);
+    ).animate(CurvedAnimation(parent: _controller, curve: Interval(0.0, 0.7)));
+    _size = Tween<double>(
+      begin: 1,
+      end: 0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Interval(0.5, 1.0)));
 
     if (widget.isDeleting) {
       _controller.forward().then((_) {
@@ -60,9 +68,12 @@ class _CartItemDeleteAnimationState extends State<CartItemDeleteAnimation>
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _fade,
-      child: SlideTransition(position: _slide, child: widget.child),
+    return SizeTransition(
+      sizeFactor: _size,
+      child: FadeTransition(
+        opacity: _fade,
+        child: SlideTransition(position: _slide, child: widget.child),
+      ),
     );
   }
 }
