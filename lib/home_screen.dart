@@ -382,9 +382,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           final prefs = await SharedPreferences.getInstance();
                           await prefs.setString('cart', cartJson);
                         }
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Product added to cart')),
-                        );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(

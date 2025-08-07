@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'cart_provider.dart';
 import 'order_provider.dart';
+import 'order_animation.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -13,6 +14,9 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
+  bool _isPlacingOrder = false;
+  bool _isOrderPlaced = false;
+
   @override
   void initState() {
     super.initState();
@@ -116,23 +120,55 @@ class _CartScreenState extends State<CartScreen> {
                         ),
                       ),
                       SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: cartItems.isEmpty
-                            ? null
-                            : () async{
-                                await orderProvider.addOrder(
-                                  cartItems,
-                                  cartTotal,
-                                  cartDiscountedTotal,
-                                );
-                                cartProvider.clearCart();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Order placed successfully'),
-                                  ),
-                                );
-                              },
-                        child: Text('Checkout'),
+                      AnimatedSwitcher(
+                        duration: Duration(milliseconds: 600),
+                        child: _isOrderPlaced
+                            ? Container(
+                                height: 48,
+                                alignment: Alignment.center,
+                                child: OrderAnimation(
+                                  isLoading: false,
+                                  isSuccess: true,
+                                  key: ValueKey('success'),
+                                ),
+                              )
+                            : _isPlacingOrder
+                            ? Container(
+                                height: 48,
+                                alignment: Alignment.center,
+                                child: OrderAnimation(
+                                  isLoading: true,
+                                  isSuccess: false,
+                                  key: ValueKey('loading'),
+                                ),
+                              )
+                            : ElevatedButton(
+                                key: ValueKey('button'),
+                                onPressed: cartItems.isEmpty || _isPlacingOrder
+                                    ? null
+                                    : () async {
+                                        setState(() {
+                                          _isPlacingOrder = true;
+                                        });
+                                        await orderProvider.addOrder(
+                                          cartItems,
+                                          cartTotal,
+                                          cartDiscountedTotal,
+                                        );
+                                        setState(() {
+                                          _isPlacingOrder = false;
+                                          _isOrderPlaced = true;
+                                        });
+                                        await Future.delayed(
+                                          Duration(seconds: 2),
+                                        );
+                                        setState(() {
+                                          _isOrderPlaced = false;
+                                        });
+                                        cartProvider.clearCart();
+                                      },
+                                child: Text('Checkout'),
+                              ),
                       ),
                     ],
                   ),
