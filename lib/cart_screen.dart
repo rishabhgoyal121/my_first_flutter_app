@@ -215,25 +215,34 @@ class _CartScreenState extends State<CartScreen> {
                                 onPressed: cartItems.isEmpty || _isPlacingOrder
                                     ? null
                                     : () async {
-                                        setState(() {
-                                          _isPlacingOrder = true;
-                                        });
-                                        await orderProvider.addOrder(
-                                          cartItems,
-                                          cartTotal,
-                                          cartDiscountedTotal,
-                                        );
-                                        setState(() {
-                                          _isPlacingOrder = false;
-                                          _isOrderPlaced = true;
-                                        });
-                                        await Future.delayed(
-                                          Duration(seconds: 2),
-                                        );
-                                        setState(() {
-                                          _isOrderPlaced = false;
-                                        });
-                                        cartProvider.clearCart();
+                                        final result =
+                                            await Navigator.pushNamed(context, '/checkout', arguments: {
+                                              'cartItems': cartItems,
+                                              'cartTotal': cartTotal,
+                                              'cartDiscountedTotal': cartDiscountedTotal
+                                            });
+                                        if ( result != null && result is Map) {
+                                          setState(() {
+                                            _isPlacingOrder = true;
+                                          });
+                                          await orderProvider.addOrder(
+                                            cartItems,
+                                            cartTotal,
+                                            cartDiscountedTotal,
+                                          );
+                                          setState(() {
+                                            _isPlacingOrder = false;
+                                            _isOrderPlaced = true;
+                                          });
+                                          await Future.delayed(
+                                            Duration(seconds: 2),
+                                          );
+                                          setState(() {
+                                            _isOrderPlaced = false;
+                                          });
+                                          cartProvider.clearCart();
+                                        }
+                                        
                                       },
                                 child: Text('Checkout'),
                               ),

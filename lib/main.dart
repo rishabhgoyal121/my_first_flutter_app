@@ -10,6 +10,7 @@ import 'login_screen.dart';
 import 'cart_screen.dart';
 import 'cart_provider.dart';
 import 'order_provider.dart';
+import 'checkout_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -96,6 +97,14 @@ class MyApp extends StatelessWidget {
           );
         },
         '/profile': (context) => ProfileScreen(),
+        '/checkout': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map;
+          return CheckoutScreen(
+            cartTotal: args['cartTotal'],
+            cartDiscountedTotal: args['cartDiscountedTotal'],
+            cartItems: args['cartItems'],
+          );
+        },
       },
     );
   }
