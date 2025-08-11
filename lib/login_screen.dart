@@ -59,8 +59,6 @@ class _LoginScreenState extends State<LoginScreen> {
                               'accessToken=${data['accessToken']}; path=/; max-age=3600';
                           html.document.cookie =
                               'refreshToken=${data['refreshToken']}; path=/; max-age=604800';
-                          html.window.localStorage['userId'] = data['id']
-                              .toString();
                         } else {
                           final prefs = await SharedPreferences.getInstance();
                           await prefs.setString(
