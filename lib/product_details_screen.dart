@@ -67,16 +67,15 @@ class ProductDetailsScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineLarge,
             ),
             SizedBox(height: 8),
-            Text('\$${product.price.toStringAsFixed(2)}'),
-            SizedBox(height: 16),
-            Text(product.description),
-            SizedBox(height: 16),
+
             AddToCartAnimation(
               key: _animationKey,
               cartIconKey: cartIconKey,
               child: Image.network(product.thumbnail, height: 200),
               onAnimationComplete: () async {},
             ),
+            SizedBox(height: 16),
+
             ElevatedButton(
               onPressed: () async {
                 final response = await http.put(
@@ -117,6 +116,26 @@ class ProductDetailsScreen extends StatelessWidget {
               },
               child: Text('Add to Cart'),
             ),
+            SizedBox(height: 16),
+            Row(
+              children: [
+                Text(
+                  '\$${product.price.toStringAsFixed(2)}',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                SizedBox(width: 20),
+                Text(
+                  '- ${product.discountPercentage.toStringAsFixed(0)}%',
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.blueAccent,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            Text(product.description),
+            SizedBox(height: 16),
           ],
         ),
       ),
