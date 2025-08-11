@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _checkAuth();
-    _loadCart();
+    // _loadCart();
     _scrollController = ScrollController()..addListener(_onScroll);
     fetchProducts();
     animationKeys = List.generate(
@@ -100,25 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
           Navigator.pushReplacementNamed(context, '/login');
         });
       }
-    }
-  }
-
-  Future<void> _loadCart() async {
-    String? cartJson;
-    if (kIsWeb) {
-      cartJson = html.window.localStorage['cart'];
-    } else {
-      final prefs = await SharedPreferences.getInstance();
-      cartJson = prefs.getString('cart');
-    }
-    if (cartJson != null && cartJson.isNotEmpty) {
-      final cartData = json.decode(cartJson);
-      if (!mounted) return;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          Provider.of<CartProvider>(context, listen: false).setCart(cartData);
-        }
-      });
     }
   }
 

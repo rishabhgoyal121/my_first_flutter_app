@@ -87,24 +87,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           }),
                         );
 
-                        if (addCartResponse.statusCode == 200 ||
-                            addCartResponse.statusCode == 201) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Cart created successfully'),
-                            ),
-                          );
-                        } else {
+                        if (!(addCartResponse.statusCode == 200 ||
+                            addCartResponse.statusCode == 201)) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Failed to create cart')),
                           );
                         }
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Welcome ${data['username']}'),
-                          ),
-                        );
                         Future.delayed(Duration(seconds: 1), () {
                           Navigator.pushReplacementNamed(navContext, '/');
                         });
