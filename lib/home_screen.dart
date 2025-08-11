@@ -339,7 +339,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Image.network(product.thumbnail),
                   ),
                   title: Text(product.title),
-                  subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
+                  subtitle: Row(
+                    children: [
+                      Icon(Icons.star, color: Colors.amber, size: 16),
+                      SizedBox(width: 4),
+                      Text(
+                        product.rating.toStringAsFixed(1),
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(width: 12),
+                      Text('\$${product.price.toStringAsFixed(2)}'),
+                    ],
+                  ),
                   onTap: () {
                     Navigator.push(
                       context,
