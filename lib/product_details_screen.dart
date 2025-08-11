@@ -160,6 +160,14 @@ class ProductDetailsScreen extends StatelessWidget {
               ],
             ),
             SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(Icons.autorenew),
+                SizedBox(width: 4),
+                Text(product.returnPolicy),
+              ],
+            ),
+            SizedBox(height: 16),
             Text(product.description),
             SizedBox(height: 16),
             Row(
