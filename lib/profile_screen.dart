@@ -91,24 +91,89 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ? Center(child: Text('No user data'))
           : Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (userData!['image'] != null)
-                    CircleAvatar(
-                      backgroundImage: NetworkImage(userData!['image']),
-                      radius: 40,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (userData!['image'] != null)
+                      CircleAvatar(
+                        backgroundImage: NetworkImage(userData!['image']),
+                        radius: 40,
+                      ),
+                    SizedBox(height: 16),
+                    Text(
+                      '${userData!['firstName']} ${userData!['lastName']}',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  SizedBox(height: 16),
-                  Text(
-                    '${userData!['firstName']} ${userData!['lastName']}',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16),
-                  Text('Email: ${userData!['email']}'),
-                  SizedBox(height: 8),
-                  Text('Age: ${userData!['age']}'),
-                ],
+                    Text(
+                      '@${userData!['username']}',
+                      style: TextStyle(color: Colors.grey[700]),
+                    ),
+                    Divider(height: 32),
+                    Text('Email: ${userData!['email']}'),
+                    SizedBox(height: 8),
+                    Text('Phone: ${userData!['phone']}'),
+                    SizedBox(height: 8),
+                    Text('Gender: ${userData!['gender']}'),
+                    SizedBox(height: 8),
+                    Text('Birth Date: ${userData!['birthDate']}'),
+                    SizedBox(height: 8),
+                    Text('Age: ${userData!['age']}'),
+                    SizedBox(height: 8),
+                    Text('Blood Group: ${userData!['bloodGroup']}'),
+                    SizedBox(height: 8),
+                    Text('Height: ${userData!['height']} cm'),
+                    SizedBox(height: 8),
+                    Text('Weight: ${userData!['weight']} kg'),
+                    SizedBox(height: 8),
+                    Text('Eye Color: ${userData!['eyeColor']}'),
+                    SizedBox(height: 8),
+                    if (userData!['hair'] != null)
+                      Text(
+                        'Hair: ${userData!['hair']['color']} (${userData!['hair']['type']})',
+                      ),
+                    Divider(height: 32),
+                    if (userData!['address'] != null)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Address:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text('${userData!['address']['address']}'),
+                          Text(
+                            '${userData!['address']['city']}, ${userData!['address']['state']} ${userData!['address']['postalCode']}',
+                          ),
+                          Text('${userData!['address']['country']}'),
+                        ],
+                      ),
+                    SizedBox(height: 16),
+                    if (userData!['company'] != null)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Company:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text('${userData!['company']['name']}'),
+                          Text(
+                            '${userData!['company']['title']} (${userData!['company']['department']})',
+                          ),
+                          if (userData!['company']['address'] != null)
+                            Text(
+                              '${userData!['company']['address']['city']}, ${userData!['company']['address']['state']}',
+                            ),
+                        ],
+                      ),
+                    SizedBox(height: 16),
+                    Text('Role: ${userData!['role']}'),
+                  ],
+                ),
               ),
             ),
     );
