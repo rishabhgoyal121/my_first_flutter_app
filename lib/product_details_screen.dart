@@ -134,6 +134,30 @@ class ProductDetailsScreen extends StatelessWidget {
               ],
             ),
             SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(Icons.shield),
+                SizedBox(width: 4),
+                Text(
+                  product.warrantyInformation,
+                  style: TextStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(width: 24),
+                Icon(Icons.local_shipping),
+                SizedBox(width: 8),
+                Text(
+                  product.shippingInformation,
+                  style: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.blueAccent,
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
             Text(product.description),
             SizedBox(height: 16),
           ],
