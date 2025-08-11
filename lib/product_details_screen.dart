@@ -134,6 +134,8 @@ class ProductDetailsScreen extends StatelessWidget {
               ],
             ),
             SizedBox(height: 16),
+            Text(product.availabilityStatus),
+            SizedBox(height: 16),
             Row(
               children: [
                 Icon(Icons.shield),
