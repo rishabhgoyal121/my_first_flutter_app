@@ -348,7 +348,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                       SizedBox(width: 12),
-                      Text('\$${product.price.toStringAsFixed(2)}'),
+                      Text(
+                        '\$ ${product.price.toStringAsFixed(2)}',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        '- ${product.discountPercentage.toStringAsFixed(0)}%',
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          color: Colors.blueAccent,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                   onTap: () {
