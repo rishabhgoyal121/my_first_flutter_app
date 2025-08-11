@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'dart:html' as html;
+import 'package:universal_html/html.dart' as html;
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,13 +35,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacementNamed(context, '/login');
       });
+      return null;
     } else {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('accessToken');
+      print('accessToken is $token');
       if (token == null || token.isEmpty) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Navigator.pushReplacementNamed(context, '/login');
         });
+        return null;
       }
       return token;
     }
