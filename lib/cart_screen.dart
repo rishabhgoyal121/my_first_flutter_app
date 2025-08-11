@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:my_first_flutter_app/product.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'cart_provider.dart';
@@ -158,6 +159,13 @@ class _CartScreenState extends State<CartScreen> {
                                     });
                                   },
                           ),
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/productDetails',
+                              arguments: {'product': item},
+                            );
+                          },
                         ),
                       );
                     },

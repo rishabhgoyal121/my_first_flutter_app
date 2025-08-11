@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:my_first_flutter_app/product.dart';
+import 'package:my_first_flutter_app/product_details_screen.dart';
 import 'orders_screen.dart';
 import 'package:provider/provider.dart';
 import 'signup_screen.dart';
@@ -86,6 +88,12 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginScreen(),
         '/cart': (context) => CartScreen(),
         '/orders': (context) => OrdersScreen(),
+        '/productDetails': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map;
+          return ProductDetailsScreen(
+            product: Product.fromJson(args['product']),
+          );
+        },
       },
     );
   }
