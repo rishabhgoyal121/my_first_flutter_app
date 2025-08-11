@@ -12,7 +12,6 @@ class OrderAnimation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      print('OrderAnimation: isLoading=$isLoading, isSuccess=$isSuccess');
 
     if (isSuccess) {
       return Icon(Icons.check_circle, color: Colors.green, size: 48);
