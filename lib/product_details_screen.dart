@@ -62,9 +62,25 @@ class ProductDetailsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              product.title,
-              style: Theme.of(context).textTheme.headlineLarge,
+            Row(
+              children: [
+                Text(
+                  product.title,
+                  style: Theme.of(context).textTheme.headlineLarge,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  product.rating.toStringAsFixed(1),
+                  style: TextStyle(color: Colors.amberAccent, fontSize: 16),
+                ),
+                SizedBox(width: 2),
+                Icon(Icons.star, size: 14, color: Colors.amberAccent),
+                SizedBox(width: 2),
+                Text(
+                  '(${product.reviews.length})',
+                  style: TextStyle(color: Colors.amberAccent, fontSize: 10),
+                ),
+              ],
             ),
             SizedBox(height: 8),
 
