@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_first_flutter_app/product.dart';
 import 'package:my_first_flutter_app/product_details_screen.dart';
+import 'package:my_first_flutter_app/profile_screen.dart';
 import 'orders_screen.dart';
 import 'package:provider/provider.dart';
 import 'signup_screen.dart';
@@ -94,6 +95,7 @@ class MyApp extends StatelessWidget {
             product: Product.fromJson(args['product']),
           );
         },
+        '/profile': (context) => ProfileScreen(),
       },
     );
   }
