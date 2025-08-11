@@ -188,7 +188,10 @@ class ProductDetailsScreen extends StatelessWidget {
               SizedBox(height: 16),
               Text(product.description),
               SizedBox(height: 16),
-              Row(
+              Wrap(
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 16,
+                runSpacing: 8,
                 children: [
                   Text(
                     'Dimensions:',
