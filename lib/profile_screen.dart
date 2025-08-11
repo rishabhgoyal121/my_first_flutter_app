@@ -171,25 +171,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ],
                       ),
                     SizedBox(height: 16),
-                    if (userData!['company'] != null)
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Company:',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          Text('${userData!['company']['name']}'),
-                          Text(
-                            '${userData!['company']['title']} (${userData!['company']['department']})',
-                          ),
-                          if (userData!['company']['address'] != null)
-                            Text(
-                              '${userData!['company']['address']['city']}, ${userData!['company']['address']['state']}',
-                            ),
-                        ],
-                      ),
-                    SizedBox(height: 16),
                     // --- Add this block for bank details ---
                     if (userData!['bank'] != null)
                       Column(
