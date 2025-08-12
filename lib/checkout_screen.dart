@@ -162,7 +162,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     if (_latitude != null && _longitude != null)
                       Text(
                         '  Lat: ${_latitude!.toStringAsFixed(4)} Lng: ${_longitude!.toStringAsFixed(4)}',
-                      ),
+                      )
+                    else 
+                      Text('Location not set')
                   ],
                 ),
                 DropdownButtonFormField(
@@ -194,7 +196,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         "state": _state,
                         'stateCode': _stateCode,
                         'postalCode': _postalCode,
-                        '_country': _country,
+                        'country': _country,
                         'coordinates': {'lat': _latitude, 'lng': _longitude},
                         'paymentMethod': _paymentMethod,
                       });
