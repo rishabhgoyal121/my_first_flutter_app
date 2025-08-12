@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
-import 'db_helper.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:universal_html/html.dart' as html;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,7 +14,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  String email = '';
+  String username = '';
   String password = '';
 
   @override
@@ -24,9 +28,9 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: [
               TextFormField(
-                decoration: InputDecoration(labelText: 'Email'),
-                onChanged: (val) => email = val,
-                validator: (val) => val!.isEmpty ? 'Enter Email' : null,
+                decoration: InputDecoration(labelText: 'Username'),
+                onChanged: (val) => username = val,
+                validator: (val) => val!.isEmpty ? 'Enter Username' : null,
               ),
               SizedBox(height: 16),
               TextFormField(
@@ -40,8 +44,65 @@ class _LoginScreenState extends State<LoginScreen> {
                   if (_formKey.currentState!.validate()) {
                     final navContext = context;
                     try {
-                      await DBHelper.insertUser(email, password);
-                      Navigator.pushReplacementNamed(navContext, '/');
+                      final response = await http.post(
+                        Uri.parse('https://dummyjson.com/auth/login'),
+                        headers: {'Content-type': 'application/json'},
+                        body: json.encode({
+                          'username': username,
+                          'password': password,
+                        }),
+                      );
+                      if (response.statusCode == 200) {
+                        final data = json.decode(response.body);
+                        if (kIsWeb) {
+                          html.document.cookie =
+                              'accessToken=${data['accessToken']}; path=/; max-age=3600';
+                          html.document.cookie =
+                              'refreshToken=${data['refreshToken']}; path=/; max-age=604800';
+                        } else {
+                          final prefs = await SharedPreferences.getInstance();
+                          await prefs.setString(
+                            'accessToken',
+                            data['accessToken'],
+                          );
+                          await prefs.setString(
+                            'refreshToken',
+                            data['refreshToken'],
+                          );
+                        }
+
+                        final addCartResponse = await http.post(
+                          Uri.parse('https://dummyjson.com/carts/add'),
+                          headers: {'Content-Type': 'application/json'},
+                          body: json.encode({
+                            'userId':
+                                1, // Assuming a user ID of 1 for demo purposes
+                            'products': [
+                              {
+                                'id':
+                                    1, // Assuming a product ID of 1 for demo purposes
+                                'quantity': 1,
+                              },
+                            ],
+                          }),
+                        );
+
+                        if (!(addCartResponse.statusCode == 200 ||
+                            addCartResponse.statusCode == 201)) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to create cart')),
+                          );
+                        }
+                        Future.delayed(Duration(seconds: 1), () {
+                          Navigator.pushReplacementNamed(navContext, '/');
+                        });
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Login failed. Please try again.'),
+                          ),
+                        );
+                      }
                     } catch (e) {
                       print('Error: $e');
                     }

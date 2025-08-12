@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:my_first_flutter_app/product.dart';
+import 'package:my_first_flutter_app/product_details_screen.dart';
+import 'package:my_first_flutter_app/profile_screen.dart';
+import 'orders_screen.dart';
+import 'package:provider/provider.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
 import 'login_screen.dart';
+import 'cart_screen.dart';
+import 'cart_provider.dart';
+import 'order_provider.dart';
+import 'checkout_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-  await Hive.openBox('users');
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -69,11 +83,28 @@ class MyApp extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      initialRoute: '/login',
+      initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(),
         '/signup': (context) => SignupScreen(),
         '/login': (context) => LoginScreen(),
+        '/cart': (context) => CartScreen(),
+        '/orders': (context) => OrdersScreen(),
+        '/productDetails': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map;
+          return ProductDetailsScreen(
+            product: Product.fromJson(args['product']),
+          );
+        },
+        '/profile': (context) => ProfileScreen(),
+        '/checkout': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map;
+          return CheckoutScreen(
+            cartTotal: args['cartTotal'],
+            cartDiscountedTotal: args['cartDiscountedTotal'],
+            cartItems: args['cartItems'],
+          );
+        },
       },
     );
   }
