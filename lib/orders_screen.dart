@@ -32,7 +32,7 @@ class OrdersScreen extends StatelessWidget {
                         Text('Discounted: \$${order['discountedTotal'].toStringAsFixed(2)}'),
                         SizedBox(height: 8,),
                         Text('Products:'),
-                        ...products.map((p)=>Text('${p['title']} x${p['quantity']} (\$${p['price']})', style: TextStyle(fontSize: 13),))
+                        ...products.map((p) => Text('${p['title']} x${p['quantity']} (\$${p['price']})', style: TextStyle(fontSize: 13),))
                       ],
                     ),
                   ),
