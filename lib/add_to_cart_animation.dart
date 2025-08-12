@@ -76,7 +76,6 @@ class AddToCartAnimationState extends State<AddToCartAnimation>
 
     await _controller.forward();
     widget.onAnimationComplete();
-    _controller.reset();
   }
 
   @override
