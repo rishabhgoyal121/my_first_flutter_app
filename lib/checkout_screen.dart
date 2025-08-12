@@ -1,5 +1,10 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:universal_html/html.dart' as html;
 
 class CheckoutScreen extends StatefulWidget {
   final double cartTotal;
@@ -29,6 +34,52 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double? _longitude;
   String _paymentMethod = 'Credit Card';
 
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _stateController = TextEditingController();
+  final TextEditingController _stateCodeController = TextEditingController();
+  final TextEditingController _postalCodeController = TextEditingController();
+  final TextEditingController _countryController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    final String? userProfileString;
+    if (kIsWeb) {
+      userProfileString = html.window.localStorage['userProfile'];
+    } else {
+      final prefs = await SharedPreferences.getInstance();
+      userProfileString = prefs.getString('userProfile');
+    }
+    if (userProfileString != null) {
+      final userProfile = jsonDecode(userProfileString)['address'];
+      setState(() {
+        _addressController.text = (userProfile['address'] ?? '').toString();
+        _cityController.text = (userProfile['city'] ?? '').toString();
+        _stateController.text = (userProfile['state'] ?? '').toString();
+        _stateCodeController.text = (userProfile['stateCode'] ?? '').toString();
+        _postalCodeController.text = (userProfile['postalCode'] ?? '')
+            .toString();
+        _countryController.text = (userProfile['country'] ?? '').toString();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _addressController.dispose();
+    _cityController.dispose();
+    _stateController.dispose();
+    _stateCodeController.dispose();
+    _postalCodeController.dispose();
+    _countryController.dispose();
+    super.dispose();
+  }
+
   Future<void> _getCurrentLocation() async {
     try {
       Position position = await Geolocator.getCurrentPosition(
@@ -57,24 +108,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             child: Column(
               children: [
                 TextFormField(
+                  controller: _addressController,
                   decoration: InputDecoration(labelText: 'Address'),
                   validator: (value) =>
                       value == null || value.isEmpty ? 'Enter Address' : null,
                   onSaved: (newValue) => _address = newValue ?? '',
                 ),
                 TextFormField(
+                  controller: _cityController,
                   decoration: InputDecoration(labelText: 'City'),
                   validator: (value) =>
                       value == null || value.isEmpty ? 'Enter City' : null,
                   onSaved: (newValue) => _city = newValue ?? '',
                 ),
                 TextFormField(
+                  controller: _stateController,
                   decoration: InputDecoration(labelText: 'State'),
                   validator: (value) =>
                       value == null || value.isEmpty ? 'Enter State' : null,
                   onSaved: (newValue) => _state = newValue ?? '',
                 ),
                 TextFormField(
+                  controller: _stateCodeController,
                   decoration: InputDecoration(labelText: 'State Code'),
                   validator: (value) => value == null || value.isEmpty
                       ? 'Enter State Code'
@@ -82,6 +137,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   onSaved: (newValue) => _stateCode = newValue ?? '',
                 ),
                 TextFormField(
+                  controller: _postalCodeController,
                   decoration: InputDecoration(labelText: 'Postal Code'),
                   validator: (value) => value == null || value.isEmpty
                       ? 'Enter Postal Code'
@@ -89,6 +145,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   onSaved: (newValue) => _postalCode = newValue ?? '',
                 ),
                 TextFormField(
+                  controller: _countryController,
                   decoration: InputDecoration(labelText: 'Country'),
                   validator: (value) =>
                       value == null || value.isEmpty ? 'Enter Country' : null,
