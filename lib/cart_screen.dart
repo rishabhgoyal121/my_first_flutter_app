@@ -221,7 +221,7 @@ class _CartScreenState extends State<CartScreen> {
                                               'cartTotal': cartTotal,
                                               'cartDiscountedTotal': cartDiscountedTotal
                                             });
-                                        if ( result != null && result is Map) {
+                                        if (result != null && result is Map) {
                                           setState(() {
                                             _isPlacingOrder = true;
                                           });
