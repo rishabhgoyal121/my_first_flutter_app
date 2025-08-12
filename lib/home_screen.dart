@@ -250,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text('Discount (High to Low)'),
               ),
               PopupMenuItem(
-                value: SortOption.discountDesc,
+                value: SortOption.discountAsc,
                 child: Text('Discount (Low to High)'),
               ),
             ],
