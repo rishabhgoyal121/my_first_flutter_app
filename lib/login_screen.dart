@@ -71,6 +71,27 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         }
 
+                        final profileResponse = await http.get(
+                          Uri.parse('https://dummyjson.com/user/me'),
+                          headers: {
+                            'Authorization': 'Bearer ${data['accessToken']}',
+                          },
+                        );
+
+                        if (profileResponse.statusCode == 200) {
+                          final profileData = json.decode(profileResponse.body);
+                          if (kIsWeb) {
+                            html.window.localStorage['userProfile'] = json
+                                .encode(profileData);
+                          } else {
+                            final prefs = await SharedPreferences.getInstance();
+                            await prefs.setString(
+                              'userProfile',
+                              json.encode(profileData),
+                            );
+                          }
+                        }
+
                         final addCartResponse = await http.post(
                           Uri.parse('https://dummyjson.com/carts/add'),
                           headers: {'Content-Type': 'application/json'},
