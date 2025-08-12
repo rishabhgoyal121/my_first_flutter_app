@@ -163,8 +163,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       Text(
                         '  Lat: ${_latitude!.toStringAsFixed(4)} Lng: ${_longitude!.toStringAsFixed(4)}',
                       )
-                    else 
-                      Text('Location not set')
+                    else
+                      Text('Location not set'),
                   ],
                 ),
                 DropdownButtonFormField(
@@ -189,6 +189,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
+                      if (_latitude == null || _longitude == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              'Please set your location before placing the order.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
                       _formKey.currentState?.save();
                       Navigator.pop(context, {
                         'address': _address,
