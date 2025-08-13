@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'product.dart';
 import 'product_details_screen.dart';
 import 'cart_provider.dart';
+import 'wishlist_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -381,48 +382,70 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   },
-                  trailing: IconButton(
-                    onPressed: () async {
-                      animationKeys[index].currentState?.startAnimation();
-                      final response = await http.put(
-                        Uri.parse('https://dummyjson.com/carts/1'),
-                        headers: {'content-type': 'application/json'},
-                        body: json.encode({
-                          'merge': true,
-                          'userId': 1,
-                          'products': [
-                            {'id': product.id, 'quantity': 1},
-                          ],
-                        }),
-                      );
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          context.read<WishlistProvider>().toggleWishlist(
+                            product.id,
+                          );
+                        },
+                        icon: Icon(
+                          context.watch<WishlistProvider>().isWishlisted(
+                                product.id,
+                              )
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                        ),
+                        color: Colors.pink,
+                        tooltip: 'Add to wishlist',
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          animationKeys[index].currentState?.startAnimation();
+                          final response = await http.put(
+                            Uri.parse('https://dummyjson.com/carts/1'),
+                            headers: {'content-type': 'application/json'},
+                            body: json.encode({
+                              'merge': true,
+                              'userId': 1,
+                              'products': [
+                                {'id': product.id, 'quantity': 1},
+                              ],
+                            }),
+                          );
 
-                      if (response.statusCode == 200 ||
-                          response.statusCode == 201 ||
-                          response.statusCode == 301) {
-                        final cartProvider = Provider.of<CartProvider>(
-                          context,
-                          listen: false,
-                        );
-                        Provider.of<CartProvider>(
-                          context,
-                          listen: false,
-                        ).addProduct({'quantity': 1, ...product.toJson()});
-                        final cartJson = json.encode(cartProvider.cart);
-                        if (kIsWeb) {
-                          html.window.localStorage['cart'] = cartJson;
-                        } else {
-                          final prefs = await SharedPreferences.getInstance();
-                          await prefs.setString('cart', cartJson);
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Failed to add product to cart'),
-                          ),
-                        );
-                      }
-                    },
-                    icon: Icon(Icons.add_shopping_cart),
+                          if (response.statusCode == 200 ||
+                              response.statusCode == 201 ||
+                              response.statusCode == 301) {
+                            final cartProvider = Provider.of<CartProvider>(
+                              context,
+                              listen: false,
+                            );
+                            Provider.of<CartProvider>(
+                              context,
+                              listen: false,
+                            ).addProduct({'quantity': 1, ...product.toJson()});
+                            final cartJson = json.encode(cartProvider.cart);
+                            if (kIsWeb) {
+                              html.window.localStorage['cart'] = cartJson;
+                            } else {
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.setString('cart', cartJson);
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to add product to cart'),
+                              ),
+                            );
+                          }
+                        },
+                        icon: Icon(Icons.add_shopping_cart),
+                      ),
+                    ],
                   ),
                 );
               },
