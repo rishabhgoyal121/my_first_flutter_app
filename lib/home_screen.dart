@@ -339,6 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
 
                 return ListTile(
+                  contentPadding: EdgeInsets.only(left: 16, right: 8),
                   leading: AddToCartAnimation(
                     key: animationKeys[index],
                     onAnimationComplete: () {},
@@ -409,8 +410,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               ? Icons.favorite
                               : Icons.favorite_border,
                         ),
+                        iconSize: 16,
                         color: Colors.pink,
                         tooltip: 'Add to wishlist',
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.symmetric(horizontal: 0),
+                        constraints: BoxConstraints(),
                       ),
                       IconButton(
                         onPressed: () async {
@@ -455,6 +460,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           }
                         },
                         icon: Icon(Icons.add_shopping_cart),
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.symmetric(horizontal: 0),
+                        constraints: BoxConstraints(),
                       ),
                     ],
                   ),
