@@ -63,23 +63,34 @@ class ProductDetailsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     product.title,
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   SizedBox(width: 8),
-                  Text(
-                    product.rating.toStringAsFixed(1),
-                    style: TextStyle(color: Colors.amberAccent, fontSize: 16),
-                  ),
-                  SizedBox(width: 2),
-                  Icon(Icons.star, size: 14, color: Colors.amberAccent),
-                  SizedBox(width: 2),
-                  Text(
-                    '(${product.reviews.length})',
-                    style: TextStyle(color: Colors.amberAccent, fontSize: 10),
+                  Row(
+                    children: [
+                      Text(
+                        product.rating.toStringAsFixed(1),
+                        style: TextStyle(
+                          color: Colors.amberAccent,
+                          fontSize: 16,
+                        ),
+                      ),
+                      SizedBox(width: 2),
+                      Icon(Icons.star, size: 14, color: Colors.amberAccent),
+                      SizedBox(width: 2),
+                      Text(
+                        '(${product.reviews.length})',
+                        style: TextStyle(
+                          color: Colors.amberAccent,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -188,28 +199,22 @@ class ProductDetailsScreen extends StatelessWidget {
               SizedBox(height: 16),
               Text(product.description),
               SizedBox(height: 16),
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 16,
-                runSpacing: 8,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Dimensions:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(width: 16),
-                  Text('Height : '),
-                  Text(product.dimensions.height.toStringAsFixed(2)),
-                  SizedBox(width: 16),
-                  Text('Width : '),
-                  Text(product.dimensions.width.toStringAsFixed(2)),
-                  SizedBox(width: 16),
-                  Text('Depth : '),
-                  Text(product.dimensions.depth.toStringAsFixed(2)),
-                  SizedBox(width: 16),
+                  SizedBox(height: 8),
                   Text(
-                    '(in mm)',
-                    style: TextStyle(fontStyle: FontStyle.italic),
+                    'Height : ${product.dimensions.height.toStringAsFixed(2)} mm',
+                  ),
+                  Text(
+                    'Width : ${product.dimensions.width.toStringAsFixed(2)} mm',
+                  ),
+                  Text(
+                    'Depth : ${product.dimensions.depth.toStringAsFixed(2)} mm',
                   ),
                 ],
               ),
@@ -220,12 +225,10 @@ class ProductDetailsScreen extends StatelessWidget {
                     'Weight:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(width: 16),
-                  Text(product.weight.toStringAsFixed(2)),
-                  SizedBox(width: 16),
+                  SizedBox(width: 8),
                   Text(
-                    '(in lbs)',
-                    style: TextStyle(fontStyle: FontStyle.italic),
+                    '${product.weight.toStringAsFixed(2)} lbs',
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
