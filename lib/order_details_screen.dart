@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:my_first_flutter_app/product.dart';
+import 'product_details_screen.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> order;
@@ -45,6 +47,14 @@ class OrderDetailsScreen extends StatelessWidget {
                 title: Text('${p['title']}'),
                 subtitle: Text('Quantity: ${p['quantity']}'),
                 trailing: Text('\$${p['price']}'),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          ProductDetailsScreen(product: Product.fromJson(p)),
+                    ),
+                  );
+                },
               ),
             ),
           ],
