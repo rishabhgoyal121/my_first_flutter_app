@@ -178,28 +178,43 @@ class ProductDetailsScreen extends StatelessWidget {
               SizedBox(height: 16),
               Text(product.availabilityStatus),
               SizedBox(height: 16),
-              Row(
-                children: [
-                  Icon(Icons.shield),
-                  SizedBox(width: 4),
-                  Text(
-                    product.warrantyInformation,
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 400;
+                  final children = [
+                    Icon(Icons.shield),
+                    SizedBox(width: 4),
+                    Text(
+                      product.warrantyInformation,
+                      style: TextStyle(
+                        color: Colors.blueAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 24),
-                  Icon(Icons.local_shipping),
-                  SizedBox(width: 8),
-                  Text(
-                    product.shippingInformation,
-                    style: TextStyle(
-                      fontStyle: FontStyle.italic,
-                      color: Colors.blueAccent,
+                    SizedBox(width: 24),
+                    Icon(Icons.local_shipping),
+                    SizedBox(width: 8),
+                    Text(
+                      product.shippingInformation,
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.blueAccent,
+                      ),
                     ),
-                  ),
-                ],
+                  ];
+                  if (isNarrow) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: children.sublist(0, 3)),
+                        SizedBox(height: 8),
+                        Row(children: children.sublist(4)),
+                      ],
+                    );
+                  } else {
+                    return Row(children: children);
+                  }
+                },
               ),
               SizedBox(height: 16),
               Row(
