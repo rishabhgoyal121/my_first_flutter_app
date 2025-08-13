@@ -321,6 +321,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }
                 final product = products[index];
+
+                if (animationKeys.length <= index) {
+                  animationKeys.add(GlobalKey<AddToCartAnimationState>());
+                }
+
                 return ListTile(
                   leading: AddToCartAnimation(
                     key: animationKeys[index],
