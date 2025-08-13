@@ -336,20 +336,24 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: Text(product.title),
                   subtitle: Row(
                     children: [
-                      Icon(Icons.star, color: Colors.amber, size: 16),
                       SizedBox(width: 4),
                       Text(
                         product.rating.toStringAsFixed(1),
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(width: 12),
-                      Text(
-                        '\$ ${product.price.toStringAsFixed(2)}',
                         style: TextStyle(
-                          decoration: TextDecoration.lineThrough,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
                       ),
-                      SizedBox(width: 12),
+                      Icon(Icons.star, color: Colors.amber, size: 12),
+                      SizedBox(width: 8),
+                      Text(
+                        '\$${product.price.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          fontSize: 8,
+                        ),
+                      ),
+                      SizedBox(width: 8),
                       Text(
                         '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
                         style: TextStyle(
