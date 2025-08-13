@@ -150,7 +150,19 @@ class ProductDetailsScreen extends StatelessWidget {
                 children: [
                   Text(
                     '\$${product.price.toStringAsFixed(2)}',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    style: TextStyle(
+                      fontSize: 18,
+                      decoration: TextDecoration.lineThrough,
+                    ),
+                  ),
+                  SizedBox(width: 20),
+                  Text(
+                    '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.green,
+                    ),
                   ),
                   SizedBox(width: 20),
                   Text(
@@ -158,6 +170,7 @@ class ProductDetailsScreen extends StatelessWidget {
                     style: TextStyle(
                       fontStyle: FontStyle.italic,
                       color: Colors.blueAccent,
+                      fontSize: 16,
                     ),
                   ),
                 ],
