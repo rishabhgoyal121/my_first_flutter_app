@@ -11,6 +11,7 @@ import 'cart_screen.dart';
 import 'cart_provider.dart';
 import 'order_provider.dart';
 import 'checkout_screen.dart';
+import 'wishlist_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +20,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => WishlistProvider()),
       ],
       child: MyApp(),
     ),
