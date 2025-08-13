@@ -131,7 +131,43 @@ class _CartScreenState extends State<CartScreen> {
                               Text(
                                 'Discounted Price: \$ ${(item['price'] * (1 - item['discountPercentage'] / 100)).toStringAsFixed(2)}',
                               ),
-                              Text('Quantity: ${item['quantity']}'),
+                              Row(
+                                children: [
+                                  Text('Quantity: '),
+                                  IconButton(
+                                    onPressed:
+                                        isDeleting || (item['quantity'] < 2)
+                                        ? null
+                                        : () {
+                                            cartProvider.addProduct({
+                                              ...item,
+                                              'quantity': -1,
+                                            });
+                                          },
+                                    icon: Icon(Icons.remove, size: 14),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    item['quantity'].toString(),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  IconButton(
+                                    onPressed: isDeleting
+                                        ? null
+                                        : () {
+                                            cartProvider.addProduct({
+                                              ...item,
+                                              'quantity': 1,
+                                            });
+                                          },
+                                    icon: Icon(Icons.add, size: 14),
+                                  ),
+                                ],
+                              ),
                               Text(
                                 'Total: \$ ${item['discountedTotal'].toStringAsFixed(2)}',
                               ),
