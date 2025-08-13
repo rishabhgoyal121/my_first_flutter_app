@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'product.dart';
 import 'cart_provider.dart';
 import 'add_to_cart_animation.dart';
+import 'wishlist_provider.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final Product product;
@@ -89,6 +90,28 @@ class ProductDetailsScreen extends StatelessWidget {
                           color: Colors.amberAccent,
                           fontSize: 10,
                         ),
+                      ),
+                      Spacer(),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              context.read<WishlistProvider>().toggleWishlist(
+                                product.id,
+                              );
+                            },
+                            icon: Icon(
+                              context.watch<WishlistProvider>().isWishlisted(
+                                    product.id,
+                                  )
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                            ),
+                            color: Colors.pink,
+                            tooltip: 'Add to wishlist',
+                          ),
+                        ],
                       ),
                     ],
                   ),
