@@ -340,7 +340,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(width: 12),
                       Text(
                         '\$ ${product.price.toStringAsFixed(2)}',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
                       ),
                       SizedBox(width: 12),
                       Text(
