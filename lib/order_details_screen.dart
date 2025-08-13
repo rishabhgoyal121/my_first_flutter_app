@@ -32,6 +32,16 @@ class OrderDetailsScreen extends StatelessWidget {
             Text('Products:', style: TextStyle(fontWeight: FontWeight.bold)),
             ...products.map(
               (p) => ListTile(
+                leading: p['thumbnail'] != null
+                    ? Image.network(
+                        p['thumbnail'],
+                        width: 48,
+                        height: 48,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            Icon(Icons.broken_image),
+                      )
+                    : Icon(Icons.image_not_supported),
                 title: Text('${p['title']}'),
                 subtitle: Text('Quantity: ${p['quantity']}'),
                 trailing: Text('\$${p['price']}'),

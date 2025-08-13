@@ -217,13 +217,13 @@ class _HomeScreenState extends State<HomeScreen> {
             : Text('Products'),
         actions: [
           IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/profile'),
-            icon: Icon(Icons.person),
-          ),
-          IconButton(
             onPressed: () => Navigator.pushNamed(context, '/orders'),
             icon: Icon(Icons.receipt_long),
             tooltip: 'Orders',
+          ),
+          IconButton(
+            onPressed: () => Navigator.pushNamed(context, '/profile'),
+            icon: Icon(Icons.person),
           ),
           PopupMenuButton<SortOption>(
             icon: Icon(Icons.sort),
