@@ -1,10 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
+import 'payment_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final double cartTotal;
@@ -32,7 +32,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String _country = '';
   double? _latitude;
   double? _longitude;
-  String _paymentMethod = 'Credit Card';
 
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
@@ -164,20 +163,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         '  Lat: ${_latitude!.toStringAsFixed(4)} Lng: ${_longitude!.toStringAsFixed(4)}',
                       )
                     else
-                      Text('Location not set'),
+                      Text('  Location not set'),
                   ],
-                ),
-                DropdownButtonFormField(
-                  value: _paymentMethod,
-                  items: [
-                    DropdownMenuItem(
-                      value: 'Credit Card',
-                      child: Text('Credit Card'),
-                    ),
-                    DropdownMenuItem(value: 'Paypal', child: Text('Paypal')),
-                  ],
-                  onChanged: (value) =>
-                      setState(() => _paymentMethod = value ?? 'Credit Card'),
                 ),
                 SizedBox(height: 24),
                 Text('Total: \$${widget.cartTotal.toStringAsFixed(2)}'),
@@ -187,7 +174,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
                 SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState?.validate() ?? false) {
                       if (_latitude == null || _longitude == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -200,19 +187,36 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         return;
                       }
                       _formKey.currentState?.save();
-                      Navigator.pop(context, {
-                        'address': _address,
-                        'city': _city,
-                        "state": _state,
-                        'stateCode': _stateCode,
-                        'postalCode': _postalCode,
-                        'country': _country,
-                        'coordinates': {'lat': _latitude, 'lng': _longitude},
-                        'paymentMethod': _paymentMethod,
-                      });
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PaymentScreen(
+                            address: {
+                              'address': _address,
+                              'city': _city,
+                              "state": _state,
+                              'stateCode': _stateCode,
+                              'postalCode': _postalCode,
+                              'country': _country,
+                              'coordinates': {
+                                'lat': _latitude,
+                                'lng': _longitude,
+                              },
+                            },
+                            cartTotal: widget.cartTotal,
+                            cartDiscountedTotal: widget.cartDiscountedTotal,
+                            cartItems: widget.cartItems,
+                          ),
+                        ),
+                      );
+                      if (result != null &&
+                          result is Map &&
+                          result['orderPlaced'] == true) {
+                        Navigator.pop(context, result);
+                      }
                     }
                   },
-                  child: Text('Place Order'),
+                  child: Text('Continue to Payment'),
                 ),
               ],
             ),

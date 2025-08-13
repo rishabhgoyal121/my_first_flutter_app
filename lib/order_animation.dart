@@ -5,10 +5,10 @@ class OrderAnimation extends StatelessWidget {
   final bool isSuccess;
 
   const OrderAnimation({
-    Key? key,
+    super.key,
     required this.isLoading,
     required this.isSuccess,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
