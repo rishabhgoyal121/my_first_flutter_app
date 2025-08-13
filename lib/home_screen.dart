@@ -223,6 +223,17 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: 'Orders',
           ),
           IconButton(
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                '/wishlist',
+                arguments: {'products': products},
+              );
+            },
+            icon: Icon(Icons.favorite),
+            tooltip: 'Wishlist',
+          ),
+          IconButton(
             onPressed: () => Navigator.pushNamed(context, '/profile'),
             icon: Icon(Icons.person),
           ),
