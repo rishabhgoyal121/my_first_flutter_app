@@ -319,6 +319,40 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _highlightQuery(String text, String query) {
+    if (query.isEmpty) return Text(text);
+    final pattern = RegExp(RegExp.escape(query), caseSensitive: false);
+    final matches = pattern.allMatches(text);
+
+    List<TextSpan> spans = [];
+    int start = 0;
+    for (final match in matches) {
+      if (match.start > start) {
+        spans.add(TextSpan(text: text.substring(start, match.start)));
+      }
+      spans.add(
+        TextSpan(
+          text: text.substring(match.start, match.end),
+          style: TextStyle(
+            backgroundColor: Colors.yellowAccent,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      );
+      start = match.end;
+    }
+    if (start < text.length) {
+      spans.add(TextSpan(text: text.substring(start)));
+    }
+    return RichText(
+      text: TextSpan(
+        style: TextStyle(color: Colors.white),
+        children: spans,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     int cartCount = context.watch<CartProvider>().cart['totalQuantity'];
@@ -480,7 +514,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     cartIconKey: cartIconKey,
                     child: Image.network(product.thumbnail),
                   ),
-                  title: Text(product.title),
+                  title: _highlightQuery(product.title, _searchController.text),
                   subtitle: Row(
                     children: [
                       SizedBox(width: 4),
