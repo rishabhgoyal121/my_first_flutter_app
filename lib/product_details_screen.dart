@@ -119,6 +119,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     _showReviewDialogWithRating(rating, commentController);
                   },
                   icon: Icon(index < rating ? Icons.star : Icons.star_border),
+                  color: Colors.amber,
                 );
               }),
             ),
@@ -491,11 +492,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     );
                   }),
                 ),
-                SizedBox(height: 12,),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: ElevatedButton.icon(onPressed: _showReviewDialog, label: Text('Write a review'), icon: Icon(Icons.rate_review),),
-                )
+              SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton.icon(
+                  onPressed: _showReviewDialog,
+                  label: Text('Write a review'),
+                  icon: Icon(Icons.rate_review),
+                ),
+              ),
             ],
           ),
         ),
