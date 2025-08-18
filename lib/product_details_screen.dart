@@ -9,14 +9,155 @@ import 'product.dart';
 import 'cart_provider.dart';
 import 'add_to_cart_animation.dart';
 import 'wishlist_provider.dart';
+import 'package:intl/intl.dart';
 
-class ProductDetailsScreen extends StatelessWidget {
+class ProductDetailsScreen extends StatefulWidget {
   final Product product;
   final GlobalKey cartIconKey = GlobalKey();
   final GlobalKey<AddToCartAnimationState> _animationKey =
       GlobalKey<AddToCartAnimationState>();
 
   ProductDetailsScreen({super.key, required this.product});
+
+  @override
+  State<StatefulWidget> createState() => _ProductDetailsScreenState();
+}
+
+class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
+  late Product product;
+
+  @override
+  void initState() {
+    super.initState();
+    product = widget.product;
+  }
+
+  void _showReviewDialog() {
+    int rating = 5;
+    TextEditingController commentController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Write a Review'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: List.generate(5, (index) {
+                return IconButton(
+                  onPressed: () {
+                    setState(() {
+                      rating = index + 1;
+                    });
+                    Navigator.of(context).pop();
+                    _showReviewDialogWithRating(rating, commentController);
+                  },
+                  icon: Icon(
+                    index < rating ? Icons.star : Icons.star_border,
+                    color: Colors.amber,
+                  ),
+                );
+              }),
+            ),
+            TextField(
+              controller: commentController,
+              decoration: InputDecoration(labelText: 'Comment'),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (commentController.text.trim().isEmpty) return;
+              final review = Review(
+                rating: rating,
+                comment: commentController.text.trim(),
+                date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                reviewerName: 'Anonymous',
+                reviewerEmail: '',
+              );
+              setState(() {
+                product.reviews.add(review);
+              });
+              Navigator.pop(context);
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Review Submitted')));
+            },
+            child: Text('Submit'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showReviewDialogWithRating(
+    int rating,
+    TextEditingController commentController,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Write a Review'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: List.generate(5, (index) {
+                return IconButton(
+                  onPressed: () {
+                    setState(() {
+                      rating = index + 1;
+                    });
+                    Navigator.of(context).pop();
+                    _showReviewDialogWithRating(rating, commentController);
+                  },
+                  icon: Icon(index < rating ? Icons.star : Icons.star_border),
+                );
+              }),
+            ),
+            TextField(
+              controller: commentController,
+              decoration: InputDecoration(labelText: 'Comment'),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (commentController.text.trim().isEmpty) return;
+              final review = Review(
+                rating: rating,
+                comment: commentController.text.trim(),
+                date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                reviewerName: 'Anonymous',
+                reviewerEmail: '',
+              );
+              setState(() {
+                product.reviews.add(review);
+              });
+              Navigator.pop(context);
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text('Review Submitted!')));
+            },
+            child: Text('Submit'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +170,7 @@ class ProductDetailsScreen extends StatelessWidget {
             alignment: Alignment.topRight,
             children: [
               IconButton(
-                key: cartIconKey,
+                key: widget.cartIconKey,
                 onPressed: () {
                   Navigator.pushNamed(context, '/cart');
                 },
@@ -120,8 +261,8 @@ class ProductDetailsScreen extends StatelessWidget {
               SizedBox(height: 8),
 
               AddToCartAnimation(
-                key: _animationKey,
-                cartIconKey: cartIconKey,
+                key: widget._animationKey,
+                cartIconKey: widget.cartIconKey,
                 child: Image.network(product.thumbnail, height: 200),
                 onAnimationComplete: () async {},
               ),
@@ -158,7 +299,7 @@ class ProductDetailsScreen extends StatelessWidget {
                       await prefs.setString('cart', cartJson);
                     }
 
-                    _animationKey.currentState?.startAnimation();
+                    widget._animationKey.currentState?.startAnimation();
                     await Future.delayed(const Duration(milliseconds: 700));
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -350,6 +491,11 @@ class ProductDetailsScreen extends StatelessWidget {
                     );
                   }),
                 ),
+                SizedBox(height: 12,),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: ElevatedButton.icon(onPressed: _showReviewDialog, label: Text('Write a review'), icon: Icon(Icons.rate_review),),
+                )
             ],
           ),
         ),
