@@ -13,6 +13,7 @@ import 'order_provider.dart';
 import 'checkout_screen.dart';
 import 'wishlist_provider.dart';
 import 'wishlist_screen.dart';
+import 'edit_profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -112,6 +113,10 @@ class MyApp extends StatelessWidget {
           final args = ModalRoute.of(context)!.settings.arguments as Map?;
           final products = args?['products'] ?? [];
           return WishlistScreen(allProducts: products);
+        },
+        '/editProfile': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map;
+          return EditProfileScreen(userData: args['userData']);
         },
       },
     );
