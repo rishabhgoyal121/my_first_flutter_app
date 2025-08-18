@@ -444,8 +444,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: products.isEmpty && isLoading
+      body: isLoading
           ? Center(child: CircularProgressIndicator())
+          : products.isEmpty
+          ? Center(
+              child: Text(
+                _isSearching
+                    ? 'No products found for "${_searchController.text}"'
+                    : 'No products available',
+              ),
+            )
           : ListView.builder(
               controller: _scrollController,
               itemCount: products.length + (hasMore ? 1 : 0),
