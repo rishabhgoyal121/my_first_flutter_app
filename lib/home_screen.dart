@@ -10,6 +10,7 @@ import 'product.dart';
 import 'product_details_screen.dart';
 import 'cart_provider.dart';
 import 'wishlist_provider.dart';
+import 'dart:async';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -34,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int limit = 10;
   int skip = 0;
   late ScrollController _scrollController;
+  Timer? _debounce;
 
   final double _minPrice = 0;
   final double _maxPrice = 1000;
@@ -86,9 +88,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      searchProducts(query);
+    });
   }
 
   Future<void> _checkAuth() async {
@@ -323,6 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   border: InputBorder.none,
                 ),
                 textInputAction: TextInputAction.search,
+                onChanged: _onSearchChanged,
                 onSubmitted: (value) => searchProducts(value),
               )
             : Text('Products'),
