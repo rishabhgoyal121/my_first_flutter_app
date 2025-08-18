@@ -365,6 +365,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 decoration: InputDecoration(
                   hintText: 'Search products...',
                   border: InputBorder.none,
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          onPressed: () {
+                            _searchController.clear();
+                          },
+                          icon: Icon(Icons.clear),
+                          tooltip: 'Clear search',
+                        )
+                      : null,
                 ),
                 textInputAction: TextInputAction.search,
                 onChanged: _onSearchChanged,
@@ -439,6 +448,7 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             },
             icon: Icon(_isSearching ? Icons.close : Icons.search),
+            tooltip: !_isSearching ? 'Search for items' : 'Cancel Search',
           ),
           Stack(
             alignment: Alignment.topRight,
