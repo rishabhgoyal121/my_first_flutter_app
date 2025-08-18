@@ -46,7 +46,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Profile')),
+      appBar: AppBar(
+        title: Text('Profile'),
+        actions: [
+          if (!isLoading && error == null && userData != null)
+            IconButton(
+              onPressed: () async {
+                final updated = await Navigator.pushNamed(
+                  context,
+                  '/editProfile',
+                  arguments: {'userData': userData},
+                );
+                if (updated == true) {
+                  fetchProfile();
+                }
+              },
+              icon: Icon(Icons.edit),
+            ),
+        ],
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : error != null
