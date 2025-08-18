@@ -28,11 +28,20 @@ enum SortOption {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Product> products = [];
+  List<Product> allProducts = [];
   bool isLoading = false;
   bool hasMore = true;
   int limit = 10;
   int skip = 0;
   late ScrollController _scrollController;
+
+  final double _minPrice = 0;
+  final double _maxPrice = 1000;
+  double _selectedMinPrice = 0;
+  double _selectedMaxPrice = 1000;
+  double _selectedMinRating = 0;
+  List<Map<String, dynamic>> _categories = [];
+  String? _selectedCategorySlug;
 
   final GlobalKey cartIconKey = GlobalKey();
   List<GlobalKey<AddToCartAnimationState>> animationKeys = [];
@@ -68,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // _loadCart();
     _scrollController = ScrollController()..addListener(_onScroll);
     fetchProducts();
+    fetchCategories();
     animationKeys = List.generate(
       100,
       (_) => GlobalKey<AddToCartAnimationState>(),
@@ -115,9 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
         : '';
 
     final response = await http.get(
-      Uri.parse(
-        'https://dummyjson.com/products?limit=$limit&skip=$skip$sortQuery',
-      ),
+      Uri.parse('https://dummyjson.com/products?limit=1000$sortQuery'),
     );
     if (!mounted) return;
     if (response.statusCode == 200) {
@@ -125,17 +133,45 @@ class _HomeScreenState extends State<HomeScreen> {
       final List<dynamic> newProducts = data['products'];
       if (!mounted) return;
       setState(() {
-        products.addAll(
-          newProducts.map((json) => Product.fromJson(json)).toList(),
-        );
-        skip += limit;
-        hasMore = newProducts.length == limit;
-        isLoading = false;
+        allProducts = newProducts
+            .map((json) => Product.fromJson(json))
+            .toList();
       });
+      applyFilters();
     } else {
       if (!mounted) return;
       setState(() => isLoading = false);
       throw Exception('Failed to load products');
+    }
+  }
+
+  void applyFilters() {
+    List<Product> filtered = allProducts.where((product) {
+      final matchesCategory =
+          _selectedCategorySlug == null ||
+          product.category == _selectedCategorySlug;
+      final matchesPrice =
+          product.price >= _selectedMinPrice &&
+          product.price <= _selectedMaxPrice;
+      final matchesRating = product.rating >= _selectedMinRating;
+      return matchesCategory && matchesPrice && matchesRating;
+    }).toList();
+    setState(() {
+      products = filtered;
+      isLoading = false;
+      hasMore = false;
+    });
+  }
+
+  Future<void> fetchCategories() async {
+    final response = await http.get(
+      Uri.parse('https://dummyjson.com/products/categories'),
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> cats = json.decode(response.body);
+      setState(() {
+        _categories = cats.cast<Map<String, dynamic>>();
+      });
     }
   }
 
@@ -197,6 +233,80 @@ class _HomeScreenState extends State<HomeScreen> {
       hasMore = true;
     });
     fetchProducts();
+  }
+
+  void _showFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.all(16),
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  Text('Category'),
+                  DropdownButton<String>(
+                    value: _selectedCategorySlug,
+                    hint: Text('Select category'),
+                    isExpanded: true,
+                    items: _categories
+                        .map(
+                          (cat) => DropdownMenuItem<String>(
+                            value: cat['slug'],
+                            child: Text(cat['name']),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (val) {
+                      setModalState(() => _selectedCategorySlug = val);
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Price Range (\$${_selectedMinPrice.toInt()} - \$${_selectedMaxPrice.toInt()})',
+                  ),
+                  RangeSlider(
+                    min: _minPrice,
+                    max: _maxPrice,
+                    divisions: 20,
+                    values: RangeValues(_selectedMinPrice, _selectedMaxPrice),
+                    onChanged: (values) {
+                      setModalState(() {
+                        _selectedMinPrice = values.start;
+                        _selectedMaxPrice = values.end;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Minimum Rating (${_selectedMinRating.toStringAsFixed(1)})',
+                  ),
+                  Slider(
+                    min: 0,
+                    max: 5,
+                    divisions: 10,
+                    value: _selectedMinRating,
+                    onChanged: (val) {
+                      setModalState(() => _selectedMinRating = val);
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      applyFilters();
+                    },
+                    child: Text('Apply filters'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -267,6 +377,11 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
             tooltip: 'Sort',
+          ),
+          IconButton(
+            onPressed: _showFilterSheet,
+            icon: Icon(Icons.filter_alt),
+            tooltip: 'Filters',
           ),
           IconButton(
             onPressed: () {
