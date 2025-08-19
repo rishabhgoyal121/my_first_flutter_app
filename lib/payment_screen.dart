@@ -107,7 +107,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         : null,
                   ),
                 ],
-                if (_paymentMethod == 'IABN') ...[
+                if (_paymentMethod == 'IBAN') ...[
                   TextFormField(
                     controller: _ibanController,
                     decoration: InputDecoration(labelText: 'IBAN'),
