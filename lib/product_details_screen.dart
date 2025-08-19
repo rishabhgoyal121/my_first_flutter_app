@@ -123,7 +123,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   },
                   icon: Icon(index < rating ? Icons.star : Icons.star_border),
                   color: Colors.amber,
-                );
+                  icon: Icon(
+                    index < rating ? Icons.star : Icons.star_border,
+                    color: Colors.amber,
+                  ),
               }),
             ),
             TextField(
