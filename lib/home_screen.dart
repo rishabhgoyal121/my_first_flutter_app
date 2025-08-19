@@ -47,8 +47,12 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _selectedCategorySlug;
 
   final GlobalKey cartIconKey = GlobalKey();
-  // Pre-allocate a large, fixed number of animation keys to avoid resizing
-  static const int _maxAnimationKeys = 1000;
+  // Pre-allocate a large, fixed number of animation keys to avoid resizing.
+  // The value 1000 is chosen as a safe upper bound for the number of animated items that could be displayed simultaneously.
+  // If your app needs to support more or fewer items, adjust this value accordingly.
+  static const int maxAnimationKeys =
+      1000; // Consider making this configurable if needed.
+  static const int _maxAnimationKeys = maxAnimationKeys;
   late final List<GlobalKey<AddToCartAnimationState>> animationKeys;
 
   final TextEditingController _searchController = TextEditingController();
@@ -138,7 +142,9 @@ class _HomeScreenState extends State<HomeScreen> {
         : '';
 
     final response = await http.get(
-      Uri.parse('https://dummyjson.com/products?limit=1000$sortQuery'),
+      Uri.parse(
+        'https://dummyjson.com/products?limit=$maxAnimationKeys$sortQuery',
+      ),
     );
     if (!mounted) return;
     if (response.statusCode == 200) {
