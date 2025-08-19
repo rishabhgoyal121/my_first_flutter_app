@@ -47,7 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _selectedCategorySlug;
 
   final GlobalKey cartIconKey = GlobalKey();
-  List<GlobalKey<AddToCartAnimationState>> animationKeys = [];
+  // Pre-allocate a large, fixed number of animation keys to avoid resizing
+  static const int _maxAnimationKeys = 1000;
+  late final List<GlobalKey<AddToCartAnimationState>> animationKeys;
 
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
@@ -82,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchProducts();
     fetchCategories();
     animationKeys = List.generate(
-      100,
+      _maxAnimationKeys,
       (_) => GlobalKey<AddToCartAnimationState>(),
     );
   }
@@ -172,17 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
       products = filtered;
       isLoading = false;
       hasMore = false;
-      // Ensure animationKeys is always in sync with products
-      if (animationKeys.length < filtered.length) {
-        animationKeys.addAll(
-          List.generate(
-            filtered.length - animationKeys.length,
-            (_) => GlobalKey<AddToCartAnimationState>(),
-          ),
-        );
-      } else if (animationKeys.length > filtered.length) {
-        animationKeys.removeRange(filtered.length, animationKeys.length);
-      }
+      // animationKeys are pre-allocated, no need to resize
     });
   }
 
@@ -207,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
         products.clear();
         skip = 0;
         hasMore = true;
-        animationKeys.clear();
+        // animationKeys are pre-allocated, no need to clear
       });
       fetchProducts();
       return;
@@ -230,17 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
         products = newProducts.map((json) => Product.fromJson(json)).toList();
         isLoading = false;
         hasMore = false;
-        // Sync animationKeys with products
-        if (animationKeys.length < products.length) {
-          animationKeys.addAll(
-            List.generate(
-              products.length - animationKeys.length,
-              (_) => GlobalKey<AddToCartAnimationState>(),
-            ),
-          );
-        } else if (animationKeys.length > products.length) {
-          animationKeys.removeRange(products.length, animationKeys.length);
-        }
+        // animationKeys are pre-allocated, no need to resize
       });
     } else {
       if (!mounted) return;
