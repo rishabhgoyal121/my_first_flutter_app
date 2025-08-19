@@ -172,6 +172,17 @@ class _HomeScreenState extends State<HomeScreen> {
       products = filtered;
       isLoading = false;
       hasMore = false;
+      // Ensure animationKeys is always in sync with products
+      if (animationKeys.length < filtered.length) {
+        animationKeys.addAll(
+          List.generate(
+            filtered.length - animationKeys.length,
+            (_) => GlobalKey<AddToCartAnimationState>(),
+          ),
+        );
+      } else if (animationKeys.length > filtered.length) {
+        animationKeys.removeRange(filtered.length, animationKeys.length);
+      }
     });
   }
 
@@ -196,6 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
         products.clear();
         skip = 0;
         hasMore = true;
+        animationKeys.clear();
       });
       fetchProducts();
       return;
@@ -218,6 +230,17 @@ class _HomeScreenState extends State<HomeScreen> {
         products = newProducts.map((json) => Product.fromJson(json)).toList();
         isLoading = false;
         hasMore = false;
+        // Sync animationKeys with products
+        if (animationKeys.length < products.length) {
+          animationKeys.addAll(
+            List.generate(
+              products.length - animationKeys.length,
+              (_) => GlobalKey<AddToCartAnimationState>(),
+            ),
+          );
+        } else if (animationKeys.length > products.length) {
+          animationKeys.removeRange(products.length, animationKeys.length);
+        }
       });
     } else {
       if (!mounted) return;
@@ -278,12 +301,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    AppLocalizations
-                        .of(context)!
-                        .priceRange(
-                          _selectedMinPrice.toInt(),
-                          _selectedMaxPrice.toInt(),
-                        ),
+                    AppLocalizations.of(context)!.priceRange(
+                      _selectedMinPrice.toInt(),
+                      _selectedMaxPrice.toInt(),
+                    ),
                   ),
                   RangeSlider(
                     min: _minPrice,
@@ -299,9 +320,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    AppLocalizations
-                        .of(context)!
-                        .minimumRating(_selectedMinRating),
+                    AppLocalizations.of(
+                      context,
+                    )!.minimumRating(_selectedMinRating),
                   ),
                   Slider(
                     min: 0,
@@ -506,7 +527,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ? Center(
               child: Text(
                 _isSearching
-                    ? AppLocalizations.of(context)!.noProductsFound(_searchController.text)
+                    ? AppLocalizations.of(
+                        context,
+                      )!.noProductsFound(_searchController.text)
                     : AppLocalizations.of(context)!.noProductsAvailable,
               ),
             )
@@ -524,9 +547,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
                 final product = products[index];
 
-                if (animationKeys.length <= index) {
-                  animationKeys.add(GlobalKey<AddToCartAnimationState>());
-                }
+                // animationKeys are now pre-generated and kept in sync with products
 
                 return ListTile(
                   contentPadding: EdgeInsets.only(left: 16, right: 8),
