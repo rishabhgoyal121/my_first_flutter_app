@@ -11,6 +11,11 @@ import 'cart_screen.dart';
 import 'cart_provider.dart';
 import 'order_provider.dart';
 import 'checkout_screen.dart';
+import 'wishlist_provider.dart';
+import 'wishlist_screen.dart';
+import 'edit_profile_screen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'generated/l10n.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +24,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => WishlistProvider()),
       ],
       child: MyApp(),
     ),
@@ -105,7 +111,23 @@ class MyApp extends StatelessWidget {
             cartItems: args['cartItems'],
           );
         },
+        '/wishlist': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map?;
+          final products = args?['products'] ?? [];
+          return WishlistScreen(allProducts: products);
+        },
+        '/editProfile': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map;
+          return EditProfileScreen(userData: args['userData']);
+        },
       },
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 }

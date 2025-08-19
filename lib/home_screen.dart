@@ -9,6 +9,9 @@ import 'dart:convert';
 import 'product.dart';
 import 'product_details_screen.dart';
 import 'cart_provider.dart';
+import 'wishlist_provider.dart';
+import 'dart:async';
+import 'generated/l10n.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,14 +30,30 @@ enum SortOption {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<Product> products = [];
+  List<Product> allProducts = [];
   bool isLoading = false;
   bool hasMore = true;
   int limit = 10;
   int skip = 0;
   late ScrollController _scrollController;
+  Timer? _debounce;
+
+  final double _minPrice = 0;
+  final double _maxPrice = 1000;
+  double _selectedMinPrice = 0;
+  double _selectedMaxPrice = 1000;
+  double _selectedMinRating = 0;
+  List<Map<String, dynamic>> _categories = [];
+  String? _selectedCategorySlug;
 
   final GlobalKey cartIconKey = GlobalKey();
-  List<GlobalKey<AddToCartAnimationState>> animationKeys = [];
+  // Pre-allocate a large, fixed number of animation keys to avoid resizing.
+  // The value 1000 is chosen as a safe upper bound for the number of animated items that could be displayed simultaneously.
+  // If your app needs to support more or fewer items, adjust this value accordingly.
+  static const int maxAnimationKeys =
+      1000; // Consider making this configurable if needed.
+  static const int _maxAnimationKeys = maxAnimationKeys;
+  late final List<GlobalKey<AddToCartAnimationState>> animationKeys;
 
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
@@ -67,17 +86,26 @@ class _HomeScreenState extends State<HomeScreen> {
     // _loadCart();
     _scrollController = ScrollController()..addListener(_onScroll);
     fetchProducts();
+    fetchCategories();
     animationKeys = List.generate(
-      100,
+      _maxAnimationKeys,
       (_) => GlobalKey<AddToCartAnimationState>(),
     );
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      searchProducts(query);
+    });
   }
 
   Future<void> _checkAuth() async {
@@ -115,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final response = await http.get(
       Uri.parse(
-        'https://dummyjson.com/products?limit=$limit&skip=$skip$sortQuery',
+        'https://dummyjson.com/products?limit=$maxAnimationKeys$sortQuery',
       ),
     );
     if (!mounted) return;
@@ -124,17 +152,48 @@ class _HomeScreenState extends State<HomeScreen> {
       final List<dynamic> newProducts = data['products'];
       if (!mounted) return;
       setState(() {
-        products.addAll(
-          newProducts.map((json) => Product.fromJson(json)).toList(),
-        );
-        skip += limit;
-        hasMore = newProducts.length == limit;
-        isLoading = false;
+        allProducts = newProducts
+            .map((json) => Product.fromJson(json))
+            .toList();
       });
+      applyFilters();
     } else {
       if (!mounted) return;
       setState(() => isLoading = false);
       throw Exception('Failed to load products');
+    }
+  }
+
+  void applyFilters() {
+    List<Product> filtered = allProducts.where((product) {
+      final matchesCategory =
+          _selectedCategorySlug == null ||
+          product.category == _selectedCategorySlug;
+      final matchesPrice =
+          product.price >= _selectedMinPrice &&
+          product.price <= _selectedMaxPrice;
+      final matchesRating = product.rating >= _selectedMinRating;
+      return matchesCategory && matchesPrice && matchesRating;
+    }).toList();
+    if (!mounted) return;
+    setState(() {
+      products = filtered;
+      isLoading = false;
+      hasMore = false;
+      // animationKeys are pre-allocated, no need to resize
+    });
+  }
+
+  Future<void> fetchCategories() async {
+    final response = await http.get(
+      Uri.parse('https://dummyjson.com/products/categories'),
+    );
+    if (response.statusCode == 200) {
+      final List<dynamic> cats = json.decode(response.body);
+      if (!mounted) return;
+      setState(() {
+        _categories = cats.cast<Map<String, dynamic>>();
+      });
     }
   }
 
@@ -146,6 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
         products.clear();
         skip = 0;
         hasMore = true;
+        // animationKeys are pre-allocated, no need to clear
       });
       fetchProducts();
       return;
@@ -168,6 +228,7 @@ class _HomeScreenState extends State<HomeScreen> {
         products = newProducts.map((json) => Product.fromJson(json)).toList();
         isLoading = false;
         hasMore = false;
+        // animationKeys are pre-allocated, no need to resize
       });
     } else {
       if (!mounted) return;
@@ -198,6 +259,119 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchProducts();
   }
 
+  void _showFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.all(16),
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  Text(AppLocalizations.of(context)!.category),
+                  DropdownButton<String>(
+                    value: _selectedCategorySlug,
+                    hint: Text(AppLocalizations.of(context)!.selectCategory),
+                    isExpanded: true,
+                    items: _categories
+                        .map(
+                          (cat) => DropdownMenuItem<String>(
+                            value: cat['slug'],
+                            child: Text(cat['name']),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (val) {
+                      setModalState(() => _selectedCategorySlug = val);
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    AppLocalizations.of(context)!.priceRange(
+                      _selectedMinPrice.toInt(),
+                      _selectedMaxPrice.toInt(),
+                    ),
+                  ),
+                  RangeSlider(
+                    min: _minPrice,
+                    max: _maxPrice,
+                    divisions: 20,
+                    values: RangeValues(_selectedMinPrice, _selectedMaxPrice),
+                    onChanged: (values) {
+                      setModalState(() {
+                        _selectedMinPrice = values.start;
+                        _selectedMaxPrice = values.end;
+                      });
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    AppLocalizations.of(
+                      context,
+                    )!.minimumRating(_selectedMinRating),
+                  ),
+                  Slider(
+                    min: 0,
+                    max: 5,
+                    divisions: 10,
+                    value: _selectedMinRating,
+                    onChanged: (val) {
+                      setModalState(() => _selectedMinRating = val);
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      applyFilters();
+                    },
+                    child: Text(AppLocalizations.of(context)!.applyFilters),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _highlightQuery(String text, String query) {
+    if (query.isEmpty) return Text(text);
+    final pattern = RegExp(RegExp.escape(query), caseSensitive: false);
+    final matches = pattern.allMatches(text);
+
+    List<TextSpan> spans = [];
+    int start = 0;
+    for (final match in matches) {
+      if (match.start > start) {
+        spans.add(TextSpan(text: text.substring(start, match.start)));
+      }
+      spans.add(
+        TextSpan(
+          text: text.substring(match.start, match.end),
+          style: TextStyle(
+            backgroundColor: Colors.yellowAccent,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+      );
+      start = match.end;
+    }
+    if (start < text.length) {
+      spans.add(TextSpan(text: text.substring(start)));
+    }
+    return RichText(
+      text: TextSpan(
+        style: TextStyle(color: Colors.white),
+        children: spans,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     int cartCount = context.watch<CartProvider>().cart['totalQuantity'];
@@ -208,22 +382,43 @@ class _HomeScreenState extends State<HomeScreen> {
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
-                  hintText: 'Search products...',
+                  hintText: AppLocalizations.of(context)!.searchProducts,
                   border: InputBorder.none,
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          onPressed: () {
+                            _searchController.clear();
+                          },
+                          icon: Icon(Icons.clear),
+                          tooltip: 'Clear search',
+                        )
+                      : null,
                 ),
                 textInputAction: TextInputAction.search,
+                onChanged: _onSearchChanged,
                 onSubmitted: (value) => searchProducts(value),
               )
-            : Text('Products'),
+            : Text(AppLocalizations.of(context)!.products),
         actions: [
-          IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/profile'),
-            icon: Icon(Icons.person),
-          ),
           IconButton(
             onPressed: () => Navigator.pushNamed(context, '/orders'),
             icon: Icon(Icons.receipt_long),
-            tooltip: 'Orders',
+            tooltip: AppLocalizations.of(context)!.orders,
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                '/wishlist',
+                arguments: {'products': products},
+              );
+            },
+            icon: Icon(Icons.favorite),
+            tooltip: AppLocalizations.of(context)!.wishlist,
+          ),
+          IconButton(
+            onPressed: () => Navigator.pushNamed(context, '/profile'),
+            icon: Icon(Icons.person),
           ),
           PopupMenuButton<SortOption>(
             icon: Icon(Icons.sort),
@@ -254,7 +449,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text('Discount (Low to High)'),
               ),
             ],
-            tooltip: 'Sort',
+            tooltip: AppLocalizations.of(context)!.sort,
+          ),
+          IconButton(
+            onPressed: _showFilterSheet,
+            icon: Icon(Icons.filter_alt),
+            tooltip: AppLocalizations.of(context)!.filters,
           ),
           IconButton(
             onPressed: () {
@@ -267,6 +467,9 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             },
             icon: Icon(_isSearching ? Icons.close : Icons.search),
+            tooltip: !_isSearching
+                ? AppLocalizations.of(context)!.searchForItems
+                : AppLocalizations.of(context)!.cancelSearch,
           ),
           Stack(
             alignment: Alignment.topRight,
@@ -281,18 +484,23 @@ class _HomeScreenState extends State<HomeScreen> {
               Positioned(
                 right: 8,
                 top: 4,
-                child: Container(
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.yellowAccent,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '$cartCount',
-                    style: TextStyle(
-                      color: Colors.redAccent,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/cart');
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.yellowAccent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '$cartCount',
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -301,8 +509,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: products.isEmpty && isLoading
+      body: isLoading
           ? Center(child: CircularProgressIndicator())
+          : products.isEmpty
+          ? Center(
+              child: Text(
+                _isSearching
+                    ? AppLocalizations.of(
+                        context,
+                      )!.noProductsFound(_searchController.text)
+                    : AppLocalizations.of(context)!.noProductsAvailable,
+              ),
+            )
           : ListView.builder(
               controller: _scrollController,
               itemCount: products.length + (hasMore ? 1 : 0),
@@ -316,26 +534,44 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }
                 final product = products[index];
+
+                // animationKeys are now pre-generated and kept in sync with products
+
                 return ListTile(
+                  contentPadding: EdgeInsets.only(left: 16, right: 8),
                   leading: AddToCartAnimation(
                     key: animationKeys[index],
                     onAnimationComplete: () {},
                     cartIconKey: cartIconKey,
                     child: Image.network(product.thumbnail),
                   ),
-                  title: Text(product.title),
+                  title: _highlightQuery(product.title, _searchController.text),
                   subtitle: Row(
                     children: [
-                      Icon(Icons.star, color: Colors.amber, size: 16),
                       SizedBox(width: 4),
                       Text(
                         product.rating.toStringAsFixed(1),
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                       ),
-                      SizedBox(width: 12),
+                      Icon(Icons.star, color: Colors.amber, size: 12),
+                      SizedBox(width: 8),
                       Text(
-                        '\$ ${product.price.toStringAsFixed(2)}',
-                        style: TextStyle(fontWeight: FontWeight.bold),
+                        '\$${product.price.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          fontSize: 8,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
                       ),
                       SizedBox(width: 12),
                       Text(
@@ -357,48 +593,77 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     );
                   },
-                  trailing: IconButton(
-                    onPressed: () async {
-                      animationKeys[index].currentState?.startAnimation();
-                      final response = await http.put(
-                        Uri.parse('https://dummyjson.com/carts/1'),
-                        headers: {'content-type': 'application/json'},
-                        body: json.encode({
-                          'merge': true,
-                          'userId': 1,
-                          'products': [
-                            {'id': product.id, 'quantity': 1},
-                          ],
-                        }),
-                      );
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () {
+                          context.read<WishlistProvider>().toggleWishlist(
+                            product.id,
+                          );
+                        },
+                        icon: Icon(
+                          context.watch<WishlistProvider>().isWishlisted(
+                                product.id,
+                              )
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                        ),
+                        iconSize: 16,
+                        color: Colors.pink,
+                        tooltip: AppLocalizations.of(context)!.addToWishlist,
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.symmetric(horizontal: 0),
+                        constraints: BoxConstraints(),
+                      ),
+                      IconButton(
+                        onPressed: () async {
+                          animationKeys[index].currentState?.startAnimation();
+                          final response = await http.put(
+                            Uri.parse('https://dummyjson.com/carts/1'),
+                            headers: {'content-type': 'application/json'},
+                            body: json.encode({
+                              'merge': true,
+                              'userId': 1,
+                              'products': [
+                                {'id': product.id, 'quantity': 1},
+                              ],
+                            }),
+                          );
 
-                      if (response.statusCode == 200 ||
-                          response.statusCode == 201 ||
-                          response.statusCode == 301) {
-                        final cartProvider = Provider.of<CartProvider>(
-                          context,
-                          listen: false,
-                        );
-                        Provider.of<CartProvider>(
-                          context,
-                          listen: false,
-                        ).addProduct({'quantity': 1, ...product.toJson()});
-                        final cartJson = json.encode(cartProvider.cart);
-                        if (kIsWeb) {
-                          html.window.localStorage['cart'] = cartJson;
-                        } else {
-                          final prefs = await SharedPreferences.getInstance();
-                          await prefs.setString('cart', cartJson);
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Failed to add product to cart'),
-                          ),
-                        );
-                      }
-                    },
-                    icon: Icon(Icons.add_shopping_cart),
+                          if (response.statusCode == 200 ||
+                              response.statusCode == 201 ||
+                              response.statusCode == 301) {
+                            final cartProvider = Provider.of<CartProvider>(
+                              context,
+                              listen: false,
+                            );
+                            Provider.of<CartProvider>(
+                              context,
+                              listen: false,
+                            ).addProduct({'quantity': 1, ...product.toJson()});
+                            final cartJson = json.encode(cartProvider.cart);
+                            if (kIsWeb) {
+                              html.window.localStorage['cart'] = cartJson;
+                            } else {
+                              final prefs =
+                                  await SharedPreferences.getInstance();
+                              await prefs.setString('cart', cartJson);
+                            }
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Failed to add product to cart'),
+                              ),
+                            );
+                          }
+                        },
+                        icon: Icon(Icons.add_shopping_cart),
+                        visualDensity: VisualDensity.compact,
+                        padding: EdgeInsets.symmetric(horizontal: 0),
+                        constraints: BoxConstraints(),
+                      ),
+                    ],
                   ),
                 );
               },

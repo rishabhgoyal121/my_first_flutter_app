@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:universal_html/html.dart' as html;
-import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,60 +22,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     fetchProfile();
   }
 
-  Future getAccessTokenFromCookies() async {
+  Future<void> fetchProfile() async {
+    String? profileJson;
     if (kIsWeb) {
-      final cookies = html.document.cookie?.split(';') ?? [];
-      for (final cookie in cookies) {
-        final parts = cookie.trim().split('=');
-        if (parts.length == 2 && parts[0] == 'accessToken') {
-          return parts[1];
-        }
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, '/login');
-      });
-      return null;
+      profileJson = html.window.localStorage['userProfile'];
     } else {
       final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('accessToken');
-      print('accessToken is $token');
-      if (token == null || token.isEmpty) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacementNamed(context, '/login');
-        });
-        return null;
-      }
-      return token;
+      profileJson = prefs.getString('userProfile');
     }
-  }
-
-  Future<void> fetchProfile() async {
-    final token = await getAccessTokenFromCookies();
-    if (token == null) {
+    if (profileJson == null) {
+      if (!mounted) return;
       setState(() {
-        error = 'No access token found in cookies';
+        error = 'Profile data not found in local storage';
         isLoading = false;
       });
-    }
-    try {
-      final response = await http.get(
-        Uri.parse('https://dummyjson.com/user/me'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-      if (response.statusCode == 200) {
-        setState(() {
-          userData = json.decode(response.body);
-          isLoading = false;
-        });
-      } else {
-        setState(() {
-          error = 'Failed to fetch profile: ${response.statusCode}';
-          isLoading = false;
-        });
-      }
-    } catch (e) {
+    } else {
+      if (!mounted) return;
       setState(() {
-        error = 'Error: $e';
+        userData = json.decode(profileJson!);
         isLoading = false;
       });
     }
@@ -85,7 +48,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Profile')),
+      appBar: AppBar(
+        title: Text('Profile'),
+        actions: [
+          if (!isLoading && error == null && userData != null)
+            IconButton(
+              onPressed: () async {
+                final updated = await Navigator.pushNamed(
+                  context,
+                  '/editProfile',
+                  arguments: {'userData': userData},
+                );
+                if (updated == true) {
+                  fetchProfile();
+                }
+              },
+              icon: Icon(Icons.edit),
+            ),
+        ],
+      ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : error != null

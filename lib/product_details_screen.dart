@@ -8,14 +8,101 @@ import 'dart:convert';
 import 'product.dart';
 import 'cart_provider.dart';
 import 'add_to_cart_animation.dart';
+import 'wishlist_provider.dart';
+import 'package:intl/intl.dart';
 
-class ProductDetailsScreen extends StatelessWidget {
+class ProductDetailsScreen extends StatefulWidget {
   final Product product;
   final GlobalKey cartIconKey = GlobalKey();
   final GlobalKey<AddToCartAnimationState> _animationKey =
       GlobalKey<AddToCartAnimationState>();
 
   ProductDetailsScreen({super.key, required this.product});
+
+  @override
+  State<StatefulWidget> createState() => _ProductDetailsScreenState();
+}
+
+class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
+  late Product product;
+
+  @override
+  void initState() {
+    super.initState();
+    product = widget.product;
+  }
+
+  void _showReviewDialog() {
+    TextEditingController commentController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) {
+        int rating = 5;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text('Write a Review'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            rating = index + 1;
+                          });
+                        },
+                        icon: Icon(
+                          index < rating ? Icons.star : Icons.star_border,
+                          color: Colors.amber,
+                        ),
+                      );
+                    }),
+                  ),
+                  TextField(
+                    controller: commentController,
+                    decoration: InputDecoration(labelText: 'Comment'),
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (commentController.text.trim().isEmpty) return;
+                    final review = Review(
+                      rating: rating,
+                      comment: commentController.text.trim(),
+                      date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                      reviewerName: 'Anonymous',
+                      reviewerEmail: '',
+                    );
+                    if (!mounted) return;
+                    // Add review and update parent state
+                    Navigator.pop(context);
+                    setState(() {
+                      product.reviews.add(review);
+                    });
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Review Submitted')));
+                  },
+                  child: Text('Submit'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Removed _showReviewDialogWithRating and _buildReviewDialog as they are no longer needed.
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +115,7 @@ class ProductDetailsScreen extends StatelessWidget {
             alignment: Alignment.topRight,
             children: [
               IconButton(
-                key: cartIconKey,
+                key: widget.cartIconKey,
                 onPressed: () {
                   Navigator.pushNamed(context, '/cart');
                 },
@@ -63,31 +150,64 @@ class ProductDetailsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     product.title,
                     style: Theme.of(context).textTheme.headlineLarge,
                   ),
                   SizedBox(width: 8),
-                  Text(
-                    product.rating.toStringAsFixed(1),
-                    style: TextStyle(color: Colors.amberAccent, fontSize: 16),
-                  ),
-                  SizedBox(width: 2),
-                  Icon(Icons.star, size: 14, color: Colors.amberAccent),
-                  SizedBox(width: 2),
-                  Text(
-                    '(${product.reviews.length})',
-                    style: TextStyle(color: Colors.amberAccent, fontSize: 10),
+                  Row(
+                    children: [
+                      Text(
+                        product.rating.toStringAsFixed(1),
+                        style: TextStyle(
+                          color: Colors.amberAccent,
+                          fontSize: 16,
+                        ),
+                      ),
+                      SizedBox(width: 2),
+                      Icon(Icons.star, size: 14, color: Colors.amberAccent),
+                      SizedBox(width: 2),
+                      Text(
+                        '(${product.reviews.length})',
+                        style: TextStyle(
+                          color: Colors.amberAccent,
+                          fontSize: 10,
+                        ),
+                      ),
+                      Spacer(),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              context.read<WishlistProvider>().toggleWishlist(
+                                product.id,
+                              );
+                            },
+                            icon: Icon(
+                              context.watch<WishlistProvider>().isWishlisted(
+                                    product.id,
+                                  )
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                            ),
+                            color: Colors.pink,
+                            tooltip: 'Add to wishlist',
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
               SizedBox(height: 8),
 
               AddToCartAnimation(
-                key: _animationKey,
-                cartIconKey: cartIconKey,
+                key: widget._animationKey,
+                cartIconKey: widget.cartIconKey,
                 child: Image.network(product.thumbnail, height: 200),
                 onAnimationComplete: () async {},
               ),
@@ -124,7 +244,7 @@ class ProductDetailsScreen extends StatelessWidget {
                       await prefs.setString('cart', cartJson);
                     }
 
-                    _animationKey.currentState?.startAnimation();
+                    widget._animationKey.currentState?.startAnimation();
                     await Future.delayed(const Duration(milliseconds: 700));
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -139,7 +259,19 @@ class ProductDetailsScreen extends StatelessWidget {
                 children: [
                   Text(
                     '\$${product.price.toStringAsFixed(2)}',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    style: TextStyle(
+                      fontSize: 18,
+                      decoration: TextDecoration.lineThrough,
+                    ),
+                  ),
+                  SizedBox(width: 20),
+                  Text(
+                    '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.green,
+                    ),
                   ),
                   SizedBox(width: 20),
                   Text(
@@ -147,6 +279,7 @@ class ProductDetailsScreen extends StatelessWidget {
                     style: TextStyle(
                       fontStyle: FontStyle.italic,
                       color: Colors.blueAccent,
+                      fontSize: 16,
                     ),
                   ),
                 ],
@@ -154,28 +287,43 @@ class ProductDetailsScreen extends StatelessWidget {
               SizedBox(height: 16),
               Text(product.availabilityStatus),
               SizedBox(height: 16),
-              Row(
-                children: [
-                  Icon(Icons.shield),
-                  SizedBox(width: 4),
-                  Text(
-                    product.warrantyInformation,
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final isNarrow = constraints.maxWidth < 400;
+                  final children = [
+                    Icon(Icons.shield),
+                    SizedBox(width: 4),
+                    Text(
+                      product.warrantyInformation,
+                      style: TextStyle(
+                        color: Colors.blueAccent,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 24),
-                  Icon(Icons.local_shipping),
-                  SizedBox(width: 8),
-                  Text(
-                    product.shippingInformation,
-                    style: TextStyle(
-                      fontStyle: FontStyle.italic,
-                      color: Colors.blueAccent,
+                    SizedBox(width: 24),
+                    Icon(Icons.local_shipping),
+                    SizedBox(width: 8),
+                    Text(
+                      product.shippingInformation,
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.blueAccent,
+                      ),
                     ),
-                  ),
-                ],
+                  ];
+                  if (isNarrow) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: children.sublist(0, 3)),
+                        SizedBox(height: 8),
+                        Row(children: children.sublist(4)),
+                      ],
+                    );
+                  } else {
+                    return Row(children: children);
+                  }
+                },
               ),
               SizedBox(height: 16),
               Row(
@@ -188,28 +336,22 @@ class ProductDetailsScreen extends StatelessWidget {
               SizedBox(height: 16),
               Text(product.description),
               SizedBox(height: 16),
-              Wrap(
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 16,
-                runSpacing: 8,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Dimensions:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(width: 16),
-                  Text('Height : '),
-                  Text(product.dimensions.height.toStringAsFixed(2)),
-                  SizedBox(width: 16),
-                  Text('Width : '),
-                  Text(product.dimensions.width.toStringAsFixed(2)),
-                  SizedBox(width: 16),
-                  Text('Depth : '),
-                  Text(product.dimensions.depth.toStringAsFixed(2)),
-                  SizedBox(width: 16),
+                  SizedBox(height: 8),
                   Text(
-                    '(in mm)',
-                    style: TextStyle(fontStyle: FontStyle.italic),
+                    'Height : ${product.dimensions.height.toStringAsFixed(2)} mm',
+                  ),
+                  Text(
+                    'Width : ${product.dimensions.width.toStringAsFixed(2)} mm',
+                  ),
+                  Text(
+                    'Depth : ${product.dimensions.depth.toStringAsFixed(2)} mm',
                   ),
                 ],
               ),
@@ -220,12 +362,10 @@ class ProductDetailsScreen extends StatelessWidget {
                     'Weight:',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(width: 16),
-                  Text(product.weight.toStringAsFixed(2)),
-                  SizedBox(width: 16),
+                  SizedBox(width: 8),
                   Text(
-                    '(in lbs)',
-                    style: TextStyle(fontStyle: FontStyle.italic),
+                    '${product.weight.toStringAsFixed(2)} lbs',
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
@@ -296,6 +436,15 @@ class ProductDetailsScreen extends StatelessWidget {
                     );
                   }),
                 ),
+              SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ElevatedButton.icon(
+                  onPressed: _showReviewDialog,
+                  label: Text('Write a review'),
+                  icon: Icon(Icons.rate_review),
+                ),
+              ),
             ],
           ),
         ),

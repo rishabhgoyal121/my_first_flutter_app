@@ -29,6 +29,12 @@ class AddToCartAnimationState extends State<AddToCartAnimation>
     );
   }
 
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   void startAnimation() async {
     final overlay = Overlay.of(context);
     final renderbox = context.findRenderObject() as RenderBox;
@@ -53,8 +59,14 @@ class AddToCartAnimationState extends State<AddToCartAnimation>
               end.dx + cartSize.width / 2,
               end.dy + cartSize.height / 2,
             );
-            final dx = startCenter.dx + (endCenter.dx - startCenter.dx) * _controller.value - size.width/2;
-            final dy = startCenter.dy + (endCenter.dy - startCenter.dy) * _controller.value - size.height/2;
+            final dx =
+                startCenter.dx +
+                (endCenter.dx - startCenter.dx) * _controller.value -
+                size.width / 2;
+            final dy =
+                startCenter.dy +
+                (endCenter.dy - startCenter.dy) * _controller.value -
+                size.height / 2;
             return Positioned(
               left: dx,
               top: dy,

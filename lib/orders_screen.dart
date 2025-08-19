@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'order_provider.dart';
+import 'order_details_screen.dart';
 
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
@@ -29,12 +30,29 @@ class OrdersScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('Total: \$${order['total'].toStringAsFixed(2)}'),
-                        Text('Discounted: \$${order['discountedTotal'].toStringAsFixed(2)}'),
-                        SizedBox(height: 8,),
+                        Text(
+                          'Discounted: \$${order['discountedTotal'].toStringAsFixed(2)}',
+                        ),
+                        SizedBox(height: 8),
                         Text('Products:'),
-                        ...products.map((p) => Text('${p['title']} x${p['quantity']} (\$${p['price']})', style: TextStyle(fontSize: 13),))
+                        ...products.map(
+                          (p) => Text(
+                            '${p['title']} x${p['quantity']} (\$${p['price']})',
+                            style: TextStyle(fontSize: 13),
+                          ),
+                        ),
                       ],
                     ),
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => OrderDetailsScreen(
+                            order: order,
+                            orderIndex: index,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 );
               },

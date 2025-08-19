@@ -62,13 +62,10 @@ class _CartScreenState extends State<CartScreen> {
                         onAnimationEnd: isDeleting
                             ? () async {
                                 try {
-                                  // Get the current cart items before making any changes
                                   final currentCartItems =
                                       List<Map<String, dynamic>>.from(
                                         cartItems,
                                       );
-
-                                  // Prepare the remaining products for API call
                                   final remainingProducts = currentCartItems
                                       .where(
                                         (item) => item['id'] != _deletingItemId,
@@ -94,16 +91,11 @@ class _CartScreenState extends State<CartScreen> {
                                       'products': remainingProducts,
                                     }),
                                   );
-
-                                  // Always remove from local state regardless of API response
-                                  // This ensures the UI is consistent and the item doesn't reappear
                                   cartProvider.removeProduct(_deletingItemId!);
-
+                                  if (!mounted) return;
                                   setState(() {
                                     _deletingItemId = null;
                                   });
-
-                                  // Show appropriate message based on API response
                                   if (deleteResponse.statusCode != 200 &&
                                       deleteResponse.statusCode != 301) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -116,8 +108,8 @@ class _CartScreenState extends State<CartScreen> {
                                     );
                                   }
                                 } catch (e) {
-                                  // On any error, still remove locally and inform user
                                   cartProvider.removeProduct(_deletingItemId!);
+                                  if (!mounted) return;
                                   setState(() {
                                     _deletingItemId = null;
                                   });
@@ -138,13 +130,48 @@ class _CartScreenState extends State<CartScreen> {
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Price: \$ ${item['price']}'),
-                              Text('Quantity: ${item['quantity']}'),
                               Text(
-                                'Total: \$ ${item['total'].toStringAsFixed(2)}',
+                                'Discounted Price: \$ ${(item['price'] * (1 - item['discountPercentage'] / 100)).toStringAsFixed(2)}',
+                              ),
+                              Row(
+                                children: [
+                                  Text('Quantity: '),
+                                  IconButton(
+                                    onPressed:
+                                        isDeleting || (item['quantity'] < 2)
+                                        ? null
+                                        : () {
+                                            cartProvider.addProduct({
+                                              ...item,
+                                              'quantity': -1,
+                                            });
+                                          },
+                                    icon: Icon(Icons.remove, size: 14),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    item['quantity'].toString(),
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  IconButton(
+                                    onPressed: isDeleting
+                                        ? null
+                                        : () {
+                                            cartProvider.addProduct({
+                                              ...item,
+                                              'quantity': 1,
+                                            });
+                                          },
+                                    icon: Icon(Icons.add, size: 14),
+                                  ),
+                                ],
                               ),
                               Text(
-                                'Discounted Price: \$ ${item['discountedTotal'].toStringAsFixed(2)}',
+                                'Total: \$ ${item['discountedTotal'].toStringAsFixed(2)}',
                               ),
                             ],
                           ),
@@ -153,6 +180,7 @@ class _CartScreenState extends State<CartScreen> {
                             onPressed: isDeleting
                                 ? null
                                 : () {
+                                  if (!mounted) return;
                                     setState(() {
                                       _deletingItemId = item['id'];
                                     });
@@ -177,13 +205,10 @@ class _CartScreenState extends State<CartScreen> {
                     children: [
                       Divider(),
                       Text(
-                        'Cart Total: \$ ${cartTotal.toStringAsFixed(2)}',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        'Discounted Total: \$ ${cartDiscountedTotal.toStringAsFixed(2)}',
+                        '  Total: \$ ${cartDiscountedTotal.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
+                          fontSize: 16,
                           color: Colors.green,
                         ),
                       ),
@@ -216,12 +241,18 @@ class _CartScreenState extends State<CartScreen> {
                                     ? null
                                     : () async {
                                         final result =
-                                            await Navigator.pushNamed(context, '/checkout', arguments: {
-                                              'cartItems': cartItems,
-                                              'cartTotal': cartTotal,
-                                              'cartDiscountedTotal': cartDiscountedTotal
-                                            });
+                                            await Navigator.pushNamed(
+                                              context,
+                                              '/checkout',
+                                              arguments: {
+                                                'cartItems': cartItems,
+                                                'cartTotal': cartTotal,
+                                                'cartDiscountedTotal':
+                                                    cartDiscountedTotal,
+                                              },
+                                            );
                                         if (result != null && result is Map) {
+                                          if (!mounted) return;
                                           setState(() {
                                             _isPlacingOrder = true;
                                           });
@@ -230,6 +261,7 @@ class _CartScreenState extends State<CartScreen> {
                                             cartTotal,
                                             cartDiscountedTotal,
                                           );
+                                          if (!mounted) return;
                                           setState(() {
                                             _isPlacingOrder = false;
                                             _isOrderPlaced = true;
@@ -237,12 +269,12 @@ class _CartScreenState extends State<CartScreen> {
                                           await Future.delayed(
                                             Duration(seconds: 2),
                                           );
+                                          if (!mounted) return;
                                           setState(() {
                                             _isOrderPlaced = false;
                                           });
                                           cartProvider.clearCart();
                                         }
-                                        
                                       },
                                 child: Text('Checkout'),
                               ),
