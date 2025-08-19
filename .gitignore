@@ -58,6 +58,17 @@ macos/Flutter/GeneratedPluginRegistrant.swift
 *.hive.lock
 *.lock
 *.pyc
+
+# Sensitive files and API keys
+*.env
+*.env.*
+**/secrets.*
+**/api_keys.*
+**/apikeys.*
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_options.dart
+**/local.properties
 *.pyo
 *.pyd
 *.so
