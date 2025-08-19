@@ -90,7 +90,6 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system,
       initialRoute: '/',
-      locale: const Locale('hi'),
       routes: {
         '/': (context) => HomeScreen(),
         '/signup': (context) => SignupScreen(),
