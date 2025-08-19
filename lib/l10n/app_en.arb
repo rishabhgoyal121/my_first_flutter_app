@@ -1,0 +1,51 @@
+{
+  "@@locale": "en",
+  "products": "Products",
+  "searchProducts": "Search Products...",
+  "noProductsFound": "No products found for \"{query}\"",
+  "@noProductsFound": {
+    "description": "Shown when no products match the search query.",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "Shoes"
+      }
+    }
+  },
+  "noProductsAvailable": "No products available",
+  "orders": "Orders",
+  "wishlist": "Wishlist",
+  "profile": "Profile",
+  "sort": "Sort",
+  "filters": "Filters",
+  "searchForItems": "Search for Items...",
+  "cancelSearch": "Cancel Search",
+  "addToWishlist": "Add to Wishlist",
+  "applyFilters": "Apply Filters",
+  "category": "Category",
+  "selectCategory": "Select Category...",
+  "priceRange": "Price Range ({min} - {max})",
+  "@priceRange": {
+    "description": "Shows the price range filter",
+    "placeholders": {
+      "min": {
+        "type": "int",
+        "example": "100"
+      },
+      "max": {
+        "type": "int",
+        "example": "500"
+      }
+    }
+  },
+  "minimumRating": "Minimum Rating ({rating})",
+  "@minimumRating": {
+    "description": "Shows the minimum rating filter",
+    "placeholders": {
+      "rating": {
+        "type": "double",
+        "example": "4.5"
+      }
+    }
+  }
+}

@@ -11,6 +11,7 @@ import 'product_details_screen.dart';
 import 'cart_provider.dart';
 import 'wishlist_provider.dart';
 import 'dart:async';
+import 'generated/l10n.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -166,6 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final matchesRating = product.rating >= _selectedMinRating;
       return matchesCategory && matchesPrice && matchesRating;
     }).toList();
+    if (!mounted) return;
     setState(() {
       products = filtered;
       isLoading = false;
@@ -179,6 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (response.statusCode == 200) {
       final List<dynamic> cats = json.decode(response.body);
+      if (!mounted) return;
       setState(() {
         _categories = cats.cast<Map<String, dynamic>>();
       });
@@ -256,10 +259,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ListView(
                 shrinkWrap: true,
                 children: [
-                  Text('Category'),
+                  Text(AppLocalizations.of(context)!.category),
                   DropdownButton<String>(
                     value: _selectedCategorySlug,
-                    hint: Text('Select category'),
+                    hint: Text(AppLocalizations.of(context)!.selectCategory),
                     isExpanded: true,
                     items: _categories
                         .map(
@@ -275,7 +278,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'Price Range (\$${_selectedMinPrice.toInt()} - \$${_selectedMaxPrice.toInt()})',
+                    AppLocalizations
+                        .of(context)!
+                        .priceRange(
+                          _selectedMinPrice.toInt(),
+                          _selectedMaxPrice.toInt(),
+                        ),
                   ),
                   RangeSlider(
                     min: _minPrice,
@@ -291,7 +299,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(height: 16),
                   Text(
-                    'Minimum Rating (${_selectedMinRating.toStringAsFixed(1)})',
+                    AppLocalizations
+                        .of(context)!
+                        .minimumRating(_selectedMinRating),
                   ),
                   Slider(
                     min: 0,
@@ -308,7 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Navigator.pop(context);
                       applyFilters();
                     },
-                    child: Text('Apply filters'),
+                    child: Text(AppLocalizations.of(context)!.applyFilters),
                   ),
                 ],
               ),
@@ -363,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 controller: _searchController,
                 autofocus: true,
                 decoration: InputDecoration(
-                  hintText: 'Search products...',
+                  hintText: AppLocalizations.of(context)!.searchProducts,
                   border: InputBorder.none,
                   suffixIcon: _searchController.text.isNotEmpty
                       ? IconButton(
@@ -379,12 +389,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 onChanged: _onSearchChanged,
                 onSubmitted: (value) => searchProducts(value),
               )
-            : Text('Products'),
+            : Text(AppLocalizations.of(context)!.products),
         actions: [
           IconButton(
             onPressed: () => Navigator.pushNamed(context, '/orders'),
             icon: Icon(Icons.receipt_long),
-            tooltip: 'Orders',
+            tooltip: AppLocalizations.of(context)!.orders,
           ),
           IconButton(
             onPressed: () {
@@ -395,7 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
             icon: Icon(Icons.favorite),
-            tooltip: 'Wishlist',
+            tooltip: AppLocalizations.of(context)!.wishlist,
           ),
           IconButton(
             onPressed: () => Navigator.pushNamed(context, '/profile'),
@@ -430,12 +440,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text('Discount (Low to High)'),
               ),
             ],
-            tooltip: 'Sort',
+            tooltip: AppLocalizations.of(context)!.sort,
           ),
           IconButton(
             onPressed: _showFilterSheet,
             icon: Icon(Icons.filter_alt),
-            tooltip: 'Filters',
+            tooltip: AppLocalizations.of(context)!.filters,
           ),
           IconButton(
             onPressed: () {
@@ -448,7 +458,9 @@ class _HomeScreenState extends State<HomeScreen> {
               }
             },
             icon: Icon(_isSearching ? Icons.close : Icons.search),
-            tooltip: !_isSearching ? 'Search for items' : 'Cancel Search',
+            tooltip: !_isSearching
+                ? AppLocalizations.of(context)!.searchForItems
+                : AppLocalizations.of(context)!.cancelSearch,
           ),
           Stack(
             alignment: Alignment.topRight,
@@ -494,8 +506,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ? Center(
               child: Text(
                 _isSearching
-                    ? 'No products found for "${_searchController.text}"'
-                    : 'No products available',
+                    ? AppLocalizations.of(context)!.noProductsFound(_searchController.text)
+                    : AppLocalizations.of(context)!.noProductsAvailable,
               ),
             )
           : ListView.builder(
@@ -590,7 +602,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         iconSize: 16,
                         color: Colors.pink,
-                        tooltip: 'Add to wishlist',
+                        tooltip: AppLocalizations.of(context)!.addToWishlist,
                         visualDensity: VisualDensity.compact,
                         padding: EdgeInsets.symmetric(horizontal: 0),
                         constraints: BoxConstraints(),

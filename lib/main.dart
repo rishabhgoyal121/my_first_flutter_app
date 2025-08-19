@@ -14,6 +14,8 @@ import 'checkout_screen.dart';
 import 'wishlist_provider.dart';
 import 'wishlist_screen.dart';
 import 'edit_profile_screen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'generated/l10n.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -88,6 +90,7 @@ class MyApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system,
       initialRoute: '/',
+      locale: const Locale('hi'),
       routes: {
         '/': (context) => HomeScreen(),
         '/signup': (context) => SignupScreen(),
@@ -119,6 +122,13 @@ class MyApp extends StatelessWidget {
           return EditProfileScreen(userData: args['userData']);
         },
       },
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 }

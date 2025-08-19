@@ -31,11 +31,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       profileJson = prefs.getString('userProfile');
     }
     if (profileJson == null) {
+      if (!mounted) return;
       setState(() {
         error = 'Profile data not found in local storage';
         isLoading = false;
       });
     } else {
+      if (!mounted) return;
       setState(() {
         userData = json.decode(profileJson!);
         isLoading = false;

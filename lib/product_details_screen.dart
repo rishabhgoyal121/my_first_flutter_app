@@ -47,6 +47,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               children: List.generate(5, (index) {
                 return IconButton(
                   onPressed: () {
+                    if (!mounted) return;
                     setState(() {
                       rating = index + 1;
                     });
@@ -82,6 +83,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 reviewerName: 'Anonymous',
                 reviewerEmail: '',
               );
+              if (!mounted) return;
               setState(() {
                 product.reviews.add(review);
               });
@@ -112,6 +114,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               children: List.generate(5, (index) {
                 return IconButton(
                   onPressed: () {
+                    if (!mounted) return;
                     setState(() {
                       rating = index + 1;
                     });
@@ -145,6 +148,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 reviewerName: 'Anonymous',
                 reviewerEmail: '',
               );
+              if (!mounted) return;
               setState(() {
                 product.reviews.add(review);
               });

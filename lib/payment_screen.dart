@@ -47,6 +47,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     if (userProfileString != null) {
       final userProfile = jsonDecode(userProfileString);
       final bank = userProfile['bank'] ?? {};
+      if (!mounted) return;
       setState(() {
         _cardNumberController.text = (bank['cardNumber'] ?? '').toString();
         _expiryDateController.text = (bank['cardExpire'] ?? '').toString();
@@ -75,7 +76,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
             child: Column(
               children: [
                 DropdownButtonFormField(
-                  value: _paymentMethod,
+                  initialValue: _paymentMethod,
                   items: [
                     DropdownMenuItem(
                       value: 'Credit Card',
@@ -83,9 +84,12 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     ),
                     DropdownMenuItem(value: 'IBAN', child: Text('IBAN')),
                   ],
-                  onChanged: (value) => setState(() {
-                    _paymentMethod = value ?? 'Credit Card';
-                  }),
+                  onChanged: (value) {
+                    if (!mounted) return;
+                    setState(() {
+                      _paymentMethod = value ?? 'Credit Card';
+                    });
+                  },
                 ),
                 if (_paymentMethod == 'Credit Card') ...[
                   TextFormField(
