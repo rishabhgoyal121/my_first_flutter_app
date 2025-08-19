@@ -14,6 +14,11 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
+  late TextEditingController firstNameController;
+  late TextEditingController lastNameController;
+  late TextEditingController emailController;
+  late TextEditingController phoneController;
+
   @override
   void dispose() {
     firstNameController.dispose();
@@ -22,11 +27,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     phoneController.dispose();
     super.dispose();
   }
-
-  late TextEditingController firstNameController;
-  late TextEditingController lastNameController;
-  late TextEditingController emailController;
-  late TextEditingController phoneController;
 
   @override
   void initState() {
