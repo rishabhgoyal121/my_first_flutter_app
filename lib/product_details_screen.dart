@@ -121,12 +121,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     Navigator.of(context).pop();
                     _showReviewDialogWithRating(rating, commentController);
                   },
-                  icon: Icon(index < rating ? Icons.star : Icons.star_border),
-                  color: Colors.amber,
                   icon: Icon(
                     index < rating ? Icons.star : Icons.star_border,
                     color: Colors.amber,
                   ),
+                );
               }),
             ),
             TextField(
