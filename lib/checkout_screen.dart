@@ -47,7 +47,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _loadUserProfile() async {
-    final String? userProfileString;
+    String? userProfileString;
     if (kIsWeb) {
       userProfileString = html.window.localStorage['userProfile'];
     } else {
