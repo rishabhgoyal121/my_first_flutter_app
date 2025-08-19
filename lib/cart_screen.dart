@@ -92,6 +92,7 @@ class _CartScreenState extends State<CartScreen> {
                                     }),
                                   );
                                   cartProvider.removeProduct(_deletingItemId!);
+                                  if (!mounted) return;
                                   setState(() {
                                     _deletingItemId = null;
                                   });
@@ -108,6 +109,7 @@ class _CartScreenState extends State<CartScreen> {
                                   }
                                 } catch (e) {
                                   cartProvider.removeProduct(_deletingItemId!);
+                                  if (!mounted) return;
                                   setState(() {
                                     _deletingItemId = null;
                                   });
@@ -178,6 +180,7 @@ class _CartScreenState extends State<CartScreen> {
                             onPressed: isDeleting
                                 ? null
                                 : () {
+                                  if (!mounted) return;
                                     setState(() {
                                       _deletingItemId = item['id'];
                                     });
@@ -249,6 +252,7 @@ class _CartScreenState extends State<CartScreen> {
                                               },
                                             );
                                         if (result != null && result is Map) {
+                                          if (!mounted) return;
                                           setState(() {
                                             _isPlacingOrder = true;
                                           });
@@ -257,6 +261,7 @@ class _CartScreenState extends State<CartScreen> {
                                             cartTotal,
                                             cartDiscountedTotal,
                                           );
+                                          if (!mounted) return;
                                           setState(() {
                                             _isPlacingOrder = false;
                                             _isOrderPlaced = true;
@@ -264,6 +269,7 @@ class _CartScreenState extends State<CartScreen> {
                                           await Future.delayed(
                                             Duration(seconds: 2),
                                           );
+                                          if (!mounted) return;
                                           setState(() {
                                             _isOrderPlaced = false;
                                           });

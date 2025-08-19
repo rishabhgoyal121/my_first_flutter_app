@@ -1,0 +1,51 @@
+{
+  "@@locale": "hi",
+  "products": "उत्पाद",
+  "searchProducts": "उत्पाद खोजें...",
+  "noProductsFound": "\"{query}\" के लिए कोई उत्पाद नहीं मिला",
+  "@noProductsFound": {
+    "description": "Shown when no products match the search query.",
+    "placeholders": {
+      "query": {
+        "type": "String",
+        "example": "जूते"
+      }
+    }
+  },
+  "noProductsAvailable": "कोई उत्पाद उपलब्ध नहीं है",
+  "orders": "आदेश",
+  "wishlist": "इच्छा सूची",
+  "profile": "प्रोफ़ाइल",
+  "sort": "क्रमबद्ध करें",
+  "filters": "फ़िल्टर",
+  "searchForItems": "आइटम खोजें",
+  "cancelSearch": "खोज रद्द करें",
+  "addToWishlist": "इच्छा सूची में जोड़ें",
+  "applyFilters": "फ़िल्टर लागू करें",
+  "category": "श्रेणी",
+  "selectCategory": "श्रेणी चुनें",
+  "priceRange": "मूल्य सीमा ({min} - {max})",
+  "@priceRange": {
+    "description": "Shows the price range filter",
+    "placeholders": {
+      "min": {
+        "type": "int",
+        "example": "100"
+      },
+      "max": {
+        "type": "int",
+        "example": "500"
+      }
+    }
+  },
+  "minimumRating": "न्यूनतम रेटिंग ({rating})",
+  "@minimumRating": {
+    "description": "Shows the minimum rating filter",
+    "placeholders": {
+      "rating": {
+        "type": "double",
+        "example": "4.5"
+      }
+    }
+  }
+}

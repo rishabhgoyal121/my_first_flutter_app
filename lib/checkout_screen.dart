@@ -56,6 +56,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
     if (userProfileString != null) {
       final userProfile = jsonDecode(userProfileString)['address'];
+      if (!mounted) return;
       setState(() {
         _addressController.text = (userProfile['address'] ?? '').toString();
         _cityController.text = (userProfile['city'] ?? '').toString();
@@ -84,6 +85,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
+      if (!mounted) return;
       setState(() {
         _latitude = position.latitude;
         _longitude = position.longitude;
