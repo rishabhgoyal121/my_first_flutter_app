@@ -23,13 +23,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
     firstNameController = TextEditingController(
-      text: widget.userData['firstName'],
+      text: widget.userData['firstName'] ?? '',
     );
     lastNameController = TextEditingController(
-      text: widget.userData['lastName'],
+      text: widget.userData['lastName'] ?? '',
     );
-    emailController = TextEditingController(text: widget.userData['email']);
-    phoneController = TextEditingController(text: widget.userData['phone']);
+    emailController = TextEditingController(
+      text: widget.userData['email'] ?? '',
+    );
+    phoneController = TextEditingController(
+      text: widget.userData['phone'] ?? '',
+    );
   }
 
   Future<void> saveProfile() async {
@@ -62,28 +66,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             TextField(
               controller: firstNameController,
               decoration: InputDecoration(labelText: 'First Name'),
+              textCapitalization: TextCapitalization.words,
             ),
             SizedBox(height: 12),
             TextField(
               controller: lastNameController,
               decoration: InputDecoration(labelText: 'Last Name'),
+              textCapitalization: TextCapitalization.words,
             ),
-            SizedBox(height: 12),
-            TextField(
-              controller: lastNameController,
-              decoration: InputDecoration(labelText: 'Last Name'),),
             SizedBox(height: 12),
             TextField(
               controller: emailController,
               decoration: InputDecoration(labelText: 'Email'),
+              keyboardType: TextInputType.emailAddress,
             ),
             SizedBox(height: 12),
             TextField(
               controller: phoneController,
               decoration: InputDecoration(labelText: 'Phone'),
+              keyboardType: TextInputType.phone,
             ),
             SizedBox(height: 24),
-            ElevatedButton(onPressed: saveProfile, child: Text('Save'))
+            ElevatedButton(onPressed: saveProfile, child: Text('Save')),
           ],
         ),
       ),
