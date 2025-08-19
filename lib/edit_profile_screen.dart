@@ -71,7 +71,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             SizedBox(height: 12),
             TextField(
               controller: lastNameController,
-              decoration: InputDecoration(labelText: 'Last Name'),
+              decoration: InputDecoration(labelText: 'Last Name'),),
             SizedBox(height: 12),
             TextField(
               controller: emailController,
