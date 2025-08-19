@@ -33,87 +33,76 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   void _showReviewDialog() {
-    int rating = 5;
     TextEditingController commentController = TextEditingController();
     showDialog(
       context: context,
-      builder: (context) => _buildReviewDialog(rating, commentController),
-    );
-  }
-
-  void _showReviewDialogWithRating(
-    int rating,
-    TextEditingController commentController,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) => _buildReviewDialog(rating, commentController),
-    );
-  }
-
-  Widget _buildReviewDialog(
-    int rating,
-    TextEditingController commentController,
-  ) {
-    return AlertDialog(
-      title: Text('Write a Review'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: List.generate(5, (index) {
-              return IconButton(
-                onPressed: () {
-                  if (!mounted) return;
-                  setState(() {
-                    rating = index + 1;
-                  });
-                  Navigator.of(context).pop();
-                  _showReviewDialogWithRating(rating, commentController);
-                },
-                icon: Icon(
-                  index < rating ? Icons.star : Icons.star_border,
-                  color: Colors.amber,
+      builder: (context) {
+        int rating = 5;
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text('Write a Review'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: List.generate(5, (index) {
+                      return IconButton(
+                        onPressed: () {
+                          setDialogState(() {
+                            rating = index + 1;
+                          });
+                        },
+                        icon: Icon(
+                          index < rating ? Icons.star : Icons.star_border,
+                          color: Colors.amber,
+                        ),
+                      );
+                    }),
+                  ),
+                  TextField(
+                    controller: commentController,
+                    decoration: InputDecoration(labelText: 'Comment'),
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Cancel'),
                 ),
-              );
-            }),
-          ),
-          TextField(
-            controller: commentController,
-            decoration: InputDecoration(labelText: 'Comment'),
-            maxLines: 3,
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (commentController.text.trim().isEmpty) return;
-            final review = Review(
-              rating: rating,
-              comment: commentController.text.trim(),
-              date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
-              reviewerName: 'Anonymous',
-              reviewerEmail: '',
+                ElevatedButton(
+                  onPressed: () {
+                    if (commentController.text.trim().isEmpty) return;
+                    final review = Review(
+                      rating: rating,
+                      comment: commentController.text.trim(),
+                      date: DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                      reviewerName: 'Anonymous',
+                      reviewerEmail: '',
+                    );
+                    if (!mounted) return;
+                    // Add review and update parent state
+                    Navigator.pop(context);
+                    setState(() {
+                      product.reviews.add(review);
+                    });
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Review Submitted')));
+                  },
+                  child: Text('Submit'),
+                ),
+              ],
             );
-            if (!mounted) return;
-            setState(() {
-              product.reviews.add(review);
-            });
-            Navigator.pop(context);
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text('Review Submitted')));
           },
-          child: Text('Submit'),
-        ),
-      ],
+        );
+      },
     );
   }
+
+  // Removed _showReviewDialogWithRating and _buildReviewDialog as they are no longer needed.
 
   @override
   Widget build(BuildContext context) {
