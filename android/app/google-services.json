@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "461455385820",
+    "project_id": "shopper-d9bac",
+    "storage_bucket": "shopper-d9bac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:461455385820:android:c638b9a37f6af6ecdf8019",
+        "android_client_info": {
+          "package_name": "com.example.my_first_flutter_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDD66U1e6qz2oRPeNIMbL1IJPehQwUpEF0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -17,10 +17,14 @@ import 'edit_profile_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'generated/l10n.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
+  await Firebase.initializeApp();
+  NotificationService().init();
   runApp(
     MultiProvider(
       providers: [
@@ -131,5 +135,23 @@ class MyApp extends StatelessWidget {
       ],
       supportedLocales: AppLocalizations.supportedLocales,
     );
+  }
+}
+
+class NotificationService {
+  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+
+  Future<void> init() async {
+    await _messaging.requestPermission();
+    String? token = await _messaging.getToken();
+    print('FCM Token: $token');
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Received a message in foreground: ${message.notification?.title}');
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('Notification Clicked!');
+    });
   }
 }
