@@ -16,9 +16,11 @@ import 'wishlist_screen.dart';
 import 'edit_profile_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'generated/l10n.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load();
   runApp(
     MultiProvider(
       providers: [

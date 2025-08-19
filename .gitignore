@@ -81,3 +81,4 @@ macos/Flutter/GeneratedPluginRegistrant.swift
 .flutter-plugins-dependencies
 
 windows/
+.env*
