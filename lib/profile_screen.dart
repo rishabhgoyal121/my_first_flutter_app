@@ -50,18 +50,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> pickAndUploadImage() async {
     final picker = ImagePicker();
-    final PickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (PickedFile == null) return;
+    if (pickedFile == null) return;
 
-    final bytes = await PickedFile.readAsBytes();
-    final base46Image = base64Encode(bytes);
+    final bytes = await pickedFile.readAsBytes();
+    final base64Image = base64Encode(bytes);
 
     final apiKey = dotenv.env['IMGBB_API_KEY'] ?? '';
 
     final response = await http.post(
       Uri.parse('https://api.imgbb.com/1/upload?key=$apiKey'),
-      body: {'image': base46Image},
+      body: {'image': base64Image},
     );
 
     if (response.statusCode == 200) {
