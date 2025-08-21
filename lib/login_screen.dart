@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -38,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
         try {
           await GoogleSignIn.instance.initialize(
             clientId:
-                '671241416838-u1mra8d5nias7502rebndkv5pvob4a6o.apps.googleusercontent.com',
+                dotenv.env['GOOGLE_CLIENT_ID'] ?? '',
           );
           googleUser = await GoogleSignIn.instance.authenticate();
         } catch (e) {
