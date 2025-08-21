@@ -38,12 +38,10 @@ class _LoginScreenState extends State<LoginScreen> {
         // For web, try the old method first, then fall back to new method
         try {
           await GoogleSignIn.instance.initialize(
-            clientId:
-                dotenv.env['GOOGLE_CLIENT_ID'] ?? '',
+            clientId: dotenv.env['GOOGLE_CLIENT_ID'] ?? '',
           );
           googleUser = await GoogleSignIn.instance.authenticate();
         } catch (e) {
-          // If authenticate fails on web, show a message that web sign-in needs to be implemented differently
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
@@ -59,7 +57,15 @@ class _LoginScreenState extends State<LoginScreen> {
         googleUser = await GoogleSignIn.instance.authenticate();
       }
 
-      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+      if (googleUser == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Google Sign In failed.')));
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+           googleUser.authentication;
 
       // Get access token from authorization client
       final auth = await googleUser.authorizationClient.authorizationForScopes([
