@@ -58,6 +58,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final base64Image = base64Encode(bytes);
 
     final apiKey = dotenv.env['IMGBB_API_KEY'] ?? '';
+    if (apiKey.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Missing image upload API key. Please set IMGBB_API_KEY.',
+          ),
+        ),
+      );
+      return;
+    }
 
     final response = await http.post(
       Uri.parse('https://api.imgbb.com/1/upload?key=$apiKey'),
