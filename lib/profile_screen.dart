@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -45,6 +48,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile == null) return;
+
+    final bytes = await pickedFile.readAsBytes();
+    final base64Image = base64Encode(bytes);
+
+    final apiKey = dotenv.env['IMGBB_API_KEY'] ?? '';
+    if (apiKey.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Missing image upload API key. Please set IMGBB_API_KEY.',
+          ),
+        ),
+      );
+      return;
+    }
+
+    final response = await http.post(
+      Uri.parse('https://api.imgbb.com/1/upload?key=$apiKey'),
+      body: {'image': base64Image},
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final imageUrl = data['data']['url'];
+
+      if (!mounted) return;
+      setState(() {
+        userData!['image'] = imageUrl;
+      });
+
+      final userDataJson = json.encode(userData);
+
+      if (kIsWeb) {
+        html.window.localStorage['userProfile'] = userDataJson;
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userProfile', userDataJson);
+      }
+    } else {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to upload image')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -80,9 +133,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (userData!['image'] != null)
-                      CircleAvatar(
-                        backgroundImage: NetworkImage(userData!['image']),
-                        radius: 40,
+                      Center(
+                        child: Stack(
+                          children: [
+                            CircleAvatar(
+                              backgroundImage: NetworkImage(userData!['image']),
+                              radius: 40,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: InkWell(
+                                onTap: pickAndUploadImage,
+                                child: CircleAvatar(
+                                  radius: 16,
+                                  backgroundColor: Colors.white,
+                                  child: Icon(
+                                    Icons.camera_alt,
+                                    size: 18,
+                                    color: Colors.indigo,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     SizedBox(height: 16),
                     Text(

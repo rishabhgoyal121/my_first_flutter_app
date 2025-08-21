@@ -1,3 +1,5 @@
+# Prevent committing Firebase API keys
+lib/firebase_options.dart
 # Miscellaneous
 *.class
 *.log
@@ -58,6 +60,17 @@ macos/Flutter/GeneratedPluginRegistrant.swift
 *.hive.lock
 *.lock
 *.pyc
+
+# Sensitive files and API keys
+*.env
+*.env.*
+**/secrets.*
+**/api_keys.*
+**/apikeys.*
+**/google-services.json
+**/GoogleService-Info.plist
+**/firebase_options.dart
+**/local.properties
 *.pyo
 *.pyd
 *.so
@@ -81,3 +94,4 @@ macos/Flutter/GeneratedPluginRegistrant.swift
 .flutter-plugins-dependencies
 
 windows/
+.env*
