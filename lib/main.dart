@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:my_first_flutter_app/product.dart';
 import 'package:my_first_flutter_app/product_details_screen.dart';
@@ -20,11 +21,27 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+void main() async {  
   await dotenv.load();
-  await Firebase.initializeApp();
+  if (kIsWeb) {
+    await Firebase.initializeApp(
+      options: FirebaseOptions(
+        apiKey: dotenv.env['FIREBASE_API_KEY'] ?? '',
+        appId: dotenv.env['FIREBASE_APP_ID'] ?? '',
+        messagingSenderId: dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '',
+        projectId: dotenv.env['FIREBASE_PROJECT_ID'] ?? '',
+        authDomain: dotenv.env['FIREBASE_AUTH_DOMAIN'] ?? '',
+        storageBucket: dotenv.env['FIREBASE_STORAGE_BUCKET'] ?? '',
+        measurementId: dotenv.env['FIREBASE_MEASUREMENT_ID'] ?? '',
+      ),
+    );
+  } else {
+    await Firebase.initializeApp();
+  }
   NotificationService().init();
+  WidgetsFlutterBinding.ensureInitialized();
+
+
   runApp(
     MultiProvider(
       providers: [
@@ -143,8 +160,6 @@ class NotificationService {
 
   Future<void> init() async {
     await _messaging.requestPermission();
-    String? token = await _messaging.getToken();
-    print('FCM Token: $token');
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print('Received a message in foreground: ${message.notification?.title}');
