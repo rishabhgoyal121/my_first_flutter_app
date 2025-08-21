@@ -1,1 +1,12 @@
-self.FIREBASE_CONFIG = {"apiKey":"AIzaSyDD66U1e6qz2oRPeNIMbL1IJPehQwUpEF0","authDomain":"shopper-d9bac.firebaseapp.com","projectId":"shopper-d9bac","storageBucket":"shopper-d9bac.firebasestorage.app","messagingSenderId":"461455385820","appId":"1:461455385820:web:439b945e109a93dddf8019","measurementId":"G-EHC41NLY60"};
+// Load environment variables (ensure you have installed the dotenv package)
+require("dotenv").config();
+
+self.FIREBASE_CONFIG = {
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
+  measurementId: process.env.FIREBASE_MEASUREMENT_ID,
+};
