@@ -110,6 +110,93 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _handleLogin() async {
+    HapticFeedback.lightImpact();
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+      });
+      try {
+        final response = await http.post(
+          Uri.parse('https://dummyjson.com/auth/login'),
+          headers: {'Content-type': 'application/json'},
+          body: json.encode({'username': username, 'password': password}),
+        );
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (kIsWeb) {
+            html.document.cookie =
+                'accessToken=${data['accessToken']}; path=/; max-age=3600';
+            html.document.cookie =
+                'refreshToken=${data['refreshToken']}; path=/; max-age=604800';
+          } else {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setString('accessToken', data['accessToken']);
+            await prefs.setString('refreshToken', data['refreshToken']);
+          }
+
+          final profileResponse = await http.get(
+            Uri.parse('https://dummyjson.com/user/me'),
+            headers: {'Authorization': 'Bearer ${data['accessToken']}'},
+          );
+
+          if (profileResponse.statusCode == 200) {
+            final profileData = json.decode(profileResponse.body);
+            if (kIsWeb) {
+              html.window.localStorage['userProfile'] = json.encode(
+                profileData,
+              );
+            } else {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setString('userProfile', json.encode(profileData));
+            }
+          }
+
+          final addCartResponse = await http.post(
+            Uri.parse('https://dummyjson.com/carts/add'),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({
+              'userId': 1, // Assuming a user ID of 1 for demo purposes
+              'products': [
+                {
+                  'id': 1, // Assuming a product ID of 1 for demo purposes
+                  'quantity': 1,
+                },
+              ],
+            }),
+          );
+
+          if (!(addCartResponse.statusCode == 200 ||
+              addCartResponse.statusCode == 201)) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Failed to create cart')));
+          }
+          Future.delayed(Duration(seconds: 1), () {
+            if (mounted) {
+              setState(() {
+                isLoading = false;
+              });
+              Navigator.pushReplacementNamed(context, '/');
+            }
+          });
+        } else {
+          setState(() {
+            isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login failed. Please try again.')),
+          );
+        }
+      } catch (e) {
+        setState(() {
+          isLoading = false;
+        });
+        print('Error: $e');
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -162,126 +249,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 onChanged: (val) => password = val,
                 validator: (val) => val!.isEmpty ? 'Enter Password' : null,
                 obscureText: true,
+                textInputAction: TextInputAction.done,
+                onFieldSubmitted: (_) async {
+                  _handleLogin();
+                },
               ),
               SizedBox(height: 40),
               ElevatedButton(
                 onPressed: (ssoSuccess || kIsWeb)
                     ? () async {
-                        HapticFeedback.lightImpact();
-                        if (_formKey.currentState!.validate()) {
-                          setState(() {
-                            isLoading = true;
-                          });
-                          try {
-                            final response = await http.post(
-                              Uri.parse('https://dummyjson.com/auth/login'),
-                              headers: {'Content-type': 'application/json'},
-                              body: json.encode({
-                                'username': username,
-                                'password': password,
-                              }),
-                            );
-                            if (response.statusCode == 200) {
-                              final data = json.decode(response.body);
-                              if (kIsWeb) {
-                                html.document.cookie =
-                                    'accessToken=${data['accessToken']}; path=/; max-age=3600';
-                                html.document.cookie =
-                                    'refreshToken=${data['refreshToken']}; path=/; max-age=604800';
-                              } else {
-                                final prefs =
-                                    await SharedPreferences.getInstance();
-                                await prefs.setString(
-                                  'accessToken',
-                                  data['accessToken'],
-                                );
-                                await prefs.setString(
-                                  'refreshToken',
-                                  data['refreshToken'],
-                                );
-                              }
-
-                              final profileResponse = await http.get(
-                                Uri.parse('https://dummyjson.com/user/me'),
-                                headers: {
-                                  'Authorization':
-                                      'Bearer ${data['accessToken']}',
-                                },
-                              );
-
-                              if (profileResponse.statusCode == 200) {
-                                final profileData = json.decode(
-                                  profileResponse.body,
-                                );
-                                if (kIsWeb) {
-                                  html.window.localStorage['userProfile'] = json
-                                      .encode(profileData);
-                                } else {
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  await prefs.setString(
-                                    'userProfile',
-                                    json.encode(profileData),
-                                  );
-                                }
-                              }
-
-                              final addCartResponse = await http.post(
-                                Uri.parse('https://dummyjson.com/carts/add'),
-                                headers: {'Content-Type': 'application/json'},
-                                body: json.encode({
-                                  'userId':
-                                      1, // Assuming a user ID of 1 for demo purposes
-                                  'products': [
-                                    {
-                                      'id':
-                                          1, // Assuming a product ID of 1 for demo purposes
-                                      'quantity': 1,
-                                    },
-                                  ],
-                                }),
-                              );
-
-                              if (!(addCartResponse.statusCode == 200 ||
-                                  addCartResponse.statusCode == 201)) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Failed to create cart'),
-                                  ),
-                                );
-                              }
-                              Future.delayed(Duration(seconds: 1), () {
-                                if (mounted) {
-                                  setState(() {
-                                    isLoading = false;
-                                  });
-                                  Navigator.pushReplacementNamed(context, '/');
-                                }
-                              });
-                            } else {
-                              setState(() {
-                                isLoading = false;
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Login failed. Please try again.',
-                                  ),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            setState(() {
-                              isLoading = false;
-                            });
-                            print('Error: $e');
-                          }
-                        }
+                        _handleLogin();
                       }
                     : null,
                 child: Text('Login'),
               ),
-              if (isLoading) Padding(padding: EdgeInsets.only(top: 24), child: Center(child: CircularProgressIndicator()),),
+              if (isLoading)
+                Padding(
+                  padding: EdgeInsets.only(top: 24),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
               SizedBox(height: 24),
               TextButton(
                 onPressed: () {
