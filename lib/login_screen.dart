@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -90,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Google SSO success. Please enter username and password',
+            'Google SSO success. Please enter username and pa ssword',
           ),
         ),
       );
@@ -129,7 +130,10 @@ class _LoginScreenState extends State<LoginScreen> {
               // Only show Google Sign In button for mobile platforms
               if (!kIsWeb) ...[
                 ElevatedButton.icon(
-                  onPressed: _performGoogleSignIn,
+                  onPressed: () async {
+                    HapticFeedback.lightImpact();
+                    await _performGoogleSignIn();
+                  },
                   label: Text('Login with Google'),
                   icon: Icon(Icons.login),
                   style: ElevatedButton.styleFrom(
@@ -169,6 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ElevatedButton(
                 onPressed: (ssoSuccess || kIsWeb)
                     ? () async {
+                        HapticFeedback.lightImpact();
                         if (_formKey.currentState!.validate()) {
                           final navContext = context;
                           try {
@@ -250,7 +255,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 );
                               }
                               Future.delayed(Duration(seconds: 1), () {
-                                Navigator.pushReplacementNamed(navContext, '/');
+                                if (mounted) {
+                                  Navigator.pushReplacementNamed(context, '/');
+                                }
+                                
                               });
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
