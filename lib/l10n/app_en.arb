@@ -22,6 +22,7 @@
   "cancelSearch": "Cancel Search",
   "addToWishlist": "Add to Wishlist",
   "applyFilters": "Apply Filters",
+  "clearFilters": "Clear Filters",
   "category": "Category",
   "selectCategory": "Select Category...",
   "priceRange": "Price Range ({min} - {max})",

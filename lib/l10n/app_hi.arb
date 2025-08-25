@@ -22,6 +22,7 @@
   "cancelSearch": "खोज रद्द करें",
   "addToWishlist": "इच्छा सूची में जोड़ें",
   "applyFilters": "फ़िल्टर लागू करें",
+  "clearFilters": "फ़िल्टर हटाएँ",
   "category": "श्रेणी",
   "selectCategory": "श्रेणी चुनें",
   "priceRange": "मूल्य सीमा ({min} - {max})",

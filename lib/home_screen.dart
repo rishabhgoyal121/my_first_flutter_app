@@ -323,11 +323,52 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(height: 16),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                      textStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     onPressed: () {
                       Navigator.pop(context);
                       applyFilters();
                     },
-                    child: Text(AppLocalizations.of(context)!.applyFilters),
+                    child: Text(
+                      AppLocalizations.of(context)!.applyFilters,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      foregroundColor: Colors.white,
+                      side: BorderSide(color: Colors.redAccent),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                      textStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onPressed: () {
+                      setModalState(() {
+                        _selectedCategorySlug = null;
+                        _selectedMinPrice = _minPrice;
+                        _selectedMaxPrice = _maxPrice;
+                        _selectedMinRating = 0;
+                      });
+                      // Also update the main product list
+                      applyFilters();
+                    },
+
+                    child: Text(AppLocalizations.of(context)!.clearFilters),
                   ),
                 ],
               ),

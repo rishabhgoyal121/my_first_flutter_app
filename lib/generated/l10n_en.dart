@@ -50,6 +50,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get applyFilters => 'Apply Filters';
 
   @override
+  String get clearFilters => 'Clear Filters';
+
+  @override
   String get category => 'Category';
 
   @override

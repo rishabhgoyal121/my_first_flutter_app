@@ -50,6 +50,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get applyFilters => 'फ़िल्टर लागू करें';
 
   @override
+  String get clearFilters => 'फ़िल्टर हटाएँ';
+
+  @override
   String get category => 'श्रेणी';
 
   @override

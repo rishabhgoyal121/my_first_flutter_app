@@ -176,6 +176,12 @@ abstract class AppLocalizations {
   /// **'Apply Filters'**
   String get applyFilters;
 
+  /// No description provided for @clearFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Filters'**
+  String get clearFilters;
+
   /// No description provided for @category.
   ///
   /// In en, this message translates to:
