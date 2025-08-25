@@ -10,6 +10,7 @@ import 'cart_provider.dart';
 import 'add_to_cart_animation.dart';
 import 'wishlist_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final Product product;
@@ -33,6 +34,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   void _showReviewDialog() {
+    HapticFeedback.lightImpact();
     TextEditingController commentController = TextEditingController();
     showDialog(
       context: context,
@@ -49,6 +51,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     children: List.generate(5, (index) {
                       return IconButton(
                         onPressed: () {
+                          HapticFeedback.lightImpact();
                           setDialogState(() {
                             rating = index + 1;
                           });
@@ -69,11 +72,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                  },
                   child: Text('Cancel'),
                 ),
                 ElevatedButton(
                   onPressed: () {
+                    HapticFeedback.lightImpact();
                     if (commentController.text.trim().isEmpty) return;
                     final review = Review(
                       rating: rating,
@@ -134,6 +141,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               IconButton(
                 key: widget.cartIconKey,
                 onPressed: () {
+                  HapticFeedback.lightImpact();
                   Navigator.pushNamed(context, '/cart');
                 },
                 icon: Icon(Icons.shopping_cart),
@@ -141,18 +149,24 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               Positioned(
                 right: 8,
                 top: 4,
-                child: Container(
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.yellowAccent,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '$cartCount',
-                    style: TextStyle(
-                      color: Colors.redAccent,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pushNamed(context, '/cart');
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.yellowAccent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '$cartCount',
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -200,6 +214,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         children: [
                           IconButton(
                             onPressed: () {
+                              HapticFeedback.lightImpact();
                               context.read<WishlistProvider>().toggleWishlist(
                                 product.id,
                               );
@@ -232,6 +247,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
               ElevatedButton(
                 onPressed: () async {
+                  HapticFeedback.lightImpact();
                   final response = await http.put(
                     Uri.parse('https://dummyjson.com/carts/1'),
                     headers: {'Content-Type': 'application/json'},
