@@ -161,6 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(labelText: 'Password'),
                 onChanged: (val) => password = val,
                 validator: (val) => val!.isEmpty ? 'Enter Password' : null,
+                obscureText: true,
               ),
               SizedBox(height: 40),
               ElevatedButton(
