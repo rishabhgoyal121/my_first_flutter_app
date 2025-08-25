@@ -59,6 +59,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectCategory => 'Select Category...';
 
   @override
+  String get selectBrand => 'Select Brand...';
+
+  @override
   String priceRange(int min, int max) {
     return 'Price Range ($min - $max)';
   }
@@ -67,4 +70,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String minimumRating(double rating) {
     return 'Minimum Rating ($rating)';
   }
+
+  @override
+  String get inStockOnly => 'In Stock Only';
+
+  @override
+  String get done => 'Done';
 }

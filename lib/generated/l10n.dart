@@ -194,6 +194,12 @@ abstract class AppLocalizations {
   /// **'Select Category...'**
   String get selectCategory;
 
+  /// No description provided for @selectBrand.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Brand...'**
+  String get selectBrand;
+
   /// Shows the price range filter
   ///
   /// In en, this message translates to:
@@ -205,6 +211,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Minimum Rating ({rating})'**
   String minimumRating(double rating);
+
+  /// No description provided for @inStockOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'In Stock Only'**
+  String get inStockOnly;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
 }
 
 class _AppLocalizationsDelegate

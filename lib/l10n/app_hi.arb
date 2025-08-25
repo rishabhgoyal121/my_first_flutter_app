@@ -25,6 +25,7 @@
   "clearFilters": "फ़िल्टर हटाएँ",
   "category": "श्रेणी",
   "selectCategory": "श्रेणी चुनें",
+  "selectBrand": "ब्रांड चुनें",
   "priceRange": "मूल्य सीमा ({min} - {max})",
   "@priceRange": {
     "description": "Shows the price range filter",
@@ -48,5 +49,7 @@
         "example": "4.5"
       }
     }
-  }
+  },
+  "inStockOnly": "केवल स्टॉक में उपलब्ध",
+  "done": "हो गया"
 }

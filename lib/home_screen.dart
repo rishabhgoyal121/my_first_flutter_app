@@ -45,6 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
   double _selectedMinRating = 0;
   List<Map<String, dynamic>> _categories = [];
   String? _selectedCategorySlug;
+  List<String> _brands = [];
+  String? _selectedBrand;
+  bool _inStockOnly = false;
 
   final GlobalKey cartIconKey = GlobalKey();
   // Pre-allocate a large, fixed number of animation keys to avoid resizing.
@@ -155,6 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
         allProducts = newProducts
             .map((json) => Product.fromJson(json))
             .toList();
+        _brands = allProducts.map((p) => p.brand).toSet().toList();
       });
       applyFilters();
     } else {
@@ -173,7 +177,14 @@ class _HomeScreenState extends State<HomeScreen> {
           product.price >= _selectedMinPrice &&
           product.price <= _selectedMaxPrice;
       final matchesRating = product.rating >= _selectedMinRating;
-      return matchesCategory && matchesPrice && matchesRating;
+      final matchesBrand =
+          _selectedBrand == null || product.brand == _selectedBrand;
+      final matchesStock = !_inStockOnly || product.stock > 0;
+      return matchesCategory &&
+          matchesPrice &&
+          matchesRating &&
+          matchesBrand &&
+          matchesStock;
     }).toList();
     if (!mounted) return;
     setState(() {
@@ -285,6 +296,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         .toList(),
                     onChanged: (val) {
                       setModalState(() => _selectedCategorySlug = val);
+                      applyFilters();
                     },
                   ),
                   SizedBox(height: 16),
@@ -304,6 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _selectedMinPrice = values.start;
                         _selectedMaxPrice = values.end;
                       });
+                      applyFilters();
                     },
                   ),
                   SizedBox(height: 16),
@@ -319,7 +332,36 @@ class _HomeScreenState extends State<HomeScreen> {
                     value: _selectedMinRating,
                     onChanged: (val) {
                       setModalState(() => _selectedMinRating = val);
+                      applyFilters();
                     },
+                  ),
+                  SizedBox(height: 16),
+                  DropdownButton<String>(
+                    value: _selectedBrand,
+                    hint: Text(AppLocalizations.of(context)!.selectBrand),
+                    isExpanded: true,
+                    items: _brands
+                        .map(
+                          (brand) => DropdownMenuItem<String>(
+                            value: brand,
+                            child: Text(brand),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (val) {
+                      setModalState(() => _selectedBrand = val);
+                      applyFilters();
+                    },
+                  ),
+                  SizedBox(height: 16),
+                  CheckboxListTile(
+                    title: Text(AppLocalizations.of(context)!.inStockOnly),
+                    value: _inStockOnly,
+                    onChanged: (val) {
+                      setModalState(() => _inStockOnly = val ?? false);
+                      applyFilters();
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,
                   ),
                   SizedBox(height: 16),
                   ElevatedButton(
@@ -335,10 +377,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     onPressed: () {
                       Navigator.pop(context);
-                      applyFilters();
                     },
                     child: Text(
-                      AppLocalizations.of(context)!.applyFilters,
+                      AppLocalizations.of(context)!.done,
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
@@ -363,6 +404,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         _selectedMinPrice = _minPrice;
                         _selectedMaxPrice = _maxPrice;
                         _selectedMinRating = 0;
+                        _selectedBrand = null;
+                        _inStockOnly = false;
                       });
                       // Also update the main product list
                       applyFilters();

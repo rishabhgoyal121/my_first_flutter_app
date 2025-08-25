@@ -58,13 +58,6 @@ class _LoginScreenState extends State<LoginScreen> {
         googleUser = await GoogleSignIn.instance.authenticate();
       }
 
-      if (googleUser == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Google Sign In failed.')));
-        return;
-      }
-
       final GoogleSignInAuthentication googleAuth =
            googleUser.authentication;
 
