@@ -21,6 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String username = '';
   String password = '';
   bool ssoSuccess = false;
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -58,8 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
         googleUser = await GoogleSignIn.instance.authenticate();
       }
 
-      final GoogleSignInAuthentication googleAuth =
-           googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
       // Get access token from authorization client
       final auth = await googleUser.authorizationClient.authorizationForScopes([
@@ -169,6 +169,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ? () async {
                         HapticFeedback.lightImpact();
                         if (_formKey.currentState!.validate()) {
+                          setState(() {
+                            isLoading = true;
+                          });
                           try {
                             final response = await http.post(
                               Uri.parse('https://dummyjson.com/auth/login'),
@@ -249,11 +252,16 @@ class _LoginScreenState extends State<LoginScreen> {
                               }
                               Future.delayed(Duration(seconds: 1), () {
                                 if (mounted) {
+                                  setState(() {
+                                    isLoading = false;
+                                  });
                                   Navigator.pushReplacementNamed(context, '/');
                                 }
-                                
                               });
                             } else {
+                              setState(() {
+                                isLoading = false;
+                              });
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
@@ -263,6 +271,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               );
                             }
                           } catch (e) {
+                            setState(() {
+                              isLoading = false;
+                            });
                             print('Error: $e');
                           }
                         }
@@ -270,7 +281,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     : null,
                 child: Text('Login'),
               ),
-              SizedBox(height: 16),
+              if (isLoading) Padding(padding: EdgeInsets.only(top: 24), child: Center(child: CircularProgressIndicator()),),
+              SizedBox(height: 24),
               TextButton(
                 onPressed: () {
                   Navigator.pushNamed(context, '/signup');
