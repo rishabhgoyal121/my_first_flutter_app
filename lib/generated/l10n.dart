@@ -200,6 +200,12 @@ abstract class AppLocalizations {
   /// **'Select Brand...'**
   String get selectBrand;
 
+  /// No description provided for @brand.
+  ///
+  /// In en, this message translates to:
+  /// **'Brand'**
+  String get brand;
+
   /// Shows the price range filter
   ///
   /// In en, this message translates to:

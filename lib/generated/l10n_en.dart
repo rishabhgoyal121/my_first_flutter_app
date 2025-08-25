@@ -62,6 +62,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get selectBrand => 'Select Brand...';
 
   @override
+  String get brand => 'Brand';
+
+  @override
   String priceRange(int min, int max) {
     return 'Price Range ($min - $max)';
   }

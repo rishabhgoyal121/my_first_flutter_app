@@ -62,6 +62,9 @@ class AppLocalizationsHi extends AppLocalizations {
   String get selectBrand => 'ब्रांड चुनें';
 
   @override
+  String get brand => 'ब्रांड';
+
+  @override
   String priceRange(int min, int max) {
     return 'मूल्य सीमा ($min - $max)';
   }

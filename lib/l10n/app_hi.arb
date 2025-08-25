@@ -26,6 +26,7 @@
   "category": "श्रेणी",
   "selectCategory": "श्रेणी चुनें",
   "selectBrand": "ब्रांड चुनें",
+  "brand": "ब्रांड",
   "priceRange": "मूल्य सीमा ({min} - {max})",
   "@priceRange": {
     "description": "Shows the price range filter",

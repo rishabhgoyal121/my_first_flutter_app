@@ -26,6 +26,7 @@
   "category": "Category",
   "selectCategory": "Select Category...",
   "selectBrand": "Select Brand...",
+  "brand": "Brand",
   "priceRange": "Price Range ({min} - {max})",
   "@priceRange": {
     "description": "Shows the price range filter",

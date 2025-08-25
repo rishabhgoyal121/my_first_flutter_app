@@ -168,7 +168,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ? () async {
                         HapticFeedback.lightImpact();
                         if (_formKey.currentState!.validate()) {
-                          final navContext = context;
                           try {
                             final response = await http.post(
                               Uri.parse('https://dummyjson.com/auth/login'),

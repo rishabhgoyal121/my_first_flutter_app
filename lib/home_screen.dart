@@ -336,6 +336,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   SizedBox(height: 16),
+                  Text(AppLocalizations.of(context)!.brand),
                   DropdownButton<String>(
                     value: _selectedBrand,
                     hint: Text(AppLocalizations.of(context)!.selectBrand),
