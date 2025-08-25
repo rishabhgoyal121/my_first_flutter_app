@@ -6,6 +6,7 @@ import 'cart_provider.dart';
 import 'order_provider.dart';
 import 'order_animation.dart';
 import 'cart_item_delete_animation.dart';
+import 'package:flutter/services.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -141,6 +142,7 @@ class _CartScreenState extends State<CartScreen> {
                                         isDeleting || (item['quantity'] < 2)
                                         ? null
                                         : () {
+                                            HapticFeedback.lightImpact();
                                             cartProvider.addProduct({
                                               ...item,
                                               'quantity': -1,
@@ -161,6 +163,7 @@ class _CartScreenState extends State<CartScreen> {
                                     onPressed: isDeleting
                                         ? null
                                         : () {
+                                            HapticFeedback.lightImpact();
                                             cartProvider.addProduct({
                                               ...item,
                                               'quantity': 1,
@@ -180,13 +183,15 @@ class _CartScreenState extends State<CartScreen> {
                             onPressed: isDeleting
                                 ? null
                                 : () {
-                                  if (!mounted) return;
+                                    HapticFeedback.lightImpact();
+                                    if (!mounted) return;
                                     setState(() {
                                       _deletingItemId = item['id'];
                                     });
                                   },
                           ),
                           onTap: () {
+                            HapticFeedback.lightImpact();
                             Navigator.pushNamed(
                               context,
                               '/productDetails',
@@ -240,6 +245,7 @@ class _CartScreenState extends State<CartScreen> {
                                 onPressed: cartItems.isEmpty || _isPlacingOrder
                                     ? null
                                     : () async {
+                                        HapticFeedback.lightImpact();
                                         final result =
                                             await Navigator.pushNamed(
                                               context,
