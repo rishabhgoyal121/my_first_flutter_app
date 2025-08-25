@@ -102,6 +102,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
+  Future<List<Product>> fetchRecommendedProducts(
+    String category,
+    int excludeId,
+  ) async {
+    final response = await http.get(
+      Uri.parse('https://dummyjson.com/products/category/$category'),
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final List<Product> products = (data['products'] as List)
+          .map((p) => Product.fromJson(p))
+          .where((p) => p.id != excludeId)
+          .toList();
+      return products.take(5).toList();
+    }
+    return [];
+  }
   // Removed _showReviewDialogWithRating and _buildReviewDialog as they are no longer needed.
 
   @override
@@ -368,6 +385,70 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
+              ),
+              SizedBox(height: 16),
+              FutureBuilder(
+                future: fetchRecommendedProducts(product.category, product.id),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return SizedBox();
+                  final recommended = snapshot.data!;
+                  if (recommended.isEmpty) return SizedBox();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 24),
+                      Text(
+                        'You may also like',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: 180,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: recommended.length,
+                          itemBuilder: (context, idx) {
+                            final rec = recommended[idx];
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        ProductDetailsScreen(product: rec),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                width: 140,
+                                margin: EdgeInsets.only(right: 12),
+                                child: Column(
+                                  children: [
+                                    Image.network(
+                                      rec.thumbnail,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    ),
+                                    Text(
+                                      rec.title,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      '\$${rec.price}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
               SizedBox(height: 16),
               Text('Reviews', style: TextStyle(fontWeight: FontWeight.bold)),
