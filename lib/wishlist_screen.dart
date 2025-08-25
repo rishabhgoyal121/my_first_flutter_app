@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'wishlist_provider.dart';
 import 'product.dart';
 import 'product_details_screen.dart';
+import 'package:flutter/services.dart';
 
 class WishlistScreen extends StatelessWidget {
   final List<Product> allProducts;
@@ -34,12 +35,14 @@ class WishlistScreen extends StatelessWidget {
             subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
             trailing: IconButton(
               onPressed: () {
+                HapticFeedback.lightImpact();
                 wishlistProvider.toggleWishlist(product.id);
               },
               icon: Icon(Icons.delete, color: Colors.red),
               tooltip: 'Remove from wishlist',
             ),
             onTap: () {
+              HapticFeedback.lightImpact();
               Navigator.push(
                 context,
                 MaterialPageRoute(
