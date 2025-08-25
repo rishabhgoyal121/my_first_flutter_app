@@ -12,6 +12,7 @@ import 'cart_provider.dart';
 import 'wishlist_provider.dart';
 import 'dart:async';
 import 'generated/l10n.dart';
+import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -260,6 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onSortSelected(SortOption? option) {
+    HapticFeedback.lightImpact();
     if (!mounted) return;
     setState(() {
       _selectedSort = option;
@@ -271,6 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showFilterSheet() {
+    HapticFeedback.lightImpact();
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -486,12 +489,16 @@ class _HomeScreenState extends State<HomeScreen> {
             : Text(AppLocalizations.of(context)!.products),
         actions: [
           IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/orders'),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.pushNamed(context, '/orders');
+            },
             icon: Icon(Icons.receipt_long),
             tooltip: AppLocalizations.of(context)!.orders,
           ),
           IconButton(
             onPressed: () {
+              HapticFeedback.lightImpact();
               Navigator.pushNamed(
                 context,
                 '/wishlist',
@@ -502,12 +509,16 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: AppLocalizations.of(context)!.wishlist,
           ),
           IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/profile'),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.pushNamed(context, '/profile');
+            },
             icon: Icon(Icons.person),
           ),
           PopupMenuButton<SortOption>(
             icon: Icon(Icons.sort),
             onSelected: _onSortSelected,
+            onOpened: () => HapticFeedback.lightImpact(),
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: SortOption.ratingDesc,
@@ -543,6 +554,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             onPressed: () {
+              HapticFeedback.lightImpact();
               if (_isSearching) {
                 _searchController.clear();
                 searchProducts('');
@@ -562,6 +574,7 @@ class _HomeScreenState extends State<HomeScreen> {
               IconButton(
                 key: cartIconKey,
                 onPressed: () {
+                  HapticFeedback.lightImpact();
                   Navigator.pushNamed(context, '/cart');
                 },
                 icon: Icon(Icons.shopping_cart),
@@ -571,6 +584,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 top: 4,
                 child: GestureDetector(
                   onTap: () {
+                    HapticFeedback.lightImpact();
                     Navigator.pushNamed(context, '/cart');
                   },
                   child: Container(
@@ -683,6 +697,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       IconButton(
                         onPressed: () {
+                          HapticFeedback.lightImpact();
                           context.read<WishlistProvider>().toggleWishlist(
                             product.id,
                           );
@@ -703,6 +718,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       IconButton(
                         onPressed: () async {
+                          HapticFeedback.lightImpact();
                           animationKeys[index].currentState?.startAnimation();
                           final response = await http.put(
                             Uri.parse('https://dummyjson.com/carts/1'),
