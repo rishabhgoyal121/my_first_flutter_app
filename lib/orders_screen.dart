@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'order_provider.dart';
 import 'order_details_screen.dart';
+import 'package:flutter/services.dart';
 
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
@@ -44,6 +45,7 @@ class OrdersScreen extends StatelessWidget {
                       ],
                     ),
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => OrderDetailsScreen(
