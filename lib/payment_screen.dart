@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
+import 'package:flutter/services.dart';
 
 class PaymentScreen extends StatefulWidget {
   final Map<String, dynamic> address;
@@ -118,6 +119,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {
+                    HapticFeedback.lightImpact();
                     if (_formKey.currentState?.validate() ?? false) {
                       Navigator.pop(context, {'orderPlaced': true});
                     }

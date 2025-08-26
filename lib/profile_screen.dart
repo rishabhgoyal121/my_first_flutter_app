@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/services.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -49,6 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> pickAndUploadImage() async {
+    HapticFeedback.lightImpact();
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
@@ -107,6 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (!isLoading && error == null && userData != null)
             IconButton(
               onPressed: () async {
+                HapticFeedback.lightImpact();
                 final updated = await Navigator.pushNamed(
                   context,
                   '/editProfile',

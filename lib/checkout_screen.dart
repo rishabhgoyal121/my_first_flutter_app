@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
 import 'payment_screen.dart';
+import 'package:flutter/services.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final double cartTotal;
@@ -81,6 +82,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
+    HapticFeedback.lightImpact();
     try {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -177,6 +179,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () async {
+                    HapticFeedback.lightImpact();
                     if (_formKey.currentState?.validate() ?? false) {
                       if (_latitude == null || _longitude == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
