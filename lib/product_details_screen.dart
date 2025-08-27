@@ -109,6 +109,24 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
+  void _showFullScreenImage(String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            color: Colors.black,
+            child: Center(
+              child: Hero(tag: imageUrl, child: Image.network(imageUrl)),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<List<Product>> fetchRecommendedProducts(
     String category,
     int excludeId,
@@ -240,7 +258,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               AddToCartAnimation(
                 key: widget._animationKey,
                 cartIconKey: widget.cartIconKey,
-                child: Image.network(product.thumbnail, height: 200),
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () => _showFullScreenImage(product.thumbnail),
+                    child: Hero(
+                      tag: product.thumbnail,
+                      child: Image.network(product.thumbnail, height: 200),
+                    ),
+                  ),
+                ),
                 onAnimationComplete: () async {},
               ),
               SizedBox(height: 16),
@@ -424,38 +451,41 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           itemCount: recommended.length,
                           itemBuilder: (context, idx) {
                             final rec = recommended[idx];
-                            return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        ProductDetailsScreen(product: rec),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                width: 140,
-                                margin: EdgeInsets.only(right: 12),
-                                child: Column(
-                                  children: [
-                                    Image.network(
-                                      rec.thumbnail,
-                                      height: 100,
-                                      fit: BoxFit.cover,
+                            return MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          ProductDetailsScreen(product: rec),
                                     ),
-                                    Text(
-                                      rec.title,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      '\$${rec.price}',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                  );
+                                },
+                                child: Container(
+                                  width: 140,
+                                  margin: EdgeInsets.only(right: 12),
+                                  child: Column(
+                                    children: [
+                                      Image.network(
+                                        rec.thumbnail,
+                                        height: 100,
+                                        fit: BoxFit.cover,
                                       ),
-                                    ),
-                                  ],
+                                      Text(
+                                        rec.title,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        '\$${rec.price}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
