@@ -15,13 +15,14 @@ import 'checkout_screen.dart';
 import 'wishlist_provider.dart';
 import 'wishlist_screen.dart';
 import 'edit_profile_screen.dart';
+import 'order_placed_screen.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'generated/l10n.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-void main() async {  
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load();
   if (kIsWeb) {
@@ -141,6 +142,13 @@ class MyApp extends StatelessWidget {
         '/editProfile': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map;
           return EditProfileScreen(userData: args['userData']);
+        },
+        '/orderPlaced': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map;
+          return OrderPlacedScreen(
+            order: args['order'],
+            orderIndex: args['orderIndex'],
+          );
         },
       },
       localizationsDelegates: const [

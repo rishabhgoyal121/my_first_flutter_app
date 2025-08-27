@@ -192,7 +192,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         return;
                       }
                       _formKey.currentState?.save();
-                      final result = await Navigator.push(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => PaymentScreen(
@@ -214,11 +214,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           ),
                         ),
                       );
-                      if (result != null &&
-                          result is Map &&
-                          result['orderPlaced'] == true) {
-                        Navigator.pop(context, result);
-                      }
                     }
                   },
                   child: Text('Continue to Payment'),

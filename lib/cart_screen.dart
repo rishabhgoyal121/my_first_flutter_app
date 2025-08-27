@@ -3,7 +3,6 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'cart_provider.dart';
-import 'order_provider.dart';
 import 'order_animation.dart';
 import 'cart_item_delete_animation.dart';
 import 'package:flutter/services.dart';
@@ -29,7 +28,6 @@ class _CartScreenState extends State<CartScreen> {
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
     final cartItems = cartProvider.cart['products'] as List;
-    final orderProvider = Provider.of<OrderProvider>(context);
     // Calculate cart totals
     double cartTotal = 0;
     double cartDiscountedTotal = 0;
@@ -246,59 +244,17 @@ class _CartScreenState extends State<CartScreen> {
                                     ? null
                                     : () async {
                                         HapticFeedback.lightImpact();
-                                        final result =
-                                            await Navigator.pushNamed(
-                                              context,
-                                              '/checkout',
-                                              arguments: {
-                                                'cartItems': cartItems,
-                                                'cartTotal': cartTotal,
-                                                'cartDiscountedTotal':
-                                                    cartDiscountedTotal,
-                                              },
-                                            );
-                                        if (result != null && result is Map) {
-                                          if (!mounted) return;
-                                          setState(() {
-                                            _isPlacingOrder = true;
-                                          });
-                                          await orderProvider.addOrder(
-                                            cartItems,
-                                            cartTotal,
-                                            cartDiscountedTotal,
-                                          );
-                                          if (!mounted) return;
-                                          setState(() {
-                                            _isPlacingOrder = false;
-                                            _isOrderPlaced = true;
-                                          });
-                                          await Future.delayed(
-                                            Duration(seconds: 2),
-                                          );
-                                          if (!mounted) return;
-                                          setState(() {
-                                            _isOrderPlaced = false;
-                                          });
-                                          cartProvider.clearCart();
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                'Order Placed Successfully! Redirecting to home page...',
-                                              ),
-                                              duration: Duration(seconds: 2),
-                                            ),
-                                          );
-                                          await Future.delayed(
-                                            Duration(seconds: 1),
-                                          );
-                                          Navigator.pushNamedAndRemoveUntil(
-                                            context,
-                                            '/',
-                                            (route) => false,
-                                          );
-                                        }
+                                        // Navigate to checkout screen
+                                        Navigator.pushNamed(
+                                          context,
+                                          '/checkout',
+                                          arguments: {
+                                            'cartItems': cartItems,
+                                            'cartTotal': cartTotal,
+                                            'cartDiscountedTotal':
+                                                cartDiscountedTotal,
+                                          },
+                                        );
                                       },
                                 child: Text('Checkout'),
                               ),
