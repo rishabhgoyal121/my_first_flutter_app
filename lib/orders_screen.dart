@@ -6,6 +6,7 @@ import 'order_provider.dart';
 import 'order_details_screen.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'order_tracking_helper.dart';
 
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
@@ -26,6 +27,11 @@ class OrdersScreen extends StatelessWidget {
                 final DateTime placedAt = DateTime.parse(
                   order['placedAt'] as String,
                 );
+                final trackingSteps = getOrderTrackingSteps(placedAt);
+                final latestStep = trackingSteps.lastWhere(
+                  (step) => step['completed'],
+                  orElse: () => trackingSteps.first,
+                );
                 final String formattedDate = DateFormat(
                   'MMM dd, yyyy \'at\' hh:mm a',
                 ).format(placedAt);
@@ -43,7 +49,15 @@ class OrdersScreen extends StatelessWidget {
                         Text(
                           'Discounted: \$${order['discountedTotal'].toStringAsFixed(2)}',
                         ),
-                        SizedBox(height: 8),
+                        SizedBox(height: 2),
+                        Text(
+                          'Tracking: ${latestStep['title']}',
+                          style: TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 2),
                         Text('Products:'),
                         SizedBox(height: 8),
                         SizedBox(
