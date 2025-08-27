@@ -154,20 +154,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       value == null || value.isEmpty ? 'Enter Country' : null,
                   onSaved: (newValue) => _country = newValue ?? '',
                 ),
-                SizedBox(height: 16),
-                Row(
+                SizedBox(height: 24),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 16,
+                  runSpacing: 16,
                   children: [
                     ElevatedButton(
                       onPressed: _getCurrentLocation,
                       child: Text('Get Location'),
                     ),
-                    SizedBox(height: 16),
                     if (_latitude != null && _longitude != null)
                       Text(
                         '  Lat: ${_latitude!.toStringAsFixed(4)} Lng: ${_longitude!.toStringAsFixed(4)}',
                       )
                     else
-                      Text('  Location not set'),
+                      Text(
+                        '  Location not set! Please get the location.',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                   ],
                 ),
                 SizedBox(height: 24),
