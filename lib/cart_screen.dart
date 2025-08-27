@@ -280,6 +280,24 @@ class _CartScreenState extends State<CartScreen> {
                                             _isOrderPlaced = false;
                                           });
                                           cartProvider.clearCart();
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                'Order Placed Successfully! Redirecting to home page...',
+                                              ),
+                                              duration: Duration(seconds: 2),
+                                            ),
+                                          );
+                                          await Future.delayed(
+                                            Duration(seconds: 1),
+                                          );
+                                          Navigator.pushNamedAndRemoveUntil(
+                                            context,
+                                            '/',
+                                            (route) => false,
+                                          );
                                         }
                                       },
                                 child: Text('Checkout'),
