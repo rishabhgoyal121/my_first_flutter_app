@@ -99,6 +99,40 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
+  Future<void> _continueToPayment() async {
+    HapticFeedback.lightImpact();
+    if (_formKey.currentState?.validate() ?? false) {
+      if (_latitude == null || _longitude == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Please set your location before placing the order.'),
+          ),
+        );
+        return;
+      }
+      _formKey.currentState?.save();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentScreen(
+            address: {
+              'address': _address,
+              'city': _city,
+              "state": _state,
+              'stateCode': _stateCode,
+              'postalCode': _postalCode,
+              'country': _country,
+              'coordinates': {'lat': _latitude, 'lng': _longitude},
+            },
+            cartTotal: widget.cartTotal,
+            cartDiscountedTotal: widget.cartDiscountedTotal,
+            cartItems: widget.cartItems,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,6 +187,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   validator: (value) =>
                       value == null || value.isEmpty ? 'Enter Country' : null,
                   onSaved: (newValue) => _country = newValue ?? '',
+                  onFieldSubmitted: (_) async {
+                    _continueToPayment();
+                  },
                 ),
                 SizedBox(height: 24),
                 Wrap(
@@ -188,42 +225,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () async {
-                    HapticFeedback.lightImpact();
-                    if (_formKey.currentState?.validate() ?? false) {
-                      if (_latitude == null || _longitude == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Please set your location before placing the order.',
-                            ),
-                          ),
-                        );
-                        return;
-                      }
-                      _formKey.currentState?.save();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PaymentScreen(
-                            address: {
-                              'address': _address,
-                              'city': _city,
-                              "state": _state,
-                              'stateCode': _stateCode,
-                              'postalCode': _postalCode,
-                              'country': _country,
-                              'coordinates': {
-                                'lat': _latitude,
-                                'lng': _longitude,
-                              },
-                            },
-                            cartTotal: widget.cartTotal,
-                            cartDiscountedTotal: widget.cartDiscountedTotal,
-                            cartItems: widget.cartItems,
-                          ),
-                        ),
-                      );
-                    }
+                    _continueToPayment();
                   },
                   child: Text('Continue to Payment'),
                 ),

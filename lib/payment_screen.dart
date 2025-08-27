@@ -69,6 +69,73 @@ class _PaymentScreenState extends State<PaymentScreen> {
     super.dispose();
   }
 
+  Future<void> _placeOrder() async {
+    HapticFeedback.lightImpact();
+    if (_formKey.currentState?.validate() ?? false) {
+      try {
+        // Show loading indicator
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => Center(child: CircularProgressIndicator()),
+        );
+
+        // Get providers
+        final cartProvider = Provider.of<CartProvider>(context, listen: false);
+        final orderProvider = Provider.of<OrderProvider>(
+          context,
+          listen: false,
+        );
+
+        // Create order from cart items
+        final cartItems = List.from(widget.cartItems);
+
+        // Add order to order provider
+        await orderProvider.addOrder(
+          cartItems,
+          widget.cartTotal,
+          widget.cartDiscountedTotal,
+        );
+
+        // Clear the cart
+        cartProvider.clearCart();
+
+        // Get the latest order (just added)
+        final orders = orderProvider.orders;
+        final latestOrder = orders.last;
+        final orderIndex = orders.length - 1;
+
+        // Close loading dialog
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+
+        // Navigate to order placed screen, removing all previous routes
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
+                OrderPlacedScreen(order: latestOrder, orderIndex: orderIndex),
+          ),
+          (route) => route.settings.name == '/',
+        );
+      } catch (e) {
+        // Close loading dialog if open
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+
+        // Show error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to place order: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,6 +177,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     validator: (value) => value == null || value.isEmpty
                         ? 'Enter Expiry Date'
                         : null,
+                    onFieldSubmitted: (_) async {
+                      _placeOrder();
+                    },
                   ),
                 ],
                 if (_paymentMethod == 'IBAN') ...[
@@ -118,81 +188,15 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     decoration: InputDecoration(labelText: 'IBAN'),
                     validator: (value) =>
                         value == null || value.isEmpty ? 'Enter IBAN' : null,
+                    onFieldSubmitted: (_) async {
+                      _placeOrder();
+                    },
                   ),
                 ],
                 SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () async {
-                    HapticFeedback.lightImpact();
-                    if (_formKey.currentState?.validate() ?? false) {
-                      try {
-                        // Show loading indicator
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context) =>
-                              Center(child: CircularProgressIndicator()),
-                        );
-
-                        // Get providers
-                        final cartProvider = Provider.of<CartProvider>(
-                          context,
-                          listen: false,
-                        );
-                        final orderProvider = Provider.of<OrderProvider>(
-                          context,
-                          listen: false,
-                        );
-
-                        // Create order from cart items
-                        final cartItems = List.from(widget.cartItems);
-
-                        // Add order to order provider
-                        await orderProvider.addOrder(
-                          cartItems,
-                          widget.cartTotal,
-                          widget.cartDiscountedTotal,
-                        );
-
-                        // Clear the cart
-                        cartProvider.clearCart();
-
-                        // Get the latest order (just added)
-                        final orders = orderProvider.orders;
-                        final latestOrder = orders.last;
-                        final orderIndex = orders.length - 1;
-
-                        // Close loading dialog
-                        if (Navigator.canPop(context)) {
-                          Navigator.pop(context);
-                        }
-
-                        // Navigate to order placed screen, removing all previous routes
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => OrderPlacedScreen(
-                              order: latestOrder,
-                              orderIndex: orderIndex,
-                            ),
-                          ),
-                          (route) => route.settings.name == '/',
-                        );
-                      } catch (e) {
-                        // Close loading dialog if open
-                        if (Navigator.canPop(context)) {
-                          Navigator.pop(context);
-                        }
-
-                        // Show error message
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Failed to place order: $e'),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    }
+                    _placeOrder();
                   },
                   child: Text('Place Order'),
                 ),
