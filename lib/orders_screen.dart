@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'order_provider.dart';
 import 'order_details_screen.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
@@ -22,11 +23,17 @@ class OrdersScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final order = orders[index];
                 final products = order['products'] as List;
+                final DateTime placedAt = DateTime.parse(
+                  order['placedAt'] as String,
+                );
+                final String formattedDate = DateFormat(
+                  'MMM dd, yyyy \'at\' hh:mm a',
+                ).format(placedAt);
                 return Card(
                   margin: EdgeInsets.all(12),
                   child: ListTile(
                     title: Text(
-                      'Order #${index + 1} - ${order['placedAt'].toString().substring(0, 19)}',
+                      'Order #${index + 1}, placed on $formattedDate',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Column(
