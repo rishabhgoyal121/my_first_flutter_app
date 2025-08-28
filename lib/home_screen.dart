@@ -213,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (query.isEmpty) {
       if (!mounted) return;
       setState(() {
-        _isSearching = false;
         products.clear();
         skip = 0;
         hasMore = true;
@@ -476,6 +475,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? IconButton(
                           onPressed: () {
                             _searchController.clear();
+                            searchProducts('');
                           },
                           icon: Icon(Icons.clear),
                           tooltip: 'Clear search',
@@ -556,6 +556,9 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () {
               HapticFeedback.lightImpact();
               if (_isSearching) {
+                setState(() {
+                  _isSearching = false;
+                });
                 _searchController.clear();
                 searchProducts('');
               } else {
