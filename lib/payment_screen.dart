@@ -177,7 +177,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     validator: (value) => value == null || value.isEmpty
                         ? 'Enter Expiry Date'
                         : null,
-                    onFieldSubmitted: (_) async {
+                    onFieldSubmitted: (_) {
                       _placeOrder();
                     },
                   ),
@@ -188,7 +188,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     decoration: InputDecoration(labelText: 'IBAN'),
                     validator: (value) =>
                         value == null || value.isEmpty ? 'Enter IBAN' : null,
-                    onFieldSubmitted: (_) async {
+                    onFieldSubmitted: (_) {
                       _placeOrder();
                     },
                   ),
