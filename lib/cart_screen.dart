@@ -15,8 +15,8 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  bool _isPlacingOrder = false;
-  bool _isOrderPlaced = false;
+  final bool _isPlacingOrder = false;
+  final bool _isOrderPlaced = false;
   int? _deletingItemId;
 
   @override
