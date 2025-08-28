@@ -46,7 +46,82 @@ class _CartScreenState extends State<CartScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('Cart')),
       body: cartItems.isEmpty
-          ? Center(child: Text('Your cart is empty'))
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 10,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.network(
+                        'https://images.unsplash.com/photo-1601598505513-7489a6272d2a?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.blue[100],
+                            child: Icon(
+                              Icons.shopping_cart_outlined,
+                              size: 80,
+                              color: Colors.blue[600],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  Text(
+                    'Your cart is empty!',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Add some items to get started',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 0,
+                      ),
+                      backgroundColor: Colors.orangeAccent,
+                      foregroundColor: Colors.white,
+                      textStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Roboto',
+                        letterSpacing: 0.5,
+                      ),
+                      elevation: 3,
+                      shadowColor: Colors.orangeAccent.withValues(alpha: 0.3),
+                    ),
+                    child: Text('Start Shopping'),
+                  ),
+                ],
+              ),
+            )
           : Column(
               children: [
                 Expanded(
