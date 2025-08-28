@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
               border: Border.all(color: Theme.of(context).dividerColor),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha:0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -133,7 +133,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
               ).colorScheme.primary.withValues(alpha: 0.14),
               selectedColor: Theme.of(context).colorScheme.primary,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.8),
               borderColor: Colors.transparent,
               selectedBorderColor: Colors.transparent,
               onPressed: (index) async {
@@ -159,6 +161,24 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  int _gridColumnsForWidth(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width >= 1600) return 6;
+    if (width >= 1360) return 5;
+    if (width >= 1100) return 4;
+    if (width >= 800) return 3;
+    return 2; // phones and small tablets
+  }
+
+  double _gridAspectRatio(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width >= 1600) return 0.9;
+    if (width >= 1360) return 0.86;
+    if (width >= 1100) return 0.8;
+    if (width >= 800) return 0.76;
+    return 0.72; // phones
   }
 
   Map<String, String> _getSortParams(SortOption? sort) {
@@ -524,7 +544,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _highlightQuery(String text, String query) {
-    if (query.isEmpty) return Text(text);
+    if (query.isEmpty) {
+      final baseColor = Theme.of(context).brightness == Brightness.dark
+          ? Colors.white
+          : Colors.black;
+      return Text(text, style: TextStyle(color: baseColor));
+    }
     final pattern = RegExp(RegExp.escape(query), caseSensitive: false);
     final matches = pattern.allMatches(text);
 
@@ -549,9 +574,12 @@ class _HomeScreenState extends State<HomeScreen> {
     if (start < text.length) {
       spans.add(TextSpan(text: text.substring(start)));
     }
+    final baseColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black;
     return RichText(
       text: TextSpan(
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: baseColor),
         children: spans,
       ),
     );
@@ -1044,16 +1072,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.72,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                          ),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: _gridColumnsForWidth(context),
+                        childAspectRatio: _gridAspectRatio(context),
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                      ),
                       itemCount: products.length,
                       itemBuilder: (context, index) {
                         final product = products[index];
+                        final bool isDark =
+                            Theme.of(context).brightness == Brightness.dark;
                         return InkWell(
                           onTap: () {
                             HapticFeedback.lightImpact();
@@ -1091,8 +1120,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       DefaultTextStyle(
-                                        style: const TextStyle(
-                                          color: Colors.black,
+                                        style: TextStyle(
+                                          color: isDark
+                                              ? Colors.white
+                                              : Colors.black,
                                           fontWeight: FontWeight.w600,
                                         ),
                                         child: _highlightQuery(
@@ -1105,9 +1136,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                         children: [
                                           Text(
                                             product.rating.toStringAsFixed(1),
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontWeight: FontWeight.bold,
                                               fontSize: 12,
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : null,
                                             ),
                                           ),
                                           const Icon(
@@ -1126,11 +1160,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                           const SizedBox(width: 6),
                                           Text(
                                             '\$${product.price.toStringAsFixed(2)}',
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               decoration:
                                                   TextDecoration.lineThrough,
                                               fontSize: 10,
-                                              color: Colors.black54,
+                                              color: isDark
+                                                  ? Colors.white70
+                                                  : Colors.black54,
                                             ),
                                           ),
                                         ],
