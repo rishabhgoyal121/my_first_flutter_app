@@ -1099,178 +1099,206 @@ class _HomeScreenState extends State<HomeScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                            child: Stack(
                               children: [
-                                Expanded(
-                                  child: AddToCartAnimation(
-                                    key: animationKeys[index],
-                                    onAnimationComplete: () {},
-                                    cartIconKey: cartIconKey,
-                                    child: Image.network(
-                                      product.thumbnail,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      DefaultTextStyle(
-                                        style: TextStyle(
-                                          color: isDark
-                                              ? Colors.white
-                                              : Colors.black,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                        child: _highlightQuery(
-                                          product.title,
-                                          _searchController.text,
+                                Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Expanded(
+                                      child: AddToCartAnimation(
+                                        key: animationKeys[index],
+                                        onAnimationComplete: () {},
+                                        cartIconKey: cartIconKey,
+                                        child: Image.network(
+                                          product.thumbnail,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
-                                      const SizedBox(height: 6),
-                                      Row(
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Text(
-                                            product.rating.toStringAsFixed(1),
+                                          DefaultTextStyle(
                                             style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 12,
                                               color: isDark
                                                   ? Colors.white
-                                                  : null,
+                                                  : Colors.black,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                            child: _highlightQuery(
+                                              product.title,
+                                              _searchController.text,
                                             ),
                                           ),
-                                          const Icon(
-                                            Icons.star,
-                                            color: Colors.amber,
-                                            size: 12,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.green,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            '\$${product.price.toStringAsFixed(2)}',
-                                            style: TextStyle(
-                                              decoration:
-                                                  TextDecoration.lineThrough,
-                                              fontSize: 10,
-                                              color: isDark
-                                                  ? Colors.white70
-                                                  : Colors.black54,
-                                            ),
+                                          const SizedBox(height: 6),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                product.rating.toStringAsFixed(
+                                                  1,
+                                                ),
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                  color: isDark
+                                                      ? Colors.white
+                                                      : null,
+                                                ),
+                                              ),
+                                              const Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                                size: 12,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.green,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Text(
+                                                '\$${product.price.toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  decoration: TextDecoration
+                                                      .lineThrough,
+                                                  fontSize: 10,
+                                                  color: isDark
+                                                      ? Colors.white70
+                                                      : Colors.black54,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
-                                      const SizedBox(height: 4),
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          IconButton(
-                                            onPressed: () {
-                                              HapticFeedback.lightImpact();
-                                              context
-                                                  .read<WishlistProvider>()
-                                                  .toggleWishlist(product.id);
-                                            },
-                                            icon: Icon(
-                                              context
-                                                      .watch<WishlistProvider>()
-                                                      .isWishlisted(product.id)
-                                                  ? Icons.favorite
-                                                  : Icons.favorite_border,
-                                            ),
-                                            color: Colors.pink,
-                                            visualDensity:
-                                                VisualDensity.compact,
+                                    ),
+                                    SizedBox(
+                                      height: 44,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          elevation: 0,
+                                          shape: const RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.zero,
                                           ),
-                                          IconButton(
-                                            onPressed: () async {
-                                              HapticFeedback.lightImpact();
-                                              animationKeys[index].currentState
-                                                  ?.startAnimation();
-                                              final response = await http.put(
-                                                Uri.parse(
-                                                  'https://dummyjson.com/carts/1',
-                                                ),
-                                                headers: {
-                                                  'content-type':
-                                                      'application/json',
+                                          backgroundColor: Colors.amber,
+                                          foregroundColor: Colors.black,
+                                        ),
+                                        onPressed: () async {
+                                          HapticFeedback.lightImpact();
+                                          animationKeys[index].currentState
+                                              ?.startAnimation();
+                                          final response = await http.put(
+                                            Uri.parse(
+                                              'https://dummyjson.com/carts/1',
+                                            ),
+                                            headers: {
+                                              'content-type':
+                                                  'application/json',
+                                            },
+                                            body: json.encode({
+                                              'merge': true,
+                                              'userId': 1,
+                                              'products': [
+                                                {
+                                                  'id': product.id,
+                                                  'quantity': 1,
                                                 },
-                                                body: json.encode({
-                                                  'merge': true,
-                                                  'userId': 1,
-                                                  'products': [
-                                                    {
-                                                      'id': product.id,
-                                                      'quantity': 1,
-                                                    },
-                                                  ],
-                                                }),
-                                              );
+                                              ],
+                                            }),
+                                          );
 
-                                              if (response.statusCode == 200 ||
-                                                  response.statusCode == 201 ||
-                                                  response.statusCode == 301) {
-                                                final cartProvider =
-                                                    Provider.of<CartProvider>(
-                                                      context,
-                                                      listen: false,
-                                                    );
+                                          if (response.statusCode == 200 ||
+                                              response.statusCode == 201 ||
+                                              response.statusCode == 301) {
+                                            final cartProvider =
                                                 Provider.of<CartProvider>(
                                                   context,
                                                   listen: false,
-                                                ).addProduct({
-                                                  'quantity': 1,
-                                                  ...product.toJson(),
-                                                });
-                                                final cartJson = json.encode(
-                                                  cartProvider.cart,
                                                 );
-                                                if (kIsWeb) {
-                                                  html
-                                                          .window
-                                                          .localStorage['cart'] =
-                                                      cartJson;
-                                                } else {
-                                                  final prefs =
-                                                      await SharedPreferences.getInstance();
-                                                  await prefs.setString(
-                                                    'cart',
-                                                    cartJson,
-                                                  );
-                                                }
-                                              } else {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
-                                                      'Failed to add product to cart',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            },
-                                            icon: const Icon(
-                                              Icons.add_shopping_cart,
-                                            ),
-                                            visualDensity:
-                                                VisualDensity.compact,
-                                          ),
-                                        ],
+                                            Provider.of<CartProvider>(
+                                              context,
+                                              listen: false,
+                                            ).addProduct({
+                                              'quantity': 1,
+                                              ...product.toJson(),
+                                            });
+                                            final cartJson = json.encode(
+                                              cartProvider.cart,
+                                            );
+                                            if (kIsWeb) {
+                                              html.window.localStorage['cart'] =
+                                                  cartJson;
+                                            } else {
+                                              final prefs =
+                                                  await SharedPreferences.getInstance();
+                                              await prefs.setString(
+                                                'cart',
+                                                cartJson,
+                                              );
+                                            }
+                                          } else {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Failed to add product to cart',
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        child:
+                                            MediaQuery.of(context).size.width <
+                                                800
+                                            ? Tooltip(
+                                                message: 'Add to Cart',
+                                                child: const Icon(
+                                                  Icons.add_shopping_cart,
+                                                  size: 18,
+                                                ),
+                                              )
+                                            : const Text(
+                                                'Add to Cart',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
                                       ),
-                                    ],
+                                    ),
+                                  ],
+                                ),
+                                Positioned(
+                                  top: 6,
+                                  right: 6,
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: IconButton(
+                                      onPressed: () {
+                                        HapticFeedback.lightImpact();
+                                        context
+                                            .read<WishlistProvider>()
+                                            .toggleWishlist(product.id);
+                                      },
+                                      icon: Icon(
+                                        context
+                                                .watch<WishlistProvider>()
+                                                .isWishlisted(product.id)
+                                            ? Icons.favorite
+                                            : Icons.favorite_border,
+                                      ),
+                                      color: Colors.pink,
+                                      tooltip: AppLocalizations.of(
+                                        context,
+                                      )!.addToWishlist,
+                                    ),
                                   ),
                                 ),
                               ],
