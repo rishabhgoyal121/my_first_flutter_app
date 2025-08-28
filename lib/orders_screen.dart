@@ -13,7 +13,7 @@ class OrdersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final orders = context.watch<OrderProvider>().orders;
+    final orders = context.watch<OrderProvider>().orders.reversed.toList();
 
     return Scaffold(
       appBar: AppBar(title: Text('My orders')),
@@ -114,7 +114,7 @@ class OrdersScreen extends StatelessWidget {
                   margin: EdgeInsets.all(12),
                   child: ListTile(
                     title: Text(
-                      'Order #${index + 1}, placed on $formattedDate',
+                      'Order #${orders.length - index}, placed on $formattedDate',
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Column(
