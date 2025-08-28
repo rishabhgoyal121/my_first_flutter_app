@@ -20,10 +20,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'generated/l10n.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  // Preserve native splash until initialization is complete
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   await dotenv.load();
   if (kIsWeb) {
     await Firebase.initializeApp(
@@ -42,6 +45,9 @@ void main() async {
   }
   NotificationService().init();
 
+  // Simulate extra startup work; adjust duration as needed
+  await Future.delayed(const Duration(seconds: 1));
+
   runApp(
     MultiProvider(
       providers: [
@@ -52,6 +58,9 @@ void main() async {
       child: MyApp(),
     ),
   );
+
+  // Remove splash once app is ready
+  FlutterNativeSplash.remove();
 }
 
 class MyApp extends StatelessWidget {
