@@ -119,7 +119,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fetchProfile();
                 }
               },
-              icon: Icon(Icons.edit),
+              icon: CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.indigo.withValues(alpha: 0.15),
+                child: Icon(
+                  Icons.edit_outlined,
+                  size: 26,
+                  color: Colors.deepOrange,
+                ),
+              ),
+              tooltip: 'Edit Profile', // Tooltip for accessibility
+              splashRadius: 28, // Larger splash for easier tap
             ),
         ],
       ),
