@@ -38,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int skip = 0;
   late ScrollController _scrollController;
   Timer? _debounce;
+  final double _heroHeight = 280;
 
   final double _minPrice = 0;
   final double _maxPrice = 1000;
@@ -459,6 +460,109 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _scrollToProducts() {
+    // Smoothly scroll just past the hero so the first product is visible.
+    _scrollController.animateTo(
+      _heroHeight,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  Widget _buildHeroSection(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      height: _heroHeight,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF1F1C2C), Color(0xFF928DAB)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Text block
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Find your next favorite',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Exclusive deals, fresh arrivals, and top-rated picks — curated for you.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 44),
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          backgroundColor: Colors.yellowAccent,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 0,
+                          tapTargetSize: MaterialTapTargetSize.padded,
+                        ),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          _scrollToProducts();
+                        },
+                        icon: const Icon(Icons.shopping_bag_outlined),
+                        label: const Text(
+                          'Shop now',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Image / Illustration
+              Expanded(
+                flex: 2,
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/images/splash_icon.png',
+                      height: _heroHeight - 40,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     int cartCount = context.watch<CartProvider>().cart['totalQuantity'];
@@ -611,168 +715,188 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : products.isEmpty
-          ? Center(
+      body: ListView.builder(
+        controller: _scrollController,
+        itemCount:
+            1 + // hero header
+            (isLoading
+                ? 1 // show loader below hero
+                : (products.isEmpty
+                      ? 1 // show empty-state below hero
+                      : products.length + (hasMore ? 1 : 0))),
+        itemBuilder: (context, index) {
+          // Header hero at index 0
+          if (index == 0) {
+            return _buildHeroSection(context);
+          }
+
+          // Content starts after hero
+          final listIndex = index - 1;
+
+          if (isLoading) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+
+          if (products.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
               child: Text(
                 _isSearching
                     ? AppLocalizations.of(
                         context,
                       )!.noProductsFound(_searchController.text)
                     : AppLocalizations.of(context)!.noProductsAvailable,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16),
               ),
-            )
-          : ListView.builder(
-              controller: _scrollController,
-              itemCount: products.length + (hasMore ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == products.length) {
-                  return Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                }
-                final product = products[index];
+            );
+          }
 
-                // animationKeys are now pre-generated and kept in sync with products
+          if (listIndex == products.length && hasMore) {
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
 
-                return ListTile(
-                  contentPadding: EdgeInsets.only(left: 16, right: 8),
-                  leading: AddToCartAnimation(
-                    key: animationKeys[index],
-                    onAnimationComplete: () {},
-                    cartIconKey: cartIconKey,
-                    child: Image.network(product.thumbnail),
-                  ),
-                  title: _highlightQuery(product.title, _searchController.text),
-                  subtitle: Row(
-                    children: [
-                      SizedBox(width: 4),
-                      Text(
-                        product.rating.toStringAsFixed(1),
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
-                        ),
-                      ),
-                      Icon(Icons.star, color: Colors.amber, size: 12),
-                      SizedBox(width: 8),
-                      Text(
-                        '\$${product.price.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          decoration: TextDecoration.lineThrough,
-                          fontSize: 8,
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Text(
-                        '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Text(
-                        '- ${product.discountPercentage.toStringAsFixed(0)}%',
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          color: Colors.blueAccent,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ProductDetailsScreen(product: product),
-                      ),
-                    );
-                  },
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          context.read<WishlistProvider>().toggleWishlist(
-                            product.id,
-                          );
-                        },
-                        icon: Icon(
-                          context.watch<WishlistProvider>().isWishlisted(
-                                product.id,
-                              )
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                        ),
-                        iconSize: 16,
-                        color: Colors.pink,
-                        tooltip: AppLocalizations.of(context)!.addToWishlist,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.symmetric(horizontal: 0),
-                        constraints: BoxConstraints(),
-                      ),
-                      IconButton(
-                        onPressed: () async {
-                          HapticFeedback.lightImpact();
-                          animationKeys[index].currentState?.startAnimation();
-                          final response = await http.put(
-                            Uri.parse('https://dummyjson.com/carts/1'),
-                            headers: {'content-type': 'application/json'},
-                            body: json.encode({
-                              'merge': true,
-                              'userId': 1,
-                              'products': [
-                                {'id': product.id, 'quantity': 1},
-                              ],
-                            }),
-                          );
+          final product = products[listIndex];
 
-                          if (response.statusCode == 200 ||
-                              response.statusCode == 201 ||
-                              response.statusCode == 301) {
-                            final cartProvider = Provider.of<CartProvider>(
-                              context,
-                              listen: false,
-                            );
-                            Provider.of<CartProvider>(
-                              context,
-                              listen: false,
-                            ).addProduct({'quantity': 1, ...product.toJson()});
-                            final cartJson = json.encode(cartProvider.cart);
-                            if (kIsWeb) {
-                              html.window.localStorage['cart'] = cartJson;
-                            } else {
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs.setString('cart', cartJson);
-                            }
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Failed to add product to cart'),
-                              ),
-                            );
-                          }
-                        },
-                        icon: Icon(Icons.add_shopping_cart),
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.symmetric(horizontal: 0),
-                        constraints: BoxConstraints(),
-                      ),
-                    ],
-                  ),
-                );
-              },
+          // animationKeys are pre-generated; offset by header index
+          return ListTile(
+            contentPadding: const EdgeInsets.only(left: 16, right: 8),
+            leading: AddToCartAnimation(
+              key: animationKeys[listIndex],
+              onAnimationComplete: () {},
+              cartIconKey: cartIconKey,
+              child: Image.network(product.thumbnail),
             ),
+            title: _highlightQuery(product.title, _searchController.text),
+            subtitle: Row(
+              children: [
+                const SizedBox(width: 4),
+                Text(
+                  product.rating.toStringAsFixed(1),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+                const Icon(Icons.star, color: Colors.amber, size: 12),
+                const SizedBox(width: 8),
+                Text(
+                  '\$${product.price.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    decoration: TextDecoration.lineThrough,
+                    fontSize: 8,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '- ${product.discountPercentage.toStringAsFixed(0)}%',
+                  style: const TextStyle(
+                    fontStyle: FontStyle.italic,
+                    color: Colors.blueAccent,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+            onTap: () {
+              HapticFeedback.lightImpact();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductDetailsScreen(product: product),
+                ),
+              );
+            },
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    context.read<WishlistProvider>().toggleWishlist(product.id);
+                  },
+                  icon: Icon(
+                    context.watch<WishlistProvider>().isWishlisted(product.id)
+                        ? Icons.favorite
+                        : Icons.favorite_border,
+                  ),
+                  iconSize: 16,
+                  color: Colors.pink,
+                  tooltip: AppLocalizations.of(context)!.addToWishlist,
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
+                  constraints: const BoxConstraints(),
+                ),
+                IconButton(
+                  onPressed: () async {
+                    HapticFeedback.lightImpact();
+                    animationKeys[listIndex].currentState?.startAnimation();
+                    final response = await http.put(
+                      Uri.parse('https://dummyjson.com/carts/1'),
+                      headers: {'content-type': 'application/json'},
+                      body: json.encode({
+                        'merge': true,
+                        'userId': 1,
+                        'products': [
+                          {'id': product.id, 'quantity': 1},
+                        ],
+                      }),
+                    );
+
+                    if (response.statusCode == 200 ||
+                        response.statusCode == 201 ||
+                        response.statusCode == 301) {
+                      final cartProvider = Provider.of<CartProvider>(
+                        context,
+                        listen: false,
+                      );
+                      Provider.of<CartProvider>(
+                        context,
+                        listen: false,
+                      ).addProduct({'quantity': 1, ...product.toJson()});
+                      final cartJson = json.encode(cartProvider.cart);
+                      if (kIsWeb) {
+                        html.window.localStorage['cart'] = cartJson;
+                      } else {
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setString('cart', cartJson);
+                      }
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Failed to add product to cart'),
+                        ),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.add_shopping_cart),
+                  visualDensity: VisualDensity.compact,
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
+                  constraints: const BoxConstraints(),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
