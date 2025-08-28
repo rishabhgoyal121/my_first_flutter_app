@@ -18,7 +18,80 @@ class OrdersScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text('My orders')),
       body: orders.isEmpty
-          ? Center(child: Text('No orders yet.'))
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 150,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.1),
+                          blurRadius: 10,
+                          offset: Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.network(
+                        'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=400&fit=crop&crop=center',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Colors.orange[100],
+                            child: Icon(
+                              Icons.shopping_bag,
+                              size: 80,
+                              color: Colors.orange[600],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 24),
+                  Text(
+                    'No orders yet!',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Start shopping to see your orders here',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 32),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 32,
+                        vertical: 16,
+                      ),
+                      backgroundColor: Colors.orangeAccent,
+                      foregroundColor: Colors.white,
+                      textStyle: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      elevation: 3,
+                      shadowColor: Colors.orangeAccent.withOpacity(0.3),
+                    ),
+                    child: Text('Start Shopping'),
+                  ),
+                ],
+              ),
+            )
           : ListView.builder(
               itemCount: orders.length,
               itemBuilder: (context, index) {
