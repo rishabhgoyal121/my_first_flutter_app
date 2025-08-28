@@ -50,10 +50,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get applyFilters => 'Apply Filters';
 
   @override
+  String get clearFilters => 'Clear Filters';
+
+  @override
   String get category => 'Category';
 
   @override
   String get selectCategory => 'Select Category...';
+
+  @override
+  String get selectBrand => 'Select Brand...';
+
+  @override
+  String get brand => 'Brand';
 
   @override
   String priceRange(int min, int max) {
@@ -64,4 +73,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String minimumRating(double rating) {
     return 'Minimum Rating ($rating)';
   }
+
+  @override
+  String get inStockOnly => 'In Stock Only';
+
+  @override
+  String get done => 'Done';
 }

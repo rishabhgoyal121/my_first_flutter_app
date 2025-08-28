@@ -5,6 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:universal_html/html.dart' as html;
 import 'payment_screen.dart';
+import 'package:flutter/services.dart';
 
 class CheckoutScreen extends StatefulWidget {
   final double cartTotal;
@@ -81,6 +82,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
+    HapticFeedback.lightImpact();
     try {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
@@ -94,6 +96,40 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Could not find location: $e')));
+    }
+  }
+
+  Future<void> _continueToPayment() async {
+    HapticFeedback.lightImpact();
+    if (_formKey.currentState?.validate() ?? false) {
+      if (_latitude == null || _longitude == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Please set your location before placing the order.'),
+          ),
+        );
+        return;
+      }
+      _formKey.currentState?.save();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentScreen(
+            address: {
+              'address': _address,
+              'city': _city,
+              "state": _state,
+              'stateCode': _stateCode,
+              'postalCode': _postalCode,
+              'country': _country,
+              'coordinates': {'lat': _latitude, 'lng': _longitude},
+            },
+            cartTotal: widget.cartTotal,
+            cartDiscountedTotal: widget.cartDiscountedTotal,
+            cartItems: widget.cartItems,
+          ),
+        ),
+      );
     }
   }
 
@@ -151,21 +187,33 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   validator: (value) =>
                       value == null || value.isEmpty ? 'Enter Country' : null,
                   onSaved: (newValue) => _country = newValue ?? '',
+                  onFieldSubmitted: (_) async {
+                    _continueToPayment();
+                  },
                 ),
-                SizedBox(height: 16),
-                Row(
+                SizedBox(height: 24),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 16,
+                  runSpacing: 16,
                   children: [
                     ElevatedButton(
                       onPressed: _getCurrentLocation,
                       child: Text('Get Location'),
                     ),
-                    SizedBox(height: 16),
                     if (_latitude != null && _longitude != null)
                       Text(
                         '  Lat: ${_latitude!.toStringAsFixed(4)} Lng: ${_longitude!.toStringAsFixed(4)}',
                       )
                     else
-                      Text('  Location not set'),
+                      Text(
+                        '  Location not set! Please get the location.',
+                        style: TextStyle(
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                   ],
                 ),
                 SizedBox(height: 24),
@@ -177,46 +225,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () async {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      if (_latitude == null || _longitude == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'Please set your location before placing the order.',
-                            ),
-                          ),
-                        );
-                        return;
-                      }
-                      _formKey.currentState?.save();
-                      final result = await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PaymentScreen(
-                            address: {
-                              'address': _address,
-                              'city': _city,
-                              "state": _state,
-                              'stateCode': _stateCode,
-                              'postalCode': _postalCode,
-                              'country': _country,
-                              'coordinates': {
-                                'lat': _latitude,
-                                'lng': _longitude,
-                              },
-                            },
-                            cartTotal: widget.cartTotal,
-                            cartDiscountedTotal: widget.cartDiscountedTotal,
-                            cartItems: widget.cartItems,
-                          ),
-                        ),
-                      );
-                      if (result != null &&
-                          result is Map &&
-                          result['orderPlaced'] == true) {
-                        Navigator.pop(context, result);
-                      }
-                    }
+                    _continueToPayment();
                   },
                   child: Text('Continue to Payment'),
                 ),

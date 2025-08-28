@@ -10,6 +10,7 @@ import 'cart_provider.dart';
 import 'add_to_cart_animation.dart';
 import 'wishlist_provider.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   final Product product;
@@ -33,6 +34,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   void _showReviewDialog() {
+    HapticFeedback.lightImpact();
     TextEditingController commentController = TextEditingController();
     showDialog(
       context: context,
@@ -49,6 +51,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     children: List.generate(5, (index) {
                       return IconButton(
                         onPressed: () {
+                          HapticFeedback.lightImpact();
                           setDialogState(() {
                             rating = index + 1;
                           });
@@ -69,11 +72,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pop(context);
+                  },
                   child: Text('Cancel'),
                 ),
                 ElevatedButton(
                   onPressed: () {
+                    HapticFeedback.lightImpact();
                     if (commentController.text.trim().isEmpty) return;
                     final review = Review(
                       rating: rating,
@@ -102,6 +109,41 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
+  void _showFullScreenImage(String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          onTap: () => Navigator.pop(context),
+          child: Container(
+            color: Colors.black,
+            child: Center(
+              child: Hero(tag: imageUrl, child: Image.network(imageUrl)),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<List<Product>> fetchRecommendedProducts(
+    String category,
+    int excludeId,
+  ) async {
+    final response = await http.get(
+      Uri.parse('https://dummyjson.com/products/category/$category'),
+    );
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      final List<Product> products = (data['products'] as List)
+          .map((p) => Product.fromJson(p))
+          .where((p) => p.id != excludeId)
+          .toList();
+      return products.take(5).toList();
+    }
+    return [];
+  }
   // Removed _showReviewDialogWithRating and _buildReviewDialog as they are no longer needed.
 
   @override
@@ -117,6 +159,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               IconButton(
                 key: widget.cartIconKey,
                 onPressed: () {
+                  HapticFeedback.lightImpact();
                   Navigator.pushNamed(context, '/cart');
                 },
                 icon: Icon(Icons.shopping_cart),
@@ -124,18 +167,24 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               Positioned(
                 right: 8,
                 top: 4,
-                child: Container(
-                  padding: EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.yellowAccent,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(
-                    '$cartCount',
-                    style: TextStyle(
-                      color: Colors.redAccent,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    Navigator.pushNamed(context, '/cart');
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.yellowAccent,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '$cartCount',
+                      style: TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -183,6 +232,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         children: [
                           IconButton(
                             onPressed: () {
+                              HapticFeedback.lightImpact();
                               context.read<WishlistProvider>().toggleWishlist(
                                 product.id,
                               );
@@ -208,13 +258,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               AddToCartAnimation(
                 key: widget._animationKey,
                 cartIconKey: widget.cartIconKey,
-                child: Image.network(product.thumbnail, height: 200),
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: GestureDetector(
+                    onTap: () => _showFullScreenImage(product.thumbnail),
+                    child: Hero(
+                      tag: product.thumbnail,
+                      child: Image.network(product.thumbnail, height: 200),
+                    ),
+                  ),
+                ),
                 onAnimationComplete: () async {},
               ),
               SizedBox(height: 16),
 
               ElevatedButton(
                 onPressed: () async {
+                  HapticFeedback.lightImpact();
                   final response = await http.put(
                     Uri.parse('https://dummyjson.com/carts/1'),
                     headers: {'Content-Type': 'application/json'},
@@ -368,6 +428,73 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
+              ),
+              SizedBox(height: 16),
+              FutureBuilder(
+                future: fetchRecommendedProducts(product.category, product.id),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return SizedBox();
+                  final recommended = snapshot.data!;
+                  if (recommended.isEmpty) return SizedBox();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 24),
+                      Text(
+                        'You may also like',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(
+                        height: 180,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: recommended.length,
+                          itemBuilder: (context, idx) {
+                            final rec = recommended[idx];
+                            return MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          ProductDetailsScreen(product: rec),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  width: 140,
+                                  margin: EdgeInsets.only(right: 12),
+                                  child: Column(
+                                    children: [
+                                      Image.network(
+                                        rec.thumbnail,
+                                        height: 100,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      Text(
+                                        rec.title,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        '\$${rec.price}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  );
+                },
               ),
               SizedBox(height: 16),
               Text('Reviews', style: TextStyle(fontWeight: FontWeight.bold)),

@@ -50,10 +50,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get applyFilters => 'फ़िल्टर लागू करें';
 
   @override
+  String get clearFilters => 'फ़िल्टर हटाएँ';
+
+  @override
   String get category => 'श्रेणी';
 
   @override
   String get selectCategory => 'श्रेणी चुनें';
+
+  @override
+  String get selectBrand => 'ब्रांड चुनें';
+
+  @override
+  String get brand => 'ब्रांड';
 
   @override
   String priceRange(int min, int max) {
@@ -64,4 +73,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String minimumRating(double rating) {
     return 'न्यूनतम रेटिंग ($rating)';
   }
+
+  @override
+  String get inStockOnly => 'केवल स्टॉक में उपलब्ध';
+
+  @override
+  String get done => 'हो गया';
 }

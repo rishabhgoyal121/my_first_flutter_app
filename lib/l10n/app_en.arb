@@ -22,8 +22,11 @@
   "cancelSearch": "Cancel Search",
   "addToWishlist": "Add to Wishlist",
   "applyFilters": "Apply Filters",
+  "clearFilters": "Clear Filters",
   "category": "Category",
   "selectCategory": "Select Category...",
+  "selectBrand": "Select Brand...",
+  "brand": "Brand",
   "priceRange": "Price Range ({min} - {max})",
   "@priceRange": {
     "description": "Shows the price range filter",
@@ -47,5 +50,7 @@
         "example": "4.5"
       }
     }
-  }
+  },
+  "inStockOnly": "In Stock Only",
+  "done": "Done"
 }

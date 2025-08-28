@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -46,6 +47,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> saveProfile() async {
+    HapticFeedback.lightImpact();
     final updatedData = Map<String, dynamic>.from(widget.userData);
     updatedData['firstName'] = firstNameController.text;
     updatedData['lastName'] = lastNameController.text;

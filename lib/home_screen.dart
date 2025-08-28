@@ -12,6 +12,7 @@ import 'cart_provider.dart';
 import 'wishlist_provider.dart';
 import 'dart:async';
 import 'generated/l10n.dart';
+import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,6 +46,9 @@ class _HomeScreenState extends State<HomeScreen> {
   double _selectedMinRating = 0;
   List<Map<String, dynamic>> _categories = [];
   String? _selectedCategorySlug;
+  List<String> _brands = [];
+  String? _selectedBrand;
+  bool _inStockOnly = false;
 
   final GlobalKey cartIconKey = GlobalKey();
   // Pre-allocate a large, fixed number of animation keys to avoid resizing.
@@ -155,6 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
         allProducts = newProducts
             .map((json) => Product.fromJson(json))
             .toList();
+        _brands = allProducts.map((p) => p.brand).toSet().toList();
       });
       applyFilters();
     } else {
@@ -173,7 +178,14 @@ class _HomeScreenState extends State<HomeScreen> {
           product.price >= _selectedMinPrice &&
           product.price <= _selectedMaxPrice;
       final matchesRating = product.rating >= _selectedMinRating;
-      return matchesCategory && matchesPrice && matchesRating;
+      final matchesBrand =
+          _selectedBrand == null || product.brand == _selectedBrand;
+      final matchesStock = !_inStockOnly || product.stock > 0;
+      return matchesCategory &&
+          matchesPrice &&
+          matchesRating &&
+          matchesBrand &&
+          matchesStock;
     }).toList();
     if (!mounted) return;
     setState(() {
@@ -201,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
     if (query.isEmpty) {
       if (!mounted) return;
       setState(() {
-        _isSearching = false;
         products.clear();
         skip = 0;
         hasMore = true;
@@ -249,6 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onSortSelected(SortOption? option) {
+    HapticFeedback.lightImpact();
     if (!mounted) return;
     setState(() {
       _selectedSort = option;
@@ -260,6 +272,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showFilterSheet() {
+    HapticFeedback.lightImpact();
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -285,6 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         .toList(),
                     onChanged: (val) {
                       setModalState(() => _selectedCategorySlug = val);
+                      applyFilters();
                     },
                   ),
                   SizedBox(height: 16),
@@ -304,6 +318,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         _selectedMinPrice = values.start;
                         _selectedMaxPrice = values.end;
                       });
+                      applyFilters();
                     },
                   ),
                   SizedBox(height: 16),
@@ -319,15 +334,87 @@ class _HomeScreenState extends State<HomeScreen> {
                     value: _selectedMinRating,
                     onChanged: (val) {
                       setModalState(() => _selectedMinRating = val);
+                      applyFilters();
                     },
                   ),
                   SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
+                  Text(AppLocalizations.of(context)!.brand),
+                  DropdownButton<String>(
+                    value: _selectedBrand,
+                    hint: Text(AppLocalizations.of(context)!.selectBrand),
+                    isExpanded: true,
+                    items: _brands
+                        .map(
+                          (brand) => DropdownMenuItem<String>(
+                            value: brand,
+                            child: Text(brand),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (val) {
+                      setModalState(() => _selectedBrand = val);
                       applyFilters();
                     },
-                    child: Text(AppLocalizations.of(context)!.applyFilters),
+                  ),
+                  SizedBox(height: 16),
+                  CheckboxListTile(
+                    title: Text(AppLocalizations.of(context)!.inStockOnly),
+                    value: _inStockOnly,
+                    onChanged: (val) {
+                      setModalState(() => _inStockOnly = val ?? false);
+                      applyFilters();
+                    },
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                      textStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text(
+                      AppLocalizations.of(context)!.done,
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent,
+                      foregroundColor: Colors.white,
+                      side: BorderSide(color: Colors.redAccent),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
+                      textStyle: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    onPressed: () {
+                      setModalState(() {
+                        _selectedCategorySlug = null;
+                        _selectedMinPrice = _minPrice;
+                        _selectedMaxPrice = _maxPrice;
+                        _selectedMinRating = 0;
+                        _selectedBrand = null;
+                        _inStockOnly = false;
+                      });
+                      // Also update the main product list
+                      applyFilters();
+                    },
+
+                    child: Text(AppLocalizations.of(context)!.clearFilters),
                   ),
                 ],
               ),
@@ -388,6 +475,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ? IconButton(
                           onPressed: () {
                             _searchController.clear();
+                            searchProducts('');
                           },
                           icon: Icon(Icons.clear),
                           tooltip: 'Clear search',
@@ -401,12 +489,16 @@ class _HomeScreenState extends State<HomeScreen> {
             : Text(AppLocalizations.of(context)!.products),
         actions: [
           IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/orders'),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.pushNamed(context, '/orders');
+            },
             icon: Icon(Icons.receipt_long),
             tooltip: AppLocalizations.of(context)!.orders,
           ),
           IconButton(
             onPressed: () {
+              HapticFeedback.lightImpact();
               Navigator.pushNamed(
                 context,
                 '/wishlist',
@@ -417,12 +509,16 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: AppLocalizations.of(context)!.wishlist,
           ),
           IconButton(
-            onPressed: () => Navigator.pushNamed(context, '/profile'),
+            onPressed: () {
+              HapticFeedback.lightImpact();
+              Navigator.pushNamed(context, '/profile');
+            },
             icon: Icon(Icons.person),
           ),
           PopupMenuButton<SortOption>(
             icon: Icon(Icons.sort),
             onSelected: _onSortSelected,
+            onOpened: () => HapticFeedback.lightImpact(),
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: SortOption.ratingDesc,
@@ -458,7 +554,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             onPressed: () {
+              HapticFeedback.lightImpact();
               if (_isSearching) {
+                setState(() {
+                  _isSearching = false;
+                });
                 _searchController.clear();
                 searchProducts('');
               } else {
@@ -477,6 +577,7 @@ class _HomeScreenState extends State<HomeScreen> {
               IconButton(
                 key: cartIconKey,
                 onPressed: () {
+                  HapticFeedback.lightImpact();
                   Navigator.pushNamed(context, '/cart');
                 },
                 icon: Icon(Icons.shopping_cart),
@@ -486,6 +587,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 top: 4,
                 child: GestureDetector(
                   onTap: () {
+                    HapticFeedback.lightImpact();
                     Navigator.pushNamed(context, '/cart');
                   },
                   child: Container(
@@ -585,6 +687,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   onTap: () {
+                    HapticFeedback.lightImpact();
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -598,6 +701,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       IconButton(
                         onPressed: () {
+                          HapticFeedback.lightImpact();
                           context.read<WishlistProvider>().toggleWishlist(
                             product.id,
                           );
@@ -618,6 +722,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       IconButton(
                         onPressed: () async {
+                          HapticFeedback.lightImpact();
                           animationKeys[index].currentState?.startAnimation();
                           final response = await http.put(
                             Uri.parse('https://dummyjson.com/carts/1'),
