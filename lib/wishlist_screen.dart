@@ -20,7 +20,79 @@ class WishlistScreen extends StatelessWidget {
     if (wishlistedProducts.isEmpty) {
       return Scaffold(
         appBar: AppBar(title: Text('Wishlist')),
-        body: Center(child: Text('No items in wishlist')),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Image.network(
+                    'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=400&fit=crop&crop=center',
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        color: Colors.pink[100],
+                        child: Icon(
+                          Icons.favorite_border,
+                          size: 80,
+                          color: Colors.pink[600],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              SizedBox(height: 24),
+              Text(
+                'Your wishlist is empty!',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[600],
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                'Start exploring and save items you love',
+                style: TextStyle(fontSize: 16, color: Colors.grey[500]),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 32),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/');
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 0),
+                  backgroundColor: Colors.orangeAccent,
+                  foregroundColor: Colors.white,
+                  textStyle: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'Roboto',
+                    letterSpacing: 0.5,
+                  ),
+                  elevation: 3,
+                  shadowColor: Colors.orangeAccent.withValues(alpha: 0.3),
+                ),
+                child: Text('Start Shopping'),
+              ),
+            ],
+          ),
+        ),
       );
     }
     return Scaffold(

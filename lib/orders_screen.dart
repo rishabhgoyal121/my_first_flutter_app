@@ -76,16 +76,18 @@ class OrdersScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       padding: EdgeInsets.symmetric(
                         horizontal: 32,
-                        vertical: 16,
+                        vertical: 0,
                       ),
                       backgroundColor: Colors.orangeAccent,
                       foregroundColor: Colors.white,
                       textStyle: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
+                        fontFamily: 'Roboto',
+                        letterSpacing: 0.5,
                       ),
                       elevation: 3,
-                      shadowColor: Colors.orangeAccent.withOpacity(0.3),
+                      shadowColor: Colors.orangeAccent.withValues(alpha: 0.3),
                     ),
                     child: Text('Start Shopping'),
                   ),
