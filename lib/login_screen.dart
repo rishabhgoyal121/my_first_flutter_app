@@ -201,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
+      appBar: AppBar(title: Text('Login to Shopper')),
       resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -245,6 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(labelText: 'Username'),
                 onChanged: (val) => username = val,
                 validator: (val) => val!.isEmpty ? 'Enter Username' : null,
+                autofillHints: const [AutofillHints.username],
               ),
               SizedBox(height: 16),
               TextFormField(
@@ -273,6 +274,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 onFieldSubmitted: (_) async {
                   _handleLogin();
                 },
+                autofillHints: const [AutofillHints.password],
               ),
               SizedBox(height: 40),
               ElevatedButton(

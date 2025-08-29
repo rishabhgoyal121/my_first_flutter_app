@@ -74,12 +74,12 @@ class MyApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.orangeAccent),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.indigoAccent,
-        foregroundColor: Colors.white,
+        foregroundColor: Colors.amberAccent,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.indigoAccent,
-          foregroundColor: Colors.white,
+          foregroundColor: Colors.amberAccent,
           textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
@@ -97,7 +97,7 @@ class MyApp extends StatelessWidget {
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
+        foregroundColor: Colors.amberAccent,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -108,7 +108,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
       textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(foregroundColor: Colors.white),
+        style: TextButton.styleFrom(foregroundColor: Colors.amberAccent),
       ),
       inputDecorationTheme: const InputDecorationTheme(
         labelStyle: TextStyle(color: Colors.white70),
@@ -199,7 +199,7 @@ class MyApp extends StatelessWidget {
           labelMedium: GoogleFonts.inter(fontWeight: FontWeight.w600),
           labelSmall: GoogleFonts.inter(fontWeight: FontWeight.w600),
         )
-        .apply(bodyColor: Colors.white, displayColor: Colors.white);
+        .apply(bodyColor: Colors.amberAccent, displayColor: Colors.amberAccent);
 
     return MaterialApp(
       title: 'Flutter Demo',
