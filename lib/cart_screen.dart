@@ -203,7 +203,7 @@ class _CartScreenState extends State<CartScreen> {
                                   ),
                                   SizedBox(height: 12),
                                   SizedBox(
-                                    height: 210,
+                                    height: 215,
                                     child: ListView.builder(
                                       scrollDirection: Axis.horizontal,
                                       itemCount: recommended.length,
@@ -240,128 +240,127 @@ class _CartScreenState extends State<CartScreen> {
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                               ),
-                                              child: Stack(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
-                                                  Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      ClipRRect(
-                                                        borderRadius:
-                                                            BorderRadius.vertical(
-                                                              top:
-                                                                  Radius.circular(
-                                                                    8,
-                                                                  ),
-                                                            ),
-                                                        child: Image.network(
-                                                          product.thumbnail,
-                                                          height: 115,
-                                                          width:
-                                                              double.infinity,
-                                                          fit: BoxFit.cover,
-                                                          errorBuilder:
-                                                              (
-                                                                context,
-                                                                error,
-                                                                stackTrace,
-                                                              ) {
-                                                                return Container(
-                                                                  height: 115,
-                                                                  color: Colors
-                                                                      .grey[200],
-                                                                  child: Icon(
-                                                                    Icons
-                                                                        .image_not_supported,
-                                                                  ),
-                                                                );
-                                                              },
-                                                        ),
+                                                  Padding(
+                                                    padding: EdgeInsets.only(
+                                                      top: 4,
+                                                      left: 4,
+                                                      right: 4,
+                                                    ),
+                                                    child: ClipRRect(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            6,
+                                                          ),
+                                                      child: Image.network(
+                                                        product.thumbnail,
+                                                        height: 95,
+                                                        width: double.infinity,
+                                                        fit: BoxFit.cover,
+                                                        errorBuilder:
+                                                            (
+                                                              context,
+                                                              error,
+                                                              stackTrace,
+                                                            ) {
+                                                              return Container(
+                                                                height: 95,
+                                                                color: Colors
+                                                                    .grey[200],
+                                                                child: Icon(
+                                                                  Icons
+                                                                      .image_not_supported,
+                                                                ),
+                                                              );
+                                                            },
                                                       ),
-                                                      Expanded(
-                                                        child: Padding(
-                                                          padding:
-                                                              EdgeInsets.all(
-                                                                6.0,
-                                                              ),
-                                                          child: Column(
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    child: Padding(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                            horizontal: 6.0,
+                                                            vertical: 4.0,
+                                                          ),
+                                                      child: Column(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            product.title,
+                                                            maxLines: 2,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w500,
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: 2),
+                                                          Row(
                                                             children: [
-                                                              Text(
-                                                                product.title,
-                                                                maxLines: 2,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                style: TextStyle(
-                                                                  fontSize: 12,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
+                                                              Flexible(
+                                                                child: Text(
+                                                                  '\$${discountedPrice.toStringAsFixed(2)}',
+                                                                  style: TextStyle(
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    color: Colors
+                                                                        .green,
+                                                                    fontSize:
+                                                                        14,
+                                                                  ),
+                                                                  overflow:
+                                                                      TextOverflow
+                                                                          .ellipsis,
                                                                 ),
                                                               ),
                                                               SizedBox(
-                                                                height: 4,
+                                                                width: 4,
                                                               ),
-                                                              Row(
-                                                                children: [
-                                                                  Flexible(
-                                                                    child: Text(
-                                                                      '\$${discountedPrice.toStringAsFixed(2)}',
-                                                                      style: TextStyle(
-                                                                        fontWeight:
-                                                                            FontWeight.bold,
-                                                                        color: Colors
-                                                                            .green,
-                                                                        fontSize:
-                                                                            14,
-                                                                      ),
-                                                                      overflow:
-                                                                          TextOverflow
-                                                                              .ellipsis,
+                                                              if (product
+                                                                      .discountPercentage >
+                                                                  0)
+                                                                Flexible(
+                                                                  child: Text(
+                                                                    '\$${product.price.toStringAsFixed(2)}',
+                                                                    style: TextStyle(
+                                                                      fontSize:
+                                                                          10,
+                                                                      decoration:
+                                                                          TextDecoration
+                                                                              .lineThrough,
+                                                                      color: Colors
+                                                                          .grey,
                                                                     ),
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
                                                                   ),
-                                                                  SizedBox(
-                                                                    width: 4,
-                                                                  ),
-                                                                  if (product
-                                                                          .discountPercentage >
-                                                                      0)
-                                                                    Flexible(
-                                                                      child: Text(
-                                                                        '\$${product.price.toStringAsFixed(2)}',
-                                                                        style: TextStyle(
-                                                                          fontSize:
-                                                                              10,
-                                                                          decoration:
-                                                                              TextDecoration.lineThrough,
-                                                                          color:
-                                                                              Colors.grey,
-                                                                        ),
-                                                                        overflow:
-                                                                            TextOverflow.ellipsis,
-                                                                      ),
-                                                                    ),
-                                                                ],
-                                                              ),
+                                                                ),
                                                             ],
                                                           ),
-                                                        ),
+                                                        ],
                                                       ),
-                                                    ],
+                                                    ),
                                                   ),
-                                                  // Add to cart button positioned at bottom right
-                                                  Positioned(
-                                                    bottom: 8,
-                                                    right: 8,
-                                                    child: GestureDetector(
-                                                      onTap: () async {
+                                                  // Full width add to cart button at bottom
+                                                  SizedBox(
+                                                    width: double.infinity,
+                                                    height: 40,
+                                                    child: ElevatedButton.icon(
+                                                      onPressed: () async {
                                                         HapticFeedback.lightImpact();
                                                         try {
                                                           // Add to cart API call
@@ -431,38 +430,49 @@ class _CartScreenState extends State<CartScreen> {
                                                           );
                                                         }
                                                       },
-                                                      child: Container(
-                                                        padding: EdgeInsets.all(
-                                                          7,
+                                                      icon: Icon(
+                                                        Icons.add_shopping_cart,
+                                                        size: 16,
+                                                      ),
+                                                      label: Text(
+                                                        'Add to Cart',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          fontWeight:
+                                                              FontWeight.w600,
                                                         ),
-                                                        decoration: BoxDecoration(
-                                                          color: Colors
-                                                              .deepPurpleAccent,
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                8,
-                                                              ),
-                                                          boxShadow: [
-                                                            BoxShadow(
-                                                              color: Colors
-                                                                  .black
-                                                                  .withValues(
-                                                                    alpha: 0.2,
-                                                                  ),
-                                                              blurRadius: 4,
-                                                              offset: Offset(
-                                                                0,
-                                                                2,
-                                                              ),
+                                                      ),
+                                                      style: ElevatedButton.styleFrom(
+                                                        backgroundColor:
+                                                            Colors.amber,
+                                                        foregroundColor:
+                                                            Colors.black,
+                                                        padding:
+                                                            EdgeInsets.symmetric(
+                                                              horizontal: 8,
+                                                              vertical: 0,
                                                             ),
-                                                          ],
+                                                        shape: RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius.only(
+                                                            topLeft:
+                                                                Radius.circular(
+                                                                  6,
+                                                                ),
+                                                            topRight:
+                                                                Radius.circular(
+                                                                  6,
+                                                                ),
+                                                            bottomLeft:
+                                                                Radius.circular(
+                                                                  8,
+                                                                ),
+                                                            bottomRight:
+                                                                Radius.circular(
+                                                                  8,
+                                                                ),
+                                                          ),
                                                         ),
-                                                        child: Icon(
-                                                          Icons
-                                                              .add_shopping_cart,
-                                                          size: 19,
-                                                          color: Colors.white,
-                                                        ),
+                                                        elevation: 2,
                                                       ),
                                                     ),
                                                   ),
@@ -667,25 +677,48 @@ class _CartScreenState extends State<CartScreen> {
                                   key: ValueKey('loading'),
                                 ),
                               )
-                            : ElevatedButton(
-                                key: ValueKey('button'),
-                                onPressed: cartItems.isEmpty || _isPlacingOrder
-                                    ? null
-                                    : () async {
-                                        HapticFeedback.lightImpact();
-                                        // Navigate to checkout screen
-                                        Navigator.pushNamed(
-                                          context,
-                                          '/checkout',
-                                          arguments: {
-                                            'cartItems': cartItems,
-                                            'cartTotal': cartTotal,
-                                            'cartDiscountedTotal':
-                                                cartDiscountedTotal,
-                                          },
-                                        );
-                                      },
-                                child: Text('Checkout'),
+                            : SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: ElevatedButton(
+                                  key: ValueKey('button'),
+                                  style: ButtonStyle(
+                                    backgroundColor: WidgetStateProperty.all(
+                                      cartItems.isEmpty || _isPlacingOrder
+                                          ? Colors.grey
+                                          : Colors.amberAccent,
+                                    ),
+                                    foregroundColor: WidgetStateProperty.all(
+                                      cartItems.isEmpty || _isPlacingOrder
+                                          ? Colors.black38
+                                          : Colors.black,
+                                    ),
+                                    padding: WidgetStateProperty.all(
+                                      EdgeInsets.symmetric(
+                                        horizontal: 0,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  onPressed:
+                                      cartItems.isEmpty || _isPlacingOrder
+                                      ? null
+                                      : () async {
+                                          HapticFeedback.lightImpact();
+                                          // Navigate to checkout screen
+                                          Navigator.pushNamed(
+                                            context,
+                                            '/checkout',
+                                            arguments: {
+                                              'cartItems': cartItems,
+                                              'cartTotal': cartTotal,
+                                              'cartDiscountedTotal':
+                                                  cartDiscountedTotal,
+                                            },
+                                          );
+                                        },
+                                  child: Text('Checkout'),
+                                ),
                               ),
                       ),
                     ],
