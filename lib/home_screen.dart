@@ -716,7 +716,42 @@ class _HomeScreenState extends State<HomeScreen> {
                 onChanged: _onSearchChanged,
                 onSubmitted: (value) => searchProducts(value),
               )
-            : Text(AppLocalizations.of(context)!.products),
+            : MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _scrollController.animateTo(
+                      0,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeOutCubic,
+                    );
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ClipOval(
+                        child: Image.asset(
+                          Theme.of(context).brightness == Brightness.dark
+                              ? 'assets/images/splash_icon_dark.png'
+                              : 'assets/images/splash_icon.png',
+                          height: 32,
+                          width: 32,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Shopper',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
         actions: [
           IconButton(
             onPressed: () {
