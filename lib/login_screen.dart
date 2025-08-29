@@ -22,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String password = '';
   bool ssoSuccess = false;
   bool isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -247,10 +248,27 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 16),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    tooltip: _obscurePassword
+                        ? 'Show password'
+                        : 'Hide password',
+                  ),
+                ),
                 onChanged: (val) => password = val,
                 validator: (val) => val!.isEmpty ? 'Enter Password' : null,
-                obscureText: true,
+                obscureText: _obscurePassword,
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) async {
                   _handleLogin();

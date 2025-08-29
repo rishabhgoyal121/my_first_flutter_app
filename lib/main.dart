@@ -84,6 +84,9 @@ class MyApp extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
       ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: Colors.indigoAccent),
+      ),
     );
 
     final baseDark = ThemeData(
@@ -94,7 +97,7 @@ class MyApp extends StatelessWidget {
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.deepOrange,
+        foregroundColor: Colors.white,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -103,6 +106,33 @@ class MyApp extends StatelessWidget {
           textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: Colors.white),
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        labelStyle: TextStyle(color: Colors.white70),
+        floatingLabelStyle: TextStyle(color: Colors.white70),
+        hintStyle: TextStyle(color: Colors.white60),
+        helperStyle: TextStyle(color: Colors.white70),
+        errorStyle: TextStyle(color: Colors.redAccent),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white38),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.white70),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.redAccent),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.redAccent),
+        ),
+      ),
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: Colors.white70,
+        selectionColor: Color(0x66FFFFFF),
+        selectionHandleColor: Colors.white70,
       ),
     );
 
@@ -136,7 +166,8 @@ class MyApp extends StatelessWidget {
           labelLarge: GoogleFonts.inter(fontWeight: FontWeight.w600),
           labelMedium: GoogleFonts.inter(fontWeight: FontWeight.w600),
           labelSmall: GoogleFonts.inter(fontWeight: FontWeight.w600),
-        );
+        )
+        .apply(bodyColor: Colors.black87, displayColor: Colors.black87);
 
     final textThemeDark = GoogleFonts.interTextTheme(baseDark.textTheme)
         .copyWith(
@@ -167,7 +198,8 @@ class MyApp extends StatelessWidget {
           labelLarge: GoogleFonts.inter(fontWeight: FontWeight.w600),
           labelMedium: GoogleFonts.inter(fontWeight: FontWeight.w600),
           labelSmall: GoogleFonts.inter(fontWeight: FontWeight.w600),
-        );
+        )
+        .apply(bodyColor: Colors.white, displayColor: Colors.white);
 
     return MaterialApp(
       title: 'Flutter Demo',
