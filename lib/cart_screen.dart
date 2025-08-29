@@ -203,7 +203,7 @@ class _CartScreenState extends State<CartScreen> {
                                   ),
                                   SizedBox(height: 12),
                                   SizedBox(
-                                    height: 200,
+                                    height: 210,
                                     child: ListView.builder(
                                       scrollDirection: Axis.horizontal,
                                       itemCount: recommended.length,
@@ -257,7 +257,7 @@ class _CartScreenState extends State<CartScreen> {
                                                             ),
                                                         child: Image.network(
                                                           product.thumbnail,
-                                                          height: 120,
+                                                          height: 115,
                                                           width:
                                                               double.infinity,
                                                           fit: BoxFit.cover,
@@ -268,7 +268,7 @@ class _CartScreenState extends State<CartScreen> {
                                                                 stackTrace,
                                                               ) {
                                                                 return Container(
-                                                                  height: 120,
+                                                                  height: 115,
                                                                   color: Colors
                                                                       .grey[200],
                                                                   child: Icon(
@@ -283,9 +283,12 @@ class _CartScreenState extends State<CartScreen> {
                                                         child: Padding(
                                                           padding:
                                                               EdgeInsets.all(
-                                                                8.0,
+                                                                6.0,
                                                               ),
                                                           child: Column(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
                                                             crossAxisAlignment:
                                                                 CrossAxisAlignment
                                                                     .start,
@@ -303,19 +306,25 @@ class _CartScreenState extends State<CartScreen> {
                                                                           .w500,
                                                                 ),
                                                               ),
-                                                              Spacer(),
+                                                              SizedBox(
+                                                                height: 4,
+                                                              ),
                                                               Row(
                                                                 children: [
-                                                                  Text(
-                                                                    '\$${discountedPrice.toStringAsFixed(2)}',
-                                                                    style: TextStyle(
-                                                                      fontWeight:
-                                                                          FontWeight
-                                                                              .bold,
-                                                                      color: Colors
-                                                                          .green,
-                                                                      fontSize:
-                                                                          14,
+                                                                  Flexible(
+                                                                    child: Text(
+                                                                      '\$${discountedPrice.toStringAsFixed(2)}',
+                                                                      style: TextStyle(
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                        color: Colors
+                                                                            .green,
+                                                                        fontSize:
+                                                                            14,
+                                                                      ),
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
                                                                     ),
                                                                   ),
                                                                   SizedBox(
@@ -324,15 +333,19 @@ class _CartScreenState extends State<CartScreen> {
                                                                   if (product
                                                                           .discountPercentage >
                                                                       0)
-                                                                    Text(
-                                                                      '\$${product.price.toStringAsFixed(2)}',
-                                                                      style: TextStyle(
-                                                                        fontSize:
-                                                                            10,
-                                                                        decoration:
-                                                                            TextDecoration.lineThrough,
-                                                                        color: Colors
-                                                                            .grey,
+                                                                    Flexible(
+                                                                      child: Text(
+                                                                        '\$${product.price.toStringAsFixed(2)}',
+                                                                        style: TextStyle(
+                                                                          fontSize:
+                                                                              10,
+                                                                          decoration:
+                                                                              TextDecoration.lineThrough,
+                                                                          color:
+                                                                              Colors.grey,
+                                                                        ),
+                                                                        overflow:
+                                                                            TextOverflow.ellipsis,
                                                                       ),
                                                                     ),
                                                                 ],
