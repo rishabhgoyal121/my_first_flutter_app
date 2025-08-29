@@ -105,12 +105,170 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Widget _buildViewTypeSwitch(BuildContext context) {
+  Widget _buildControlsBar(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth >= 800; // Tablet and desktop breakpoint
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          // Sort button - chip-like for large screens, icon for small screens
+          if (isLargeScreen) ...[
+            // Chip-like sort button for large screens
+            PopupMenuButton<SortOption>(
+              tooltip: '', // Disable the default "Show menu" tooltip
+              onSelected: _onSortSelected,
+              onOpened: () => HapticFeedback.lightImpact(),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: SortOption.ratingDesc,
+                  child: Text('Rating (High to Low)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.ratingAsc,
+                  child: Text('Rating (Low to High)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.priceAsc,
+                  child: Text('Price (Low to High)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.priceDesc,
+                  child: Text('Price (High to Low)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.discountDesc,
+                  child: Text('Discount (High to Low)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.discountAsc,
+                  child: Text('Discount (Low to High)'),
+                ),
+              ],
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.sort,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Sort',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Chip-like filter button for large screens
+            InkWell(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                _showFilterSheet();
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.filter_alt,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Filter',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ] else ...[
+            // Icon buttons for small screens
+            PopupMenuButton<SortOption>(
+              tooltip: '', // Disable the default "Show menu" tooltip
+              icon: Icon(Icons.sort),
+              onSelected: _onSortSelected,
+              onOpened: () => HapticFeedback.lightImpact(),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: SortOption.ratingDesc,
+                  child: Text('Rating (High to Low)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.ratingAsc,
+                  child: Text('Rating (Low to High)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.priceAsc,
+                  child: Text('Price (Low to High)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.priceDesc,
+                  child: Text('Price (High to Low)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.discountDesc,
+                  child: Text('Discount (High to Low)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.discountAsc,
+                  child: Text('Discount (Low to High)'),
+                ),
+              ],
+            ),
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: IconButton(
+                onPressed: _showFilterSheet,
+                icon: Icon(Icons.filter_alt),
+              ),
+            ),
+          ],
+          const SizedBox(width: 8),
+          // View type switcher on the right
           SegmentedButton<ViewType>(
             segments: const [
               ButtonSegment<ViewType>(
@@ -780,43 +938,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: Icon(Icons.person),
           ),
-          PopupMenuButton<SortOption>(
-            icon: Icon(Icons.sort),
-            onSelected: _onSortSelected,
-            onOpened: () => HapticFeedback.lightImpact(),
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: SortOption.ratingDesc,
-                child: Text('Rating (High to Low)'),
-              ),
-              PopupMenuItem(
-                value: SortOption.ratingAsc,
-                child: Text('Rating (Low to High)'),
-              ),
-              PopupMenuItem(
-                value: SortOption.priceAsc,
-                child: Text('Price (Low to High)'),
-              ),
-              PopupMenuItem(
-                value: SortOption.priceDesc,
-                child: Text('Price (High to Low)'),
-              ),
-              PopupMenuItem(
-                value: SortOption.discountDesc,
-                child: Text('Discount (High to Low)'),
-              ),
-              PopupMenuItem(
-                value: SortOption.discountAsc,
-                child: Text('Discount (Low to High)'),
-              ),
-            ],
-            tooltip: AppLocalizations.of(context)!.sort,
-          ),
-          IconButton(
-            onPressed: _showFilterSheet,
-            icon: Icon(Icons.filter_alt),
-            tooltip: AppLocalizations.of(context)!.filters,
-          ),
+
           IconButton(
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -896,7 +1018,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // View type switch at index 1
                     if (index == 1) {
-                      return _buildViewTypeSwitch(context);
+                      return _buildControlsBar(context);
                     }
 
                     // Content starts after hero
@@ -1103,7 +1225,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   controller: _scrollController,
                   children: [
                     _buildHeroSection(context),
-                    _buildViewTypeSwitch(context),
+                    _buildControlsBar(context),
                     if (isLoading)
                       const Center(
                         child: Padding(
