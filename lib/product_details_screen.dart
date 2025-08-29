@@ -26,11 +26,30 @@ class ProductDetailsScreen extends StatefulWidget {
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   late Product product;
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _reviewsKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     product = widget.product;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToReviews() {
+    final context = _reviewsKey.currentContext;
+    if (context != null) {
+      Scrollable.ensureVisible(
+        context,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void _showReviewDialog() {
@@ -231,6 +250,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -244,21 +264,38 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   SizedBox(width: 8),
                   Row(
                     children: [
-                      Text(
-                        product.rating.toStringAsFixed(1),
-                        style: TextStyle(
-                          color: Colors.amberAccent,
-                          fontSize: 16,
-                        ),
-                      ),
-                      SizedBox(width: 2),
-                      Icon(Icons.star, size: 14, color: Colors.amberAccent),
-                      SizedBox(width: 2),
-                      Text(
-                        '(${product.reviews.length})',
-                        style: TextStyle(
-                          color: Colors.amberAccent,
-                          fontSize: 10,
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _scrollToReviews();
+                        },
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: Row(
+                            children: [
+                              Text(
+                                product.rating.toStringAsFixed(1),
+                                style: TextStyle(
+                                  color: Colors.amberAccent,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              SizedBox(width: 2),
+                              Icon(
+                                Icons.star,
+                                size: 14,
+                                color: Colors.amberAccent,
+                              ),
+                              SizedBox(width: 2),
+                              Text(
+                                '(${product.reviews.length})',
+                                style: TextStyle(
+                                  color: Colors.amberAccent,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       Spacer(),
@@ -532,7 +569,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 },
               ),
               SizedBox(height: 16),
-              Text('Reviews', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Reviews',
+                key: _reviewsKey,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               SizedBox(height: 16),
 
               if (product.reviews.isEmpty)
