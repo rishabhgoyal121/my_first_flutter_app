@@ -1125,6 +1125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               },
                               child: Card(
                                 clipBehavior: Clip.antiAlias,
+                                color: isDark ? null : Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),

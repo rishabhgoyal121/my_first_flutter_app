@@ -74,7 +74,7 @@ class MyApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.orangeAccent),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.indigoAccent,
-        foregroundColor: Colors.amberAccent,
+        foregroundColor: Colors.white,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -97,7 +97,7 @@ class MyApp extends StatelessWidget {
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.amberAccent,
+        foregroundColor: Colors.white,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
