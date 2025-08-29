@@ -7,6 +7,7 @@ import 'order_animation.dart';
 import 'cart_item_delete_animation.dart';
 import 'package:flutter/services.dart';
 import 'product.dart';
+import 'src/widgets/safe_network_image.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -99,19 +100,10 @@ class _CartScreenState extends State<CartScreen> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
-                      child: Image.network(
-                        'https://images.unsplash.com/photo-1601598505513-7489a6272d2a?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D',
+                      child: SafeNetworkImage(
+                        imageUrl:
+                            'https://images.unsplash.com/photo-1601598505513-7489a6272d2a?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D',
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.blue[100],
-                            child: Icon(
-                              Icons.shopping_cart_outlined,
-                              size: 80,
-                              color: Colors.blue[600],
-                            ),
-                          );
-                        },
                       ),
                     ),
                   ),
@@ -254,28 +246,17 @@ class _CartScreenState extends State<CartScreen> {
                                                             BorderRadius.circular(
                                                               6,
                                                             ),
-                                                        child: Image.network(
-                                                          product.thumbnail,
+                                                        child: SafeNetworkImage(
+                                                          imageUrl:
+                                                              product.thumbnail,
                                                           height: 95,
                                                           width:
                                                               double.infinity,
                                                           fit: BoxFit.cover,
-                                                          errorBuilder:
-                                                              (
-                                                                context,
-                                                                error,
-                                                                stackTrace,
-                                                              ) {
-                                                                return Container(
-                                                                  height: 95,
-                                                                  color: Colors
-                                                                      .grey[200],
-                                                                  child: Icon(
-                                                                    Icons
-                                                                        .image_not_supported,
-                                                                  ),
-                                                                );
-                                                              },
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                6,
+                                                              ),
                                                         ),
                                                       ),
                                                     ),
@@ -571,7 +552,13 @@ class _CartScreenState extends State<CartScreen> {
                               }
                             : null,
                         child: ListTile(
-                          leading: Image.network(item['thumbnail'], width: 50),
+                          leading: SafeNetworkImage(
+                            imageUrl: item['thumbnail'],
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
                           title: Text(item['title']),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

@@ -22,6 +22,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -69,57 +70,109 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.orangeAccent),
-        appBarTheme: AppBarTheme(
+    final baseLight = ThemeData(
+      colorScheme: ColorScheme.fromSeed(seedColor: Colors.orangeAccent),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.indigoAccent,
+        foregroundColor: Colors.white,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
           backgroundColor: Colors.indigoAccent,
           foregroundColor: Colors.white,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.indigoAccent,
-            foregroundColor: Colors.white,
-            textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          ),
+          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
       ),
-      darkTheme: ThemeData(
+    );
+
+    final baseDark = ThemeData(
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.deepPurple,
         brightness: Brightness.dark,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-        appBarTheme: AppBarTheme(
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.deepOrange,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
           backgroundColor: Colors.deepPurple,
-          foregroundColor: Colors.deepOrange,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.deepPurple,
-            foregroundColor: Colors.amberAccent,
-            textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          ),
+          foregroundColor: Colors.amberAccent,
+          textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         ),
       ),
+    );
+
+    // Fonts: Inter for body/UI, Poppins for display (H1–H3)
+    final textThemeLight = GoogleFonts.interTextTheme(baseLight.textTheme)
+        .copyWith(
+          displayLarge: GoogleFonts.poppins(
+            textStyle: baseLight.textTheme.displayLarge,
+          ),
+          displayMedium: GoogleFonts.poppins(
+            textStyle: baseLight.textTheme.displayMedium,
+          ),
+          displaySmall: GoogleFonts.poppins(
+            textStyle: baseLight.textTheme.displaySmall,
+          ),
+          headlineLarge: GoogleFonts.poppins(
+            textStyle: baseLight.textTheme.headlineLarge,
+          ),
+          headlineMedium: GoogleFonts.poppins(
+            textStyle: baseLight.textTheme.headlineMedium,
+          ),
+          headlineSmall: GoogleFonts.poppins(
+            textStyle: baseLight.textTheme.headlineSmall,
+          ),
+          titleLarge: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          titleMedium: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          titleSmall: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          bodyLarge: GoogleFonts.inter(),
+          bodyMedium: GoogleFonts.inter(),
+          bodySmall: GoogleFonts.inter(),
+          labelLarge: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          labelMedium: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          labelSmall: GoogleFonts.inter(fontWeight: FontWeight.w600),
+        );
+
+    final textThemeDark = GoogleFonts.interTextTheme(baseDark.textTheme)
+        .copyWith(
+          displayLarge: GoogleFonts.poppins(
+            textStyle: baseDark.textTheme.displayLarge,
+          ),
+          displayMedium: GoogleFonts.poppins(
+            textStyle: baseDark.textTheme.displayMedium,
+          ),
+          displaySmall: GoogleFonts.poppins(
+            textStyle: baseDark.textTheme.displaySmall,
+          ),
+          headlineLarge: GoogleFonts.poppins(
+            textStyle: baseDark.textTheme.headlineLarge,
+          ),
+          headlineMedium: GoogleFonts.poppins(
+            textStyle: baseDark.textTheme.headlineMedium,
+          ),
+          headlineSmall: GoogleFonts.poppins(
+            textStyle: baseDark.textTheme.headlineSmall,
+          ),
+          titleLarge: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          titleMedium: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          titleSmall: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          bodyLarge: GoogleFonts.inter(),
+          bodyMedium: GoogleFonts.inter(),
+          bodySmall: GoogleFonts.inter(),
+          labelLarge: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          labelMedium: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          labelSmall: GoogleFonts.inter(fontWeight: FontWeight.w600),
+        );
+
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: baseLight.copyWith(textTheme: textThemeLight),
+      darkTheme: baseDark.copyWith(textTheme: textThemeDark),
       themeMode: ThemeMode.system,
       initialRoute: '/',
       routes: {

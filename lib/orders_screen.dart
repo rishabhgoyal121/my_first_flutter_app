@@ -7,6 +7,7 @@ import 'order_details_screen.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'order_tracking_helper.dart';
+import 'src/widgets/safe_network_image.dart';
 
 class OrdersScreen extends StatelessWidget {
   const OrdersScreen({super.key});
@@ -37,19 +38,10 @@ class OrdersScreen extends StatelessWidget {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
-                      child: Image.network(
-                        'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=400&fit=crop&crop=center',
+                      child: SafeNetworkImage(
+                        imageUrl:
+                            'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&h=400&fit=crop&crop=center',
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.orange[100],
-                            child: Icon(
-                              Icons.shopping_bag,
-                              size: 80,
-                              color: Colors.orange[600],
-                            ),
-                          );
-                        },
                       ),
                     ),
                   ),
@@ -162,17 +154,11 @@ class OrdersScreen extends StatelessWidget {
                                         Column(
                                           children: [
                                             Expanded(
-                                              child: Image.network(
-                                                p['thumbnail'] ?? '',
+                                              child: SafeNetworkImage(
+                                                imageUrl: p['thumbnail'] ?? '',
                                                 fit: BoxFit.cover,
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) => Icon(
-                                                      Icons.image_not_supported,
-                                                    ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
                                               ),
                                             ),
                                             Padding(

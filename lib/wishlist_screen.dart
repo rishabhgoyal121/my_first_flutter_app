@@ -4,6 +4,7 @@ import 'wishlist_provider.dart';
 import 'product.dart';
 import 'product_details_screen.dart';
 import 'package:flutter/services.dart';
+import 'src/widgets/safe_network_image.dart';
 
 class WishlistScreen extends StatelessWidget {
   final List<Product> allProducts;
@@ -39,19 +40,10 @@ class WishlistScreen extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(20),
-                  child: Image.network(
-                    'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=400&fit=crop&crop=center',
+                  child: SafeNetworkImage(
+                    imageUrl:
+                        'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=400&h=400&fit=crop&crop=center',
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.pink[100],
-                        child: Icon(
-                          Icons.favorite_border,
-                          size: 80,
-                          color: Colors.pink[600],
-                        ),
-                      );
-                    },
                   ),
                 ),
               ),
@@ -102,7 +94,13 @@ class WishlistScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final product = wishlistedProducts[index];
           return ListTile(
-            leading: Image.network(product.thumbnail, width: 56, height: 56),
+            leading: SafeNetworkImage(
+              imageUrl: product.thumbnail,
+              width: 56,
+              height: 56,
+              fit: BoxFit.cover,
+              borderRadius: BorderRadius.circular(8),
+            ),
             title: Text(product.title),
             subtitle: Text('\$${product.price.toStringAsFixed(2)}'),
             trailing: IconButton(

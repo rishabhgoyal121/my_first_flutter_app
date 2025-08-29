@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'src/widgets/safe_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -141,7 +142,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: Center(
                 child: Hero(
                   tag: imageUrl,
-                  child: Image.network(imageUrl, fit: BoxFit.contain),
+                  child: SafeNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
             ),
@@ -336,7 +340,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     onTap: () => _showFullScreenImage(product.thumbnail),
                     child: Hero(
                       tag: product.thumbnail,
-                      child: Image.network(product.thumbnail, height: 200),
+                      child: SafeNetworkImage(
+                        imageUrl: product.thumbnail,
+                        height: 200,
+                        fit: BoxFit.cover,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
@@ -540,10 +549,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   margin: EdgeInsets.only(right: 12),
                                   child: Column(
                                     children: [
-                                      Image.network(
-                                        rec.thumbnail,
+                                      SafeNetworkImage(
+                                        imageUrl: rec.thumbnail,
                                         height: 100,
                                         fit: BoxFit.cover,
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                       Text(
                                         rec.title,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'src/widgets/safe_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_first_flutter_app/add_to_cart_animation_small.dart';
 import 'package:provider/provider.dart';
@@ -909,7 +910,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     key: animationKeys[listIndex],
                     onAnimationComplete: () {},
                     cartIconKey: cartIconKey,
-                    child: Image.network(product.thumbnail),
+                    child: SafeNetworkImage(imageUrl: product.thumbnail),
                   ),
                   title: _highlightQuery(product.title, _searchController.text),
                   subtitle: Row(
@@ -1110,8 +1111,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         key: animationKeys[index],
                                         onAnimationComplete: () {},
                                         cartIconKey: cartIconKey,
-                                        child: Image.network(
-                                          product.thumbnail,
+                                        child: SafeNetworkImage(
+                                          imageUrl: product.thumbnail,
                                           fit: BoxFit.cover,
                                         ),
                                       ),
