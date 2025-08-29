@@ -69,8 +69,8 @@ class WishlistScreen extends StatelessWidget {
                 },
                 style: ElevatedButton.styleFrom(
                   padding: EdgeInsets.symmetric(horizontal: 32, vertical: 0),
-                  backgroundColor: Colors.orangeAccent,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.amberAccent,
+                  foregroundColor: Colors.black,
                   textStyle: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

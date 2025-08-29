@@ -132,8 +132,8 @@ class _CartScreenState extends State<CartScreen> {
                         horizontal: 32,
                         vertical: 0,
                       ),
-                      backgroundColor: Colors.orangeAccent,
-                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.amberAccent,
+                      foregroundColor: Colors.black,
                       textStyle: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
