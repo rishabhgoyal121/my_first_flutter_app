@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/services.dart';
+import 'src/widgets/safe_network_image.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -150,8 +151,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         child: Stack(
                           children: [
                             CircleAvatar(
-                              backgroundImage: NetworkImage(userData!['image']),
                               radius: 40,
+                              child: ClipOval(
+                                child: SafeNetworkImage(
+                                  imageUrl: userData!['image'],
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
                             Positioned(
                               bottom: 0,

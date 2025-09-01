@@ -4,6 +4,7 @@ import 'package:my_first_flutter_app/product.dart';
 import 'product_details_screen.dart';
 import 'order_details_screen.dart';
 import 'package:flutter/services.dart';
+import 'src/widgets/safe_network_image.dart';
 
 class OrderPlacedScreen extends StatelessWidget {
   final Map<String, dynamic> order;
@@ -171,22 +172,11 @@ class OrderPlacedScreen extends StatelessWidget {
                               leading: ClipRRect(
                                 borderRadius: BorderRadius.circular(4),
                                 child: p['thumbnail'] != null
-                                    ? Image.network(
-                                        p['thumbnail'],
+                                    ? SafeNetworkImage(
+                                        imageUrl: p['thumbnail'],
                                         width: 48,
                                         height: 48,
                                         fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                Container(
-                                                  width: 48,
-                                                  height: 48,
-                                                  color: Colors.grey[200],
-                                                  child: Icon(
-                                                    Icons.broken_image,
-                                                    color: Colors.grey[500],
-                                                  ),
-                                                ),
                                       )
                                     : Container(
                                         width: 48,

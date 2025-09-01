@@ -4,6 +4,7 @@ import 'package:my_first_flutter_app/product.dart';
 import 'product_details_screen.dart';
 import 'package:flutter/services.dart';
 import 'order_tracking_helper.dart';
+import 'src/widgets/safe_network_image.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   final Map<String, dynamic> order;
@@ -83,13 +84,12 @@ class OrderDetailsScreen extends StatelessWidget {
             ...products.map(
               (p) => ListTile(
                 leading: p['thumbnail'] != null
-                    ? Image.network(
-                        p['thumbnail'],
+                    ? SafeNetworkImage(
+                        imageUrl: p['thumbnail'],
                         width: 48,
                         height: 48,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Icon(Icons.broken_image),
+                        borderRadius: BorderRadius.circular(6),
                       )
                     : Icon(Icons.image_not_supported),
                 title: Text('${p['title']}'),

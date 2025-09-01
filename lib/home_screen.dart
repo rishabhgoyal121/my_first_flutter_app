@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'src/widgets/safe_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_first_flutter_app/add_to_cart_animation_small.dart';
 import 'package:provider/provider.dart';
@@ -29,16 +30,19 @@ enum SortOption {
   discountAsc,
 }
 
+enum ViewType { list, grid }
+
 class _HomeScreenState extends State<HomeScreen> {
   List<Product> products = [];
   List<Product> allProducts = [];
   bool isLoading = false;
   bool hasMore = true;
-  int limit = 10;
   int skip = 0;
   late ScrollController _scrollController;
   Timer? _debounce;
+  final double _heroHeight = 280;
 
+  // Filters
   final double _minPrice = 0;
   final double _maxPrice = 1000;
   double _selectedMinPrice = 0;
@@ -61,8 +65,280 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
-
+  // More pronounced colors handled in segmented button style
+  ViewType _viewType = ViewType.list;
   SortOption? _selectedSort;
+  bool _isViewSwitching = false;
+
+  Future<void> _loadViewTypePreference() async {
+    try {
+      if (kIsWeb) {
+        final value = html.window.localStorage['viewType'];
+        if (value == 'grid') {
+          if (!mounted) return;
+          setState(() => _viewType = ViewType.grid);
+        }
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        final value = prefs.getString('viewType');
+        if (value == 'grid') {
+          if (!mounted) return;
+          setState(() => _viewType = ViewType.grid);
+        }
+      }
+    } catch (_) {
+      // ignore prefs errors
+    }
+  }
+
+  Future<void> _saveViewTypePreference() async {
+    try {
+      final value = _viewType == ViewType.grid ? 'grid' : 'list';
+      if (kIsWeb) {
+        html.window.localStorage['viewType'] = value;
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('viewType', value);
+      }
+    } catch (_) {
+      // ignore prefs errors
+    }
+  }
+
+  Widget _buildControlsBar(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isLargeScreen = screenWidth >= 800; // Tablet and desktop breakpoint
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Sort button - chip-like for large screens, icon for small screens
+          if (isLargeScreen) ...[
+            // Chip-like sort button for large screens
+            PopupMenuButton<SortOption>(
+              tooltip: '', // Disable the default "Show menu" tooltip
+              onSelected: _onSortSelected,
+              onOpened: () => HapticFeedback.lightImpact(),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: SortOption.ratingDesc,
+                  child: Text('Rating (High to Low)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.ratingAsc,
+                  child: Text('Rating (Low to High)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.priceAsc,
+                  child: Text('Price (Low to High)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.priceDesc,
+                  child: Text('Price (High to Low)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.discountDesc,
+                  child: Text('Discount (High to Low)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.discountAsc,
+                  child: Text('Discount (Low to High)'),
+                ),
+              ],
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.sort,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Sort',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Chip-like filter button for large screens
+            InkWell(
+              onTap: () {
+                HapticFeedback.lightImpact();
+                _showFilterSheet();
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.outline.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.filter_alt,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Filter',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ] else ...[
+            // Icon buttons for small screens
+            PopupMenuButton<SortOption>(
+              tooltip: '', // Disable the default "Show menu" tooltip
+              icon: Icon(Icons.sort),
+              onSelected: _onSortSelected,
+              onOpened: () => HapticFeedback.lightImpact(),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: SortOption.ratingDesc,
+                  child: Text('Rating (High to Low)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.ratingAsc,
+                  child: Text('Rating (Low to High)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.priceAsc,
+                  child: Text('Price (Low to High)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.priceDesc,
+                  child: Text('Price (High to Low)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.discountDesc,
+                  child: Text('Discount (High to Low)'),
+                ),
+                PopupMenuItem(
+                  value: SortOption.discountAsc,
+                  child: Text('Discount (Low to High)'),
+                ),
+              ],
+            ),
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: IconButton(
+                onPressed: _showFilterSheet,
+                icon: Icon(Icons.filter_alt),
+              ),
+            ),
+          ],
+          const SizedBox(width: 8),
+          // View type switcher on the right
+          SegmentedButton<ViewType>(
+            segments: const [
+              ButtonSegment<ViewType>(
+                value: ViewType.list,
+                icon: Icon(Icons.view_list),
+                label: Text('List'),
+              ),
+              ButtonSegment<ViewType>(
+                value: ViewType.grid,
+                icon: Icon(Icons.grid_view),
+                label: Text('Grid'),
+              ),
+            ],
+            selected: <ViewType>{_viewType},
+            multiSelectionEnabled: false,
+            emptySelectionAllowed: false,
+            showSelectedIcon: false,
+            style: ButtonStyle(
+              minimumSize: WidgetStatePropertyAll(const Size(68, 36)),
+              padding: WidgetStatePropertyAll(
+                const EdgeInsets.symmetric(horizontal: 8),
+              ),
+              // Disable all animations for instant response
+              animationDuration: Duration.zero,
+              splashFactory: NoSplash.splashFactory,
+              overlayColor: WidgetStatePropertyAll(Colors.transparent),
+              visualDensity: VisualDensity.compact,
+            ),
+            onSelectionChanged: (newSelection) {
+              // Single immediate haptic for fastest feel
+              HapticFeedback.selectionClick();
+              if (!mounted) return;
+              setState(() {
+                _viewType = newSelection.first;
+                _isViewSwitching = true;
+              });
+              // Hide loader after brief delay for smooth transition
+              Timer(const Duration(milliseconds: 300), () {
+                if (mounted) {
+                  setState(() {
+                    _isViewSwitching = false;
+                  });
+                }
+              });
+              // Persist without blocking UI
+              unawaited(_saveViewTypePreference());
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _gridColumnsForWidth(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width >= 1600) return 6;
+    if (width >= 1360) return 5;
+    if (width >= 1100) return 4;
+    if (width >= 800) return 3;
+    return 2; // phones and small tablets
+  }
+
+  double _gridAspectRatio(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width >= 1600) return 0.9;
+    if (width >= 1360) return 0.86;
+    if (width >= 1100) return 0.8;
+    if (width >= 800) return 0.76;
+    return 0.72; // phones
+  }
 
   Map<String, String> _getSortParams(SortOption? sort) {
     switch (sort) {
@@ -95,6 +371,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _maxAnimationKeys,
       (_) => GlobalKey<AddToCartAnimationState>(),
     );
+    _loadViewTypePreference();
   }
 
   @override
@@ -426,7 +703,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _highlightQuery(String text, String query) {
-    if (query.isEmpty) return Text(text);
+    if (query.isEmpty) {
+      final baseColor = Theme.of(context).brightness == Brightness.dark
+          ? Colors.white
+          : Colors.black;
+      return Text(text, style: TextStyle(color: baseColor));
+    }
     final pattern = RegExp(RegExp.escape(query), caseSensitive: false);
     final matches = pattern.allMatches(text);
 
@@ -451,10 +733,116 @@ class _HomeScreenState extends State<HomeScreen> {
     if (start < text.length) {
       spans.add(TextSpan(text: text.substring(start)));
     }
+    final baseColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black;
     return RichText(
       text: TextSpan(
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(color: baseColor),
         children: spans,
+      ),
+    );
+  }
+
+  void _scrollToProducts() {
+    // Smoothly scroll just past the hero so the first product is visible.
+    _scrollController.animateTo(
+      _heroHeight,
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  Widget _buildHeroSection(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      height: _heroHeight,
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF1F1C2C), Color(0xFF928DAB)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Text block
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Find your next favorite',
+                      style: theme.textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Exclusive deals, fresh arrivals, and top-rated picks — curated for you.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white70,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 44),
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          backgroundColor: Colors.yellowAccent,
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 0,
+                          tapTargetSize: MaterialTapTargetSize.padded,
+                        ),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          _scrollToProducts();
+                        },
+                        icon: const Icon(Icons.shopping_bag_outlined),
+                        label: const Text(
+                          'Shop now',
+                          style: TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Image / Illustration
+              Expanded(
+                flex: 2,
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/images/splash_icon.png',
+                      height: _heroHeight - 40,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -486,7 +874,42 @@ class _HomeScreenState extends State<HomeScreen> {
                 onChanged: _onSearchChanged,
                 onSubmitted: (value) => searchProducts(value),
               )
-            : Text(AppLocalizations.of(context)!.products),
+            : MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.lightImpact();
+                    _scrollController.animateTo(
+                      0,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeOutCubic,
+                    );
+                  },
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ClipOval(
+                        child: Image.asset(
+                          Theme.of(context).brightness == Brightness.dark
+                              ? 'assets/images/splash_icon_dark.png'
+                              : 'assets/images/splash_icon.png',
+                          height: 32,
+                          width: 32,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'Shopper',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
         actions: [
           IconButton(
             onPressed: () {
@@ -515,43 +938,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             icon: Icon(Icons.person),
           ),
-          PopupMenuButton<SortOption>(
-            icon: Icon(Icons.sort),
-            onSelected: _onSortSelected,
-            onOpened: () => HapticFeedback.lightImpact(),
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: SortOption.ratingDesc,
-                child: Text('Rating (High to Low)'),
-              ),
-              PopupMenuItem(
-                value: SortOption.ratingAsc,
-                child: Text('Rating (Low to High)'),
-              ),
-              PopupMenuItem(
-                value: SortOption.priceAsc,
-                child: Text('Price (Low to High)'),
-              ),
-              PopupMenuItem(
-                value: SortOption.priceDesc,
-                child: Text('Price (High to Low)'),
-              ),
-              PopupMenuItem(
-                value: SortOption.discountDesc,
-                child: Text('Discount (High to Low)'),
-              ),
-              PopupMenuItem(
-                value: SortOption.discountAsc,
-                child: Text('Discount (Low to High)'),
-              ),
-            ],
-            tooltip: AppLocalizations.of(context)!.sort,
-          ),
-          IconButton(
-            onPressed: _showFilterSheet,
-            icon: Icon(Icons.filter_alt),
-            tooltip: AppLocalizations.of(context)!.filters,
-          ),
+
           IconButton(
             onPressed: () {
               HapticFeedback.lightImpact();
@@ -611,168 +998,543 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : products.isEmpty
-          ? Center(
-              child: Text(
-                _isSearching
-                    ? AppLocalizations.of(
-                        context,
-                      )!.noProductsFound(_searchController.text)
-                    : AppLocalizations.of(context)!.noProductsAvailable,
-              ),
-            )
-          : ListView.builder(
-              controller: _scrollController,
-              itemCount: products.length + (hasMore ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (index == products.length) {
-                  return Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: CircularProgressIndicator(),
-                    ),
-                  );
-                }
-                final product = products[index];
+      body: Stack(
+        children: [
+          _viewType == ViewType.list
+              ? ListView.builder(
+                  controller: _scrollController,
+                  itemCount:
+                      2 + // hero header + view switch
+                      (isLoading
+                          ? 1 // loader below hero
+                          : (products.isEmpty
+                                ? 1 // empty-state below hero
+                                : products.length + (hasMore ? 1 : 0))),
+                  itemBuilder: (context, index) {
+                    // Header hero at index 0
+                    if (index == 0) {
+                      return _buildHeroSection(context);
+                    }
 
-                // animationKeys are now pre-generated and kept in sync with products
+                    // View type switch at index 1
+                    if (index == 1) {
+                      return _buildControlsBar(context);
+                    }
 
-                return ListTile(
-                  contentPadding: EdgeInsets.only(left: 16, right: 8),
-                  leading: AddToCartAnimation(
-                    key: animationKeys[index],
-                    onAnimationComplete: () {},
-                    cartIconKey: cartIconKey,
-                    child: Image.network(product.thumbnail),
-                  ),
-                  title: _highlightQuery(product.title, _searchController.text),
-                  subtitle: Row(
-                    children: [
-                      SizedBox(width: 4),
-                      Text(
-                        product.rating.toStringAsFixed(1),
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                    // Content starts after hero
+                    final listIndex = index - 2;
+
+                    if (isLoading) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+
+                    if (products.isEmpty) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 24,
+                        ),
+                        child: Text(
+                          _isSearching
+                              ? AppLocalizations.of(
+                                  context,
+                                )!.noProductsFound(_searchController.text)
+                              : AppLocalizations.of(
+                                  context,
+                                )!.noProductsAvailable,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      );
+                    }
+
+                    if (listIndex == products.length && hasMore) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    }
+
+                    final product = products[listIndex];
+
+                    // animationKeys are pre-generated; offset by header index
+                    return ListTile(
+                      contentPadding: const EdgeInsets.only(left: 16, right: 8),
+                      // Constrain leading so it doesn't consume the entire tile width.
+                      leading: SizedBox(
+                        width: 56,
+                        height: 56,
+                        child: AddToCartAnimation(
+                          key: animationKeys[listIndex],
+                          onAnimationComplete: () {},
+                          cartIconKey: cartIconKey,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: SafeNetworkImage(
+                              imageUrl: product.thumbnail,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
                       ),
-                      Icon(Icons.star, color: Colors.amber, size: 12),
-                      SizedBox(width: 8),
-                      Text(
-                        '\$${product.price.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          decoration: TextDecoration.lineThrough,
-                          fontSize: 8,
-                        ),
+                      title: _highlightQuery(
+                        product.title,
+                        _searchController.text,
                       ),
-                      SizedBox(width: 8),
-                      Text(
-                        '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
+                      subtitle: Row(
+                        children: [
+                          const SizedBox(width: 4),
+                          Text(
+                            product.rating.toStringAsFixed(1),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                          const Icon(Icons.star, color: Colors.amber, size: 12),
+                          const SizedBox(width: 8),
+                          Text(
+                            '\$${product.price.toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                              fontSize: 8,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            '- ${product.discountPercentage.toStringAsFixed(0)}%',
+                            style: const TextStyle(
+                              fontStyle: FontStyle.italic,
+                              color: Colors.blueAccent,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
                       ),
-                      SizedBox(width: 12),
-                      Text(
-                        '- ${product.discountPercentage.toStringAsFixed(0)}%',
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          color: Colors.blueAccent,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    HapticFeedback.lightImpact();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ProductDetailsScreen(product: product),
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ProductDetailsScreen(product: product),
+                          ),
+                        );
+                      },
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              context.read<WishlistProvider>().toggleWishlist(
+                                product.id,
+                              );
+                            },
+                            icon: Icon(
+                              context.watch<WishlistProvider>().isWishlisted(
+                                    product.id,
+                                  )
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                            ),
+                            iconSize: 16,
+                            color: Colors.pink,
+                            tooltip: AppLocalizations.of(
+                              context,
+                            )!.addToWishlist,
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 0),
+                            constraints: const BoxConstraints(),
+                          ),
+                          IconButton(
+                            onPressed: () async {
+                              HapticFeedback.lightImpact();
+                              animationKeys[listIndex].currentState
+                                  ?.startAnimation();
+                              final response = await http.put(
+                                Uri.parse('https://dummyjson.com/carts/1'),
+                                headers: {'content-type': 'application/json'},
+                                body: json.encode({
+                                  'merge': true,
+                                  'userId': 1,
+                                  'products': [
+                                    {'id': product.id, 'quantity': 1},
+                                  ],
+                                }),
+                              );
+
+                              if (response.statusCode == 200 ||
+                                  response.statusCode == 201 ||
+                                  response.statusCode == 301) {
+                                final cartProvider = Provider.of<CartProvider>(
+                                  context,
+                                  listen: false,
+                                );
+                                Provider.of<CartProvider>(
+                                  context,
+                                  listen: false,
+                                ).addProduct({
+                                  'quantity': 1,
+                                  ...product.toJson(),
+                                });
+                                final cartJson = json.encode(cartProvider.cart);
+                                if (kIsWeb) {
+                                  html.window.localStorage['cart'] = cartJson;
+                                } else {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  await prefs.setString('cart', cartJson);
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Failed to add product to cart',
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                            icon: const Icon(Icons.add_shopping_cart),
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 0),
+                            constraints: const BoxConstraints(),
+                          ),
+                        ],
                       ),
                     );
                   },
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          HapticFeedback.lightImpact();
-                          context.read<WishlistProvider>().toggleWishlist(
-                            product.id,
-                          );
-                        },
-                        icon: Icon(
-                          context.watch<WishlistProvider>().isWishlisted(
-                                product.id,
-                              )
-                              ? Icons.favorite
-                              : Icons.favorite_border,
+                )
+              : ListView(
+                  controller: _scrollController,
+                  children: [
+                    _buildHeroSection(context),
+                    _buildControlsBar(context),
+                    if (isLoading)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: CircularProgressIndicator(),
                         ),
-                        iconSize: 16,
-                        color: Colors.pink,
-                        tooltip: AppLocalizations.of(context)!.addToWishlist,
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.symmetric(horizontal: 0),
-                        constraints: BoxConstraints(),
-                      ),
-                      IconButton(
-                        onPressed: () async {
-                          HapticFeedback.lightImpact();
-                          animationKeys[index].currentState?.startAnimation();
-                          final response = await http.put(
-                            Uri.parse('https://dummyjson.com/carts/1'),
-                            headers: {'content-type': 'application/json'},
-                            body: json.encode({
-                              'merge': true,
-                              'userId': 1,
-                              'products': [
-                                {'id': product.id, 'quantity': 1},
-                              ],
-                            }),
-                          );
+                      )
+                    else if (products.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 24,
+                        ),
+                        child: Text(
+                          _isSearching
+                              ? AppLocalizations.of(
+                                  context,
+                                )!.noProductsFound(_searchController.text)
+                              : AppLocalizations.of(
+                                  context,
+                                )!.noProductsAvailable,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      )
+                    else ...[
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: _gridColumnsForWidth(context),
+                                childAspectRatio: _gridAspectRatio(context),
+                                crossAxisSpacing: 12,
+                                mainAxisSpacing: 12,
+                              ),
+                          itemCount: products.length,
+                          itemBuilder: (context, index) {
+                            final product = products[index];
+                            final bool isDark =
+                                Theme.of(context).brightness == Brightness.dark;
+                            return InkWell(
+                              onTap: () {
+                                HapticFeedback.lightImpact();
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        ProductDetailsScreen(product: product),
+                                  ),
+                                );
+                              },
+                              child: Card(
+                                clipBehavior: Clip.antiAlias,
+                                color: isDark ? null : Colors.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Stack(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Expanded(
+                                          child: AddToCartAnimation(
+                                            key: animationKeys[index],
+                                            onAnimationComplete: () {},
+                                            cartIconKey: cartIconKey,
+                                            child: SafeNetworkImage(
+                                              imageUrl: product.thumbnail,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              DefaultTextStyle(
+                                                style: TextStyle(
+                                                  color: isDark
+                                                      ? Colors.white
+                                                      : Colors.black,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                                child: _highlightQuery(
+                                                  product.title,
+                                                  _searchController.text,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 6),
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    product.rating
+                                                        .toStringAsFixed(1),
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      fontSize: 12,
+                                                      color: isDark
+                                                          ? Colors.white
+                                                          : null,
+                                                    ),
+                                                  ),
+                                                  const Icon(
+                                                    Icons.star,
+                                                    color: Colors.amber,
+                                                    size: 12,
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.green,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    '\$${product.price.toStringAsFixed(2)}',
+                                                    style: TextStyle(
+                                                      decoration: TextDecoration
+                                                          .lineThrough,
+                                                      fontSize: 10,
+                                                      color: isDark
+                                                          ? Colors.white70
+                                                          : Colors.black54,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: 44,
+                                          child: ElevatedButton(
+                                            style: ElevatedButton.styleFrom(
+                                              elevation: 0,
+                                              shape:
+                                                  const RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.zero,
+                                                  ),
+                                              backgroundColor: Colors.amber,
+                                              foregroundColor: Colors.black,
+                                            ),
+                                            onPressed: () async {
+                                              HapticFeedback.lightImpact();
+                                              animationKeys[index].currentState
+                                                  ?.startAnimation();
+                                              final response = await http.put(
+                                                Uri.parse(
+                                                  'https://dummyjson.com/carts/1',
+                                                ),
+                                                headers: {
+                                                  'content-type':
+                                                      'application/json',
+                                                },
+                                                body: json.encode({
+                                                  'merge': true,
+                                                  'userId': 1,
+                                                  'products': [
+                                                    {
+                                                      'id': product.id,
+                                                      'quantity': 1,
+                                                    },
+                                                  ],
+                                                }),
+                                              );
 
-                          if (response.statusCode == 200 ||
-                              response.statusCode == 201 ||
-                              response.statusCode == 301) {
-                            final cartProvider = Provider.of<CartProvider>(
-                              context,
-                              listen: false,
-                            );
-                            Provider.of<CartProvider>(
-                              context,
-                              listen: false,
-                            ).addProduct({'quantity': 1, ...product.toJson()});
-                            final cartJson = json.encode(cartProvider.cart);
-                            if (kIsWeb) {
-                              html.window.localStorage['cart'] = cartJson;
-                            } else {
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-                              await prefs.setString('cart', cartJson);
-                            }
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Failed to add product to cart'),
+                                              if (response.statusCode == 200 ||
+                                                  response.statusCode == 201 ||
+                                                  response.statusCode == 301) {
+                                                final cartProvider =
+                                                    Provider.of<CartProvider>(
+                                                      context,
+                                                      listen: false,
+                                                    );
+                                                Provider.of<CartProvider>(
+                                                  context,
+                                                  listen: false,
+                                                ).addProduct({
+                                                  'quantity': 1,
+                                                  ...product.toJson(),
+                                                });
+                                                final cartJson = json.encode(
+                                                  cartProvider.cart,
+                                                );
+                                                if (kIsWeb) {
+                                                  html
+                                                          .window
+                                                          .localStorage['cart'] =
+                                                      cartJson;
+                                                } else {
+                                                  final prefs =
+                                                      await SharedPreferences.getInstance();
+                                                  await prefs.setString(
+                                                    'cart',
+                                                    cartJson,
+                                                  );
+                                                }
+                                              } else {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Failed to add product to cart',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            child:
+                                                MediaQuery.of(
+                                                      context,
+                                                    ).size.width <
+                                                    800
+                                                ? Tooltip(
+                                                    message: 'Add to Cart',
+                                                    child: const Icon(
+                                                      Icons.add_shopping_cart,
+                                                      size: 18,
+                                                    ),
+                                                  )
+                                                : const Text(
+                                                    'Add to Cart',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                    ),
+                                                  ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Positioned(
+                                      top: 6,
+                                      right: 6,
+                                      child: Material(
+                                        color: Colors.transparent,
+                                        child: IconButton(
+                                          onPressed: () {
+                                            HapticFeedback.lightImpact();
+                                            context
+                                                .read<WishlistProvider>()
+                                                .toggleWishlist(product.id);
+                                          },
+                                          icon: Icon(
+                                            context
+                                                    .watch<WishlistProvider>()
+                                                    .isWishlisted(product.id)
+                                                ? Icons.favorite
+                                                : Icons.favorite_border,
+                                          ),
+                                          color: Colors.pink,
+                                          tooltip: AppLocalizations.of(
+                                            context,
+                                          )!.addToWishlist,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
-                          }
-                        },
-                        icon: Icon(Icons.add_shopping_cart),
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.symmetric(horizontal: 0),
-                        constraints: BoxConstraints(),
+                          },
+                        ),
                       ),
+                      if (hasMore)
+                        const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(16),
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
                     ],
+                  ],
+                ),
+          // Loader overlay for view switching
+          if (_isViewSwitching)
+            Container(
+              color: Colors.black.withValues(alpha: 0.3),
+              child: const Center(
+                child: Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 12),
+                        Text('Switching view...'),
+                      ],
+                    ),
                   ),
-                );
-              },
+                ),
+              ),
             ),
+        ],
+      ),
     );
   }
 }

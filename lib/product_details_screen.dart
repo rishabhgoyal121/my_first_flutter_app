@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'src/widgets/safe_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,11 +27,30 @@ class ProductDetailsScreen extends StatefulWidget {
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   late Product product;
+  final ScrollController _scrollController = ScrollController();
+  final GlobalKey _reviewsKey = GlobalKey();
 
   @override
   void initState() {
     super.initState();
     product = widget.product;
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToReviews() {
+    final context = _reviewsKey.currentContext;
+    if (context != null) {
+      Scrollable.ensureVisible(
+        context,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   void _showReviewDialog() {
@@ -112,16 +132,54 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   void _showFullScreenImage(String imageUrl) {
     showDialog(
       context: context,
-      builder: (context) => MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Container(
-            color: Colors.black,
-            child: Center(
-              child: Hero(tag: imageUrl, child: Image.network(imageUrl)),
+      builder: (context) => Dialog.fullscreen(
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            InteractiveViewer(
+              minScale: 1.0,
+              maxScale: 5.0,
+              child: Center(
+                child: Hero(
+                  tag: imageUrl,
+                  child: SafeNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
             ),
-          ),
+            Positioned(
+              top: 40,
+              right: 16,
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: Icon(Icons.close, color: Colors.white, size: 30),
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.black54,
+                  shape: CircleBorder(),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 40,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black54,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'Pinch to zoom • Tap close button to exit',
+                    style: TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -196,6 +254,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -209,21 +268,38 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   SizedBox(width: 8),
                   Row(
                     children: [
-                      Text(
-                        product.rating.toStringAsFixed(1),
-                        style: TextStyle(
-                          color: Colors.amberAccent,
-                          fontSize: 16,
-                        ),
-                      ),
-                      SizedBox(width: 2),
-                      Icon(Icons.star, size: 14, color: Colors.amberAccent),
-                      SizedBox(width: 2),
-                      Text(
-                        '(${product.reviews.length})',
-                        style: TextStyle(
-                          color: Colors.amberAccent,
-                          fontSize: 10,
+                      GestureDetector(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          _scrollToReviews();
+                        },
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: Row(
+                            children: [
+                              Text(
+                                product.rating.toStringAsFixed(1),
+                                style: TextStyle(
+                                  color: Colors.amberAccent,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              SizedBox(width: 2),
+                              Icon(
+                                Icons.star,
+                                size: 14,
+                                color: Colors.amberAccent,
+                              ),
+                              SizedBox(width: 2),
+                              Text(
+                                '(${product.reviews.length})',
+                                style: TextStyle(
+                                  color: Colors.amberAccent,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       Spacer(),
@@ -264,7 +340,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     onTap: () => _showFullScreenImage(product.thumbnail),
                     child: Hero(
                       tag: product.thumbnail,
-                      child: Image.network(product.thumbnail, height: 200),
+                      child: SafeNetworkImage(
+                        imageUrl: product.thumbnail,
+                        height: 200,
+                        fit: BoxFit.cover,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
                 ),
@@ -468,10 +549,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   margin: EdgeInsets.only(right: 12),
                                   child: Column(
                                     children: [
-                                      Image.network(
-                                        rec.thumbnail,
+                                      SafeNetworkImage(
+                                        imageUrl: rec.thumbnail,
                                         height: 100,
                                         fit: BoxFit.cover,
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
                                       Text(
                                         rec.title,
@@ -497,7 +579,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 },
               ),
               SizedBox(height: 16),
-              Text('Reviews', style: TextStyle(fontWeight: FontWeight.bold)),
+              Text(
+                'Reviews',
+                key: _reviewsKey,
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               SizedBox(height: 16),
 
               if (product.reviews.isEmpty)

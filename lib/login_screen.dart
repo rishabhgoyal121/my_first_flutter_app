@@ -22,6 +22,7 @@ class _LoginScreenState extends State<LoginScreen> {
   String password = '';
   bool ssoSuccess = false;
   bool isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -200,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
+      appBar: AppBar(title: Text('Login to Shopper')),
       resizeToAvoidBottomInset: true,
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -244,17 +245,36 @@ class _LoginScreenState extends State<LoginScreen> {
                 decoration: InputDecoration(labelText: 'Username'),
                 onChanged: (val) => username = val,
                 validator: (val) => val!.isEmpty ? 'Enter Username' : null,
+                autofillHints: const [AutofillHints.username],
               ),
               SizedBox(height: 16),
               TextFormField(
-                decoration: InputDecoration(labelText: 'Password'),
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    tooltip: _obscurePassword
+                        ? 'Show password'
+                        : 'Hide password',
+                  ),
+                ),
                 onChanged: (val) => password = val,
                 validator: (val) => val!.isEmpty ? 'Enter Password' : null,
-                obscureText: true,
+                obscureText: _obscurePassword,
                 textInputAction: TextInputAction.done,
                 onFieldSubmitted: (_) async {
                   _handleLogin();
                 },
+                autofillHints: const [AutofillHints.password],
               ),
               SizedBox(height: 40),
               ElevatedButton(

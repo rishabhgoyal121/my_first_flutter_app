@@ -7,6 +7,7 @@ import 'order_animation.dart';
 import 'cart_item_delete_animation.dart';
 import 'package:flutter/services.dart';
 import 'product.dart';
+import 'src/widgets/safe_network_image.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -99,19 +100,10 @@ class _CartScreenState extends State<CartScreen> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),
-                      child: Image.network(
-                        'https://images.unsplash.com/photo-1601598505513-7489a6272d2a?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D',
+                      child: SafeNetworkImage(
+                        imageUrl:
+                            'https://images.unsplash.com/photo-1601598505513-7489a6272d2a?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1yZWxhdGVkfDF8fHxlbnwwfHx8fHw%3D',
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: Colors.blue[100],
-                            child: Icon(
-                              Icons.shopping_cart_outlined,
-                              size: 80,
-                              color: Colors.blue[600],
-                            ),
-                          );
-                        },
                       ),
                     ),
                   ),
@@ -140,8 +132,8 @@ class _CartScreenState extends State<CartScreen> {
                         horizontal: 32,
                         vertical: 0,
                       ),
-                      backgroundColor: Colors.orangeAccent,
-                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.amberAccent,
+                      foregroundColor: Colors.black,
                       textStyle: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -203,7 +195,7 @@ class _CartScreenState extends State<CartScreen> {
                                   ),
                                   SizedBox(height: 12),
                                   SizedBox(
-                                    height: 200,
+                                    height: 215,
                                     child: ListView.builder(
                                       scrollDirection: Axis.horizontal,
                                       itemCount: recommended.length,
@@ -228,85 +220,78 @@ class _CartScreenState extends State<CartScreen> {
                                                 },
                                               );
                                             },
-                                            child: Container(
-                                              width: 160,
+                                            child: Card(
+                                              clipBehavior: Clip.antiAlias,
                                               margin: EdgeInsets.only(
                                                 right: 12,
                                               ),
-                                              decoration: BoxDecoration(
-                                                border: Border.all(
-                                                  color: Colors.grey.shade300,
-                                                ),
+                                              shape: RoundedRectangleBorder(
                                                 borderRadius:
                                                     BorderRadius.circular(8),
                                               ),
-                                              child: Stack(
-                                                children: [
-                                                  Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      ClipRRect(
+                                              child: SizedBox(
+                                                width: 160,
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                        top: 4,
+                                                        left: 4,
+                                                        right: 4,
+                                                      ),
+                                                      child: ClipRRect(
                                                         borderRadius:
-                                                            BorderRadius.vertical(
-                                                              top:
-                                                                  Radius.circular(
-                                                                    8,
-                                                                  ),
+                                                            BorderRadius.circular(
+                                                              6,
                                                             ),
-                                                        child: Image.network(
-                                                          product.thumbnail,
-                                                          height: 120,
+                                                        child: SafeNetworkImage(
+                                                          imageUrl:
+                                                              product.thumbnail,
+                                                          height: 95,
                                                           width:
                                                               double.infinity,
                                                           fit: BoxFit.cover,
-                                                          errorBuilder:
-                                                              (
-                                                                context,
-                                                                error,
-                                                                stackTrace,
-                                                              ) {
-                                                                return Container(
-                                                                  height: 120,
-                                                                  color: Colors
-                                                                      .grey[200],
-                                                                  child: Icon(
-                                                                    Icons
-                                                                        .image_not_supported,
-                                                                  ),
-                                                                );
-                                                              },
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                6,
+                                                              ),
                                                         ),
                                                       ),
-                                                      Expanded(
-                                                        child: Padding(
-                                                          padding:
-                                                              EdgeInsets.all(
-                                                                8.0,
+                                                    ),
+                                                    Expanded(
+                                                      child: Padding(
+                                                        padding:
+                                                            EdgeInsets.symmetric(
+                                                              horizontal: 6.0,
+                                                              vertical: 4.0,
+                                                            ),
+                                                        child: Column(
+                                                          mainAxisSize:
+                                                              MainAxisSize.min,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
+                                                          children: [
+                                                            Text(
+                                                              product.title,
+                                                              maxLines: 2,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: TextStyle(
+                                                                fontSize: 12,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
                                                               ),
-                                                          child: Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            children: [
-                                                              Text(
-                                                                product.title,
-                                                                maxLines: 2,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                style: TextStyle(
-                                                                  fontSize: 12,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
-                                                              ),
-                                                              Spacer(),
-                                                              Row(
-                                                                children: [
-                                                                  Text(
+                                                            ),
+                                                            SizedBox(height: 2),
+                                                            Row(
+                                                              children: [
+                                                                Flexible(
+                                                                  child: Text(
                                                                     '\$${discountedPrice.toStringAsFixed(2)}',
                                                                     style: TextStyle(
                                                                       fontWeight:
@@ -317,14 +302,19 @@ class _CartScreenState extends State<CartScreen> {
                                                                       fontSize:
                                                                           14,
                                                                     ),
+                                                                    overflow:
+                                                                        TextOverflow
+                                                                            .ellipsis,
                                                                   ),
-                                                                  SizedBox(
-                                                                    width: 4,
-                                                                  ),
-                                                                  if (product
-                                                                          .discountPercentage >
-                                                                      0)
-                                                                    Text(
+                                                                ),
+                                                                SizedBox(
+                                                                  width: 4,
+                                                                ),
+                                                                if (product
+                                                                        .discountPercentage >
+                                                                    0)
+                                                                  Flexible(
+                                                                    child: Text(
                                                                       '\$${product.price.toStringAsFixed(2)}',
                                                                       style: TextStyle(
                                                                         fontSize:
@@ -334,126 +324,148 @@ class _CartScreenState extends State<CartScreen> {
                                                                         color: Colors
                                                                             .grey,
                                                                       ),
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
                                                                     ),
-                                                                ],
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  // Add to cart button positioned at bottom right
-                                                  Positioned(
-                                                    bottom: 8,
-                                                    right: 8,
-                                                    child: GestureDetector(
-                                                      onTap: () async {
-                                                        HapticFeedback.lightImpact();
-                                                        try {
-                                                          // Add to cart API call
-                                                          await http.put(
-                                                            Uri.parse(
-                                                              'https://dummyjson.com/carts/1',
-                                                            ),
-                                                            headers: {
-                                                              'Content-Type':
-                                                                  'application/json',
-                                                            },
-                                                            body: json.encode({
-                                                              'merge': true,
-                                                              'userId': 1,
-                                                              'products': [
-                                                                {
-                                                                  'id': product
-                                                                      .id,
-                                                                  'quantity': 1,
-                                                                },
-                                                              ],
-                                                            }),
-                                                          );
-
-                                                          // Add to local cart
-                                                          final cartProvider =
-                                                              Provider.of<
-                                                                CartProvider
-                                                              >(
-                                                                context,
-                                                                listen: false,
-                                                              );
-                                                          cartProvider
-                                                              .addProduct({
-                                                                'quantity': 1,
-                                                                ...product
-                                                                    .toJson(),
-                                                              });
-
-                                                          // Show success message
-                                                          ScaffoldMessenger.of(
-                                                            context,
-                                                          ).showSnackBar(
-                                                            SnackBar(
-                                                              content: Text(
-                                                                '${product.title} added to cart!',
-                                                              ),
-                                                              duration: Duration(
-                                                                milliseconds:
-                                                                    1500,
-                                                              ),
-                                                              backgroundColor:
-                                                                  Colors.green,
-                                                            ),
-                                                          );
-                                                        } catch (e) {
-                                                          ScaffoldMessenger.of(
-                                                            context,
-                                                          ).showSnackBar(
-                                                            SnackBar(
-                                                              content: Text(
-                                                                'Failed to add to cart',
-                                                              ),
-                                                              backgroundColor:
-                                                                  Colors.red,
-                                                            ),
-                                                          );
-                                                        }
-                                                      },
-                                                      child: Container(
-                                                        padding: EdgeInsets.all(
-                                                          7,
-                                                        ),
-                                                        decoration: BoxDecoration(
-                                                          color: Colors
-                                                              .deepPurpleAccent,
-                                                          borderRadius:
-                                                              BorderRadius.circular(
-                                                                8,
-                                                              ),
-                                                          boxShadow: [
-                                                            BoxShadow(
-                                                              color: Colors
-                                                                  .black
-                                                                  .withValues(
-                                                                    alpha: 0.2,
                                                                   ),
-                                                              blurRadius: 4,
-                                                              offset: Offset(
-                                                                0,
-                                                                2,
-                                                              ),
+                                                              ],
                                                             ),
                                                           ],
                                                         ),
-                                                        child: Icon(
-                                                          Icons
-                                                              .add_shopping_cart,
-                                                          size: 19,
-                                                          color: Colors.white,
-                                                        ),
                                                       ),
                                                     ),
-                                                  ),
-                                                ],
+                                                    // Full width add to cart button at bottom
+                                                    SizedBox(
+                                                      width: double.infinity,
+                                                      height: 40,
+                                                      child: LayoutBuilder(
+                                                        builder: (context, constraints) {
+                                                          // Check if screen width is small (mobile)
+                                                          final isSmallScreen =
+                                                              MediaQuery.of(
+                                                                context,
+                                                              ).size.width <
+                                                              600;
+
+                                                          return ElevatedButton(
+                                                            onPressed: () async {
+                                                              HapticFeedback.lightImpact();
+                                                              try {
+                                                                // Add to cart API call
+                                                                await http.put(
+                                                                  Uri.parse(
+                                                                    'https://dummyjson.com/carts/1',
+                                                                  ),
+                                                                  headers: {
+                                                                    'Content-Type':
+                                                                        'application/json',
+                                                                  },
+                                                                  body: json.encode({
+                                                                    'merge':
+                                                                        true,
+                                                                    'userId': 1,
+                                                                    'products': [
+                                                                      {
+                                                                        'id': product
+                                                                            .id,
+                                                                        'quantity':
+                                                                            1,
+                                                                      },
+                                                                    ],
+                                                                  }),
+                                                                );
+
+                                                                // Add to local cart
+                                                                final cartProvider =
+                                                                    Provider.of<
+                                                                      CartProvider
+                                                                    >(
+                                                                      context,
+                                                                      listen:
+                                                                          false,
+                                                                    );
+                                                                cartProvider
+                                                                    .addProduct({
+                                                                      'quantity':
+                                                                          1,
+                                                                      ...product
+                                                                          .toJson(),
+                                                                    });
+
+                                                                // Show success message
+                                                                ScaffoldMessenger.of(
+                                                                  context,
+                                                                ).showSnackBar(
+                                                                  SnackBar(
+                                                                    content: Text(
+                                                                      '${product.title} added to cart!',
+                                                                    ),
+                                                                    duration: Duration(
+                                                                      milliseconds:
+                                                                          1500,
+                                                                    ),
+                                                                    backgroundColor:
+                                                                        Colors
+                                                                            .green,
+                                                                  ),
+                                                                );
+                                                              } catch (e) {
+                                                                ScaffoldMessenger.of(
+                                                                  context,
+                                                                ).showSnackBar(
+                                                                  SnackBar(
+                                                                    content: Text(
+                                                                      'Failed to add to cart',
+                                                                    ),
+                                                                    backgroundColor:
+                                                                        Colors
+                                                                            .red,
+                                                                  ),
+                                                                );
+                                                              }
+                                                            },
+                                                            style: ElevatedButton.styleFrom(
+                                                              backgroundColor:
+                                                                  Colors.amber,
+                                                              foregroundColor:
+                                                                  Colors.black,
+                                                              padding:
+                                                                  EdgeInsets.symmetric(
+                                                                    horizontal:
+                                                                        8,
+                                                                    vertical: 0,
+                                                                  ),
+                                                              shape: RoundedRectangleBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .zero,
+                                                              ),
+                                                              elevation: 2,
+                                                            ),
+
+                                                            child: isSmallScreen
+                                                                ? Icon(
+                                                                    Icons
+                                                                        .add_shopping_cart,
+                                                                    size: 20,
+                                                                  )
+                                                                : Text(
+                                                                    'Add to Cart',
+                                                                    style: TextStyle(
+                                                                      fontSize:
+                                                                          11,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w600,
+                                                                    ),
+                                                                  ),
+                                                          );
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -540,7 +552,13 @@ class _CartScreenState extends State<CartScreen> {
                               }
                             : null,
                         child: ListTile(
-                          leading: Image.network(item['thumbnail'], width: 50),
+                          leading: SafeNetworkImage(
+                            imageUrl: item['thumbnail'],
+                            width: 50,
+                            height: 50,
+                            fit: BoxFit.cover,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
                           title: Text(item['title']),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -654,25 +672,48 @@ class _CartScreenState extends State<CartScreen> {
                                   key: ValueKey('loading'),
                                 ),
                               )
-                            : ElevatedButton(
-                                key: ValueKey('button'),
-                                onPressed: cartItems.isEmpty || _isPlacingOrder
-                                    ? null
-                                    : () async {
-                                        HapticFeedback.lightImpact();
-                                        // Navigate to checkout screen
-                                        Navigator.pushNamed(
-                                          context,
-                                          '/checkout',
-                                          arguments: {
-                                            'cartItems': cartItems,
-                                            'cartTotal': cartTotal,
-                                            'cartDiscountedTotal':
-                                                cartDiscountedTotal,
-                                          },
-                                        );
-                                      },
-                                child: Text('Checkout'),
+                            : SizedBox(
+                                width: double.infinity,
+                                height: 48,
+                                child: ElevatedButton(
+                                  key: ValueKey('button'),
+                                  style: ButtonStyle(
+                                    backgroundColor: WidgetStateProperty.all(
+                                      cartItems.isEmpty || _isPlacingOrder
+                                          ? Colors.grey
+                                          : Colors.amberAccent,
+                                    ),
+                                    foregroundColor: WidgetStateProperty.all(
+                                      cartItems.isEmpty || _isPlacingOrder
+                                          ? Colors.black38
+                                          : Colors.black,
+                                    ),
+                                    padding: WidgetStateProperty.all(
+                                      EdgeInsets.symmetric(
+                                        horizontal: 0,
+                                        vertical: 12,
+                                      ),
+                                    ),
+                                  ),
+                                  onPressed:
+                                      cartItems.isEmpty || _isPlacingOrder
+                                      ? null
+                                      : () async {
+                                          HapticFeedback.lightImpact();
+                                          // Navigate to checkout screen
+                                          Navigator.pushNamed(
+                                            context,
+                                            '/checkout',
+                                            arguments: {
+                                              'cartItems': cartItems,
+                                              'cartTotal': cartTotal,
+                                              'cartDiscountedTotal':
+                                                  cartDiscountedTotal,
+                                            },
+                                          );
+                                        },
+                                  child: Text('Checkout'),
+                                ),
                               ),
                       ),
                     ],
