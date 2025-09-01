@@ -587,148 +587,157 @@ class _HomeScreenState extends State<HomeScreen> {
     HapticFeedback.lightImpact();
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (context) {
+        final double sheetHeight = MediaQuery.of(context).size.height * 0.6;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
-              padding: EdgeInsets.all(16),
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  Text(AppLocalizations.of(context)!.category),
-                  DropdownButton<String>(
-                    value: _selectedCategorySlug,
-                    hint: Text(AppLocalizations.of(context)!.selectCategory),
-                    isExpanded: true,
-                    items: _categories
-                        .map(
-                          (cat) => DropdownMenuItem<String>(
-                            value: cat['slug'],
-                            child: Text(cat['name']),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (val) {
-                      setModalState(() => _selectedCategorySlug = val);
-                      applyFilters();
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(context)!.priceRange(
-                      _selectedMinPrice.toInt(),
-                      _selectedMaxPrice.toInt(),
+              padding: EdgeInsets.only(
+                left: 16,
+                right: 16,
+                top: 16,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+              ),
+              child: SizedBox(
+                height: sheetHeight,
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    Text(AppLocalizations.of(context)!.category),
+                    DropdownButton<String>(
+                      value: _selectedCategorySlug,
+                      hint: Text(AppLocalizations.of(context)!.selectCategory),
+                      isExpanded: true,
+                      items: _categories
+                          .map(
+                            (cat) => DropdownMenuItem<String>(
+                              value: cat['slug'],
+                              child: Text(cat['name']),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (val) {
+                        setModalState(() => _selectedCategorySlug = val);
+                        applyFilters();
+                      },
                     ),
-                  ),
-                  RangeSlider(
-                    min: _minPrice,
-                    max: _maxPrice,
-                    divisions: 20,
-                    values: RangeValues(_selectedMinPrice, _selectedMaxPrice),
-                    onChanged: (values) {
-                      setModalState(() {
-                        _selectedMinPrice = values.start;
-                        _selectedMaxPrice = values.end;
-                      });
-                      applyFilters();
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    AppLocalizations.of(
-                      context,
-                    )!.minimumRating(_selectedMinRating),
-                  ),
-                  Slider(
-                    min: 0,
-                    max: 5,
-                    divisions: 10,
-                    value: _selectedMinRating,
-                    onChanged: (val) {
-                      setModalState(() => _selectedMinRating = val);
-                      applyFilters();
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  Text(AppLocalizations.of(context)!.brand),
-                  DropdownButton<String>(
-                    value: _selectedBrand,
-                    hint: Text(AppLocalizations.of(context)!.selectBrand),
-                    isExpanded: true,
-                    items: _brands
-                        .map(
-                          (brand) => DropdownMenuItem<String>(
-                            value: brand,
-                            child: Text(brand),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (val) {
-                      setModalState(() => _selectedBrand = val);
-                      applyFilters();
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  CheckboxListTile(
-                    title: Text(AppLocalizations.of(context)!.inStockOnly),
-                    value: _inStockOnly,
-                    onChanged: (val) {
-                      setModalState(() => _inStockOnly = val ?? false);
-                      applyFilters();
-                    },
-                    controlAffinity: ListTileControlAffinity.leading,
-                  ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      elevation: 0,
-                      textStyle: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                    SizedBox(height: 16),
+                    Text(
+                      AppLocalizations.of(context)!.priceRange(
+                        _selectedMinPrice.toInt(),
+                        _selectedMaxPrice.toInt(),
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(
-                      AppLocalizations.of(context)!.done,
-                      style: TextStyle(color: Colors.white),
+                    RangeSlider(
+                      min: _minPrice,
+                      max: _maxPrice,
+                      divisions: 20,
+                      values: RangeValues(_selectedMinPrice, _selectedMaxPrice),
+                      onChanged: (values) {
+                        setModalState(() {
+                          _selectedMinPrice = values.start;
+                          _selectedMaxPrice = values.end;
+                        });
+                        applyFilters();
+                      },
                     ),
-                  ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                      foregroundColor: Colors.white,
-                      side: BorderSide(color: Colors.redAccent),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                    SizedBox(height: 16),
+                    Text(
+                      AppLocalizations.of(
+                        context,
+                      )!.minimumRating(_selectedMinRating),
+                    ),
+                    Slider(
+                      min: 0,
+                      max: 5,
+                      divisions: 10,
+                      value: _selectedMinRating,
+                      onChanged: (val) {
+                        setModalState(() => _selectedMinRating = val);
+                        applyFilters();
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    Text(AppLocalizations.of(context)!.brand),
+                    DropdownButton<String>(
+                      value: _selectedBrand,
+                      hint: Text(AppLocalizations.of(context)!.selectBrand),
+                      isExpanded: true,
+                      items: _brands
+                          .map(
+                            (brand) => DropdownMenuItem<String>(
+                              value: brand,
+                              child: Text(brand),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (val) {
+                        setModalState(() => _selectedBrand = val);
+                        applyFilters();
+                      },
+                    ),
+                    SizedBox(height: 16),
+                    CheckboxListTile(
+                      title: Text(AppLocalizations.of(context)!.inStockOnly),
+                      value: _inStockOnly,
+                      onChanged: (val) {
+                        setModalState(() => _inStockOnly = val ?? false);
+                        applyFilters();
+                      },
+                      controlAffinity: ListTileControlAffinity.leading,
+                    ),
+                    SizedBox(height: 16),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 0,
+                        textStyle: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      elevation: 0,
-                      textStyle: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        AppLocalizations.of(context)!.done,
+                        style: TextStyle(color: Colors.white),
                       ),
                     ),
-                    onPressed: () {
-                      setModalState(() {
-                        _selectedCategorySlug = null;
-                        _selectedMinPrice = _minPrice;
-                        _selectedMaxPrice = _maxPrice;
-                        _selectedMinRating = 0;
-                        _selectedBrand = null;
-                        _inStockOnly = false;
-                      });
-                      // Also update the main product list
-                      applyFilters();
-                    },
-
-                    child: Text(AppLocalizations.of(context)!.clearFilters),
-                  ),
-                ],
+                    SizedBox(height: 16),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white,
+                        side: BorderSide(color: Colors.redAccent),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        elevation: 0,
+                        textStyle: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onPressed: () {
+                        setModalState(() {
+                          _selectedCategorySlug = null;
+                          _selectedMinPrice = _minPrice;
+                          _selectedMaxPrice = _maxPrice;
+                          _selectedMinRating = 0;
+                          _selectedBrand = null;
+                          _inStockOnly = false;
+                        });
+                        // Also update the main product list
+                        applyFilters();
+                      },
+                      child: Text(AppLocalizations.of(context)!.clearFilters),
+                    ),
+                  ],
+                ),
               ),
             );
           },
