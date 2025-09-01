@@ -937,6 +937,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.pushNamed(context, '/profile');
             },
             icon: Icon(Icons.person),
+            tooltip: AppLocalizations.of(context)!.profile,
           ),
 
           IconButton(
@@ -968,6 +969,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.pushNamed(context, '/cart');
                 },
                 icon: Icon(Icons.shopping_cart),
+                tooltip: AppLocalizations.of(context)!.viewCart,
               ),
               Positioned(
                 right: 8,

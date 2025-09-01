@@ -79,4 +79,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get done => 'हो गया';
+
+  @override
+  String get viewCart => 'कार्ट देखें';
 }

@@ -52,5 +52,6 @@
     }
   },
   "inStockOnly": "In Stock Only",
-  "done": "Done"
+  "done": "Done",
+  "viewCart": "View Cart"
 }
