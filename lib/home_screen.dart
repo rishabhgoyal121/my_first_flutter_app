@@ -1103,7 +1103,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         product.title,
                         _searchController.text,
                       ),
-                      subtitle: Row(
+                      subtitle: Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 2,
                         children: [
                           const SizedBox(width: 4),
                           Text(
@@ -1114,23 +1117,22 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           const Icon(Icons.star, color: Colors.amber, size: 12),
-                          const SizedBox(width: 8),
                           Text(
                             '\$${product.price.toStringAsFixed(2)}',
                             style: const TextStyle(
                               decoration: TextDecoration.lineThrough,
                               fontSize: 8,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(width: 8),
                           Text(
                             '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.green,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(width: 12),
                           Text(
                             '- ${product.discountPercentage.toStringAsFixed(0)}%',
                             style: const TextStyle(
@@ -1138,6 +1140,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               color: Colors.blueAccent,
                               fontSize: 12,
                             ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
@@ -1343,7 +1346,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 ),
                                               ),
                                               const SizedBox(height: 6),
-                                              Row(
+                                              Wrap(
+                                                crossAxisAlignment:
+                                                    WrapCrossAlignment.center,
+                                                spacing: 6,
+                                                runSpacing: 2,
                                                 children: [
                                                   Text(
                                                     product.rating
@@ -1362,7 +1369,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     color: Colors.amber,
                                                     size: 12,
                                                   ),
-                                                  const SizedBox(width: 6),
                                                   Text(
                                                     '\$${(product.price * (1 - product.discountPercentage / 100)).toStringAsFixed(2)}',
                                                     style: const TextStyle(
@@ -1370,8 +1376,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                                           FontWeight.bold,
                                                       color: Colors.green,
                                                     ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
-                                                  const SizedBox(width: 6),
                                                   Text(
                                                     '\$${product.price.toStringAsFixed(2)}',
                                                     style: TextStyle(
@@ -1382,6 +1389,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                           ? Colors.white70
                                                           : Colors.black54,
                                                     ),
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                   ),
                                                 ],
                                               ),
