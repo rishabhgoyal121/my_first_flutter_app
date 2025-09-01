@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
-                  vertical: 8,
+                  vertical: 6,
                 ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -193,7 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
-                  vertical: 8,
+                  vertical: 6,
                 ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -271,25 +271,25 @@ class _HomeScreenState extends State<HomeScreen> {
           // View type switcher on the right
           SegmentedButton<ViewType>(
             segments: isLargeScreen
-                ? const [
+                ? [
                     ButtonSegment<ViewType>(
                       value: ViewType.list,
-                      icon: Icon(Icons.view_list),
-                      label: Text('List'),
+                      icon: const Icon(Icons.view_list),
+                      label: Builder(builder: (context) => Text('List')),
                     ),
                     ButtonSegment<ViewType>(
                       value: ViewType.grid,
-                      icon: Icon(Icons.grid_view),
-                      label: Text('Grid'),
+                      icon: const Icon(Icons.grid_view),
+                      label: Builder(builder: (context) => Text('Grid')),
                     ),
                   ]
-                : const [
-                    ButtonSegment<ViewType>(
+                : [
+                    const ButtonSegment<ViewType>(
                       value: ViewType.list,
                       icon: Icon(Icons.view_list),
                       label: SizedBox.shrink(),
                     ),
-                    ButtonSegment<ViewType>(
+                    const ButtonSegment<ViewType>(
                       value: ViewType.grid,
                       icon: Icon(Icons.grid_view),
                       label: SizedBox.shrink(),
