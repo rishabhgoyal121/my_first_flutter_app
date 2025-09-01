@@ -1307,14 +1307,20 @@ class _HomeScreenState extends State<HomeScreen> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.stretch,
                                       children: [
+                                        // Flexible image area with top padding to avoid wishlist icon
                                         Expanded(
-                                          child: AddToCartAnimation(
-                                            key: animationKeys[index],
-                                            onAnimationComplete: () {},
-                                            cartIconKey: cartIconKey,
-                                            child: SafeNetworkImage(
-                                              imageUrl: product.thumbnail,
-                                              fit: BoxFit.cover,
+                                          child: Container(
+                                            padding: const EdgeInsets.only(
+                                              top: 32.0,
+                                            ),
+                                            child: AddToCartAnimation(
+                                              key: animationKeys[index],
+                                              onAnimationComplete: () {},
+                                              cartIconKey: cartIconKey,
+                                              child: SafeNetworkImage(
+                                                imageUrl: product.thumbnail,
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
                                           ),
                                         ),
