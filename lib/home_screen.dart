@@ -270,18 +270,31 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(width: 8),
           // View type switcher on the right
           SegmentedButton<ViewType>(
-            segments: const [
-              ButtonSegment<ViewType>(
-                value: ViewType.list,
-                icon: Icon(Icons.view_list),
-                label: Text('List'),
-              ),
-              ButtonSegment<ViewType>(
-                value: ViewType.grid,
-                icon: Icon(Icons.grid_view),
-                label: Text('Grid'),
-              ),
-            ],
+            segments: isLargeScreen
+                ? const [
+                    ButtonSegment<ViewType>(
+                      value: ViewType.list,
+                      icon: Icon(Icons.view_list),
+                      label: Text('List'),
+                    ),
+                    ButtonSegment<ViewType>(
+                      value: ViewType.grid,
+                      icon: Icon(Icons.grid_view),
+                      label: Text('Grid'),
+                    ),
+                  ]
+                : const [
+                    ButtonSegment<ViewType>(
+                      value: ViewType.list,
+                      icon: Icon(Icons.view_list),
+                      label: SizedBox.shrink(),
+                    ),
+                    ButtonSegment<ViewType>(
+                      value: ViewType.grid,
+                      icon: Icon(Icons.grid_view),
+                      label: SizedBox.shrink(),
+                    ),
+                  ],
             selected: <ViewType>{_viewType},
             multiSelectionEnabled: false,
             emptySelectionAllowed: false,
