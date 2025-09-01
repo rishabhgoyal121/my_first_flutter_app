@@ -114,6 +114,28 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          // Product count display or loading indicator
+          Padding(
+            padding: const EdgeInsets.only(right: 12.0),
+            child: isLoading
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2.2),
+                  )
+                : Text(
+                    products.isEmpty
+                        ? 'no results'
+                        : products.length == 1
+                        ? '1 result'
+                        : '${products.length} results',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+          ),
           // Sort button - chip-like for large screens, icon for small screens
           if (isLargeScreen) ...[
             // Chip-like sort button for large screens
