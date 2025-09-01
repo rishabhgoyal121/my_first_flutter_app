@@ -46,11 +46,12 @@ class SafeNetworkImage extends StatelessWidget {
       height: height,
       fit: fit,
       loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null)
+        if (loadingProgress == null) {
           return ClipRRect(
             borderRadius: borderRadius ?? BorderRadius.zero,
             child: child,
           );
+        }
         return placeholder;
       },
       errorBuilder: (context, error, stackTrace) {
