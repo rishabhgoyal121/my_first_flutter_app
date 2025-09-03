@@ -3,7 +3,8 @@ import 'src/widgets/safe_network_image.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, defaultTargetPlatform, TargetPlatform;
 import 'package:universal_html/html.dart' as html;
 import 'dart:convert';
 import 'product.dart';
@@ -29,16 +30,32 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   late Product product;
   final ScrollController _scrollController = ScrollController();
   final GlobalKey _reviewsKey = GlobalKey();
+  late final PageController _imagePageController;
+  int _currentImageIndex = 0;
+
+  bool get _isDesktopOrWeb {
+    if (kIsWeb) return true;
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
+      case TargetPlatform.linux:
+        return true;
+      default:
+        return false;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     product = widget.product;
+    _imagePageController = PageController();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _imagePageController.dispose();
     super.dispose();
   }
 
@@ -129,57 +146,151 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  void _showFullScreenImage(String imageUrl) {
+  void _showFullScreenGallery({required int initialIndex}) {
+    final images = (product.images.isNotEmpty)
+        ? product.images
+        : (product.thumbnail.isNotEmpty ? [product.thumbnail] : <String>[]);
+    if (images.isEmpty) return;
+
+    int current = initialIndex.clamp(0, images.length - 1);
+    final pageController = PageController(initialPage: current);
+
     showDialog(
       context: context,
       builder: (context) => Dialog.fullscreen(
         backgroundColor: Colors.black,
-        child: Stack(
-          children: [
-            InteractiveViewer(
-              minScale: 1.0,
-              maxScale: 5.0,
-              child: Center(
-                child: Hero(
-                  tag: imageUrl,
-                  child: SafeNetworkImage(
-                    imageUrl: imageUrl,
-                    fit: BoxFit.contain,
+        child: StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Stack(
+              children: [
+                PageView.builder(
+                  controller: pageController,
+                  onPageChanged: (i) => setDialogState(() => current = i),
+                  itemCount: images.length,
+                  itemBuilder: (context, index) {
+                    final url = images[index];
+                    return InteractiveViewer(
+                      minScale: 1.0,
+                      maxScale: 5.0,
+                      child: Center(
+                        child: Hero(
+                          tag: url,
+                          child: SafeNetworkImage(
+                            imageUrl: url,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                // Close button
+                Positioned(
+                  top: 40,
+                  right: 16,
+                  child: IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(Icons.close, color: Colors.white, size: 30),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black54,
+                      shape: CircleBorder(),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            Positioned(
-              top: 40,
-              right: 16,
-              child: IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: Icon(Icons.close, color: Colors.white, size: 30),
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.black54,
-                  shape: CircleBorder(),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 40,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(20),
+                // Navigation arrows for desktop/web
+                if (_isDesktopOrWeb && images.length > 1) ...[
+                  Positioned(
+                    left: 16,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: IconButton(
+                        tooltip: 'Previous',
+                        onPressed: current > 0
+                            ? () {
+                                final target = (current - 1).clamp(
+                                  0,
+                                  images.length - 1,
+                                );
+                                pageController.animateToPage(
+                                  target,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                                setDialogState(() => current = target);
+                              }
+                            : null,
+                        icon: const Icon(
+                          Icons.chevron_left,
+                          size: 36,
+                          color: Colors.white,
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.black45,
+                          shape: const CircleBorder(),
+                        ),
+                      ),
+                    ),
                   ),
-                  child: Text(
-                    'Pinch to zoom • Tap close button to exit',
-                    style: TextStyle(color: Colors.white, fontSize: 14),
+                  Positioned(
+                    right: 16,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: IconButton(
+                        tooltip: 'Next',
+                        onPressed: current < images.length - 1
+                            ? () {
+                                final target = (current + 1).clamp(
+                                  0,
+                                  images.length - 1,
+                                );
+                                pageController.animateToPage(
+                                  target,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                                setDialogState(() => current = target);
+                              }
+                            : null,
+                        icon: const Icon(
+                          Icons.chevron_right,
+                          size: 36,
+                          color: Colors.white,
+                        ),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.black45,
+                          shape: const CircleBorder(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                // Page indicator
+                Positioned(
+                  bottom: 24,
+                  left: 0,
+                  right: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(images.length, (i) {
+                      final active = current == i;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: active ? 10 : 8,
+                        height: active ? 10 : 8,
+                        decoration: BoxDecoration(
+                          color: active ? Colors.white : Colors.white54,
+                          shape: BoxShape.circle,
+                        ),
+                      );
+                    }),
                   ),
                 ),
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
@@ -203,6 +314,147 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     return [];
   }
   // Removed _showReviewDialogWithRating and _buildReviewDialog as they are no longer needed.
+
+  Widget _buildImageCarousel() {
+    final images = (product.images.isNotEmpty)
+        ? product.images
+        : (product.thumbnail.isNotEmpty ? [product.thumbnail] : <String>[]);
+    if (images.isEmpty) {
+      // Fallback empty placeholder
+      return Container(
+        height: 200,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(child: Icon(Icons.image_not_supported)),
+      );
+    }
+
+    return Column(
+      children: [
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () =>
+                _showFullScreenGallery(initialIndex: _currentImageIndex),
+            child: SizedBox(
+              height: 220,
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: PageView.builder(
+                      controller: _imagePageController,
+                      itemCount: images.length,
+                      onPageChanged: (i) {
+                        if (!mounted) return;
+                        setState(() => _currentImageIndex = i);
+                      },
+                      itemBuilder: (context, index) {
+                        final url = images[index];
+                        return Hero(
+                          tag: url,
+                          child: SafeNetworkImage(
+                            imageUrl: url,
+                            fit: BoxFit.contain,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  if (_isDesktopOrWeb && images.length > 1) ...[
+                    Positioned(
+                      left: 8,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: IconButton(
+                          tooltip: 'Previous',
+                          onPressed: _currentImageIndex > 0
+                              ? () {
+                                  final target = (_currentImageIndex - 1).clamp(
+                                    0,
+                                    images.length - 1,
+                                  );
+                                  _imagePageController.animateToPage(
+                                    target,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                  );
+                                  setState(() => _currentImageIndex = target);
+                                }
+                              : null,
+                          icon: const Icon(Icons.chevron_left, size: 30),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.black45,
+                            foregroundColor: Colors.white,
+                            shape: const CircleBorder(),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      right: 8,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: IconButton(
+                          tooltip: 'Next',
+                          onPressed: _currentImageIndex < images.length - 1
+                              ? () {
+                                  final target = (_currentImageIndex + 1).clamp(
+                                    0,
+                                    images.length - 1,
+                                  );
+                                  _imagePageController.animateToPage(
+                                    target,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                  );
+                                  setState(() => _currentImageIndex = target);
+                                }
+                              : null,
+                          icon: const Icon(Icons.chevron_right, size: 30),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.black45,
+                            foregroundColor: Colors.white,
+                            shape: const CircleBorder(),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        // Dots indicator
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(images.length, (i) {
+            final active = i == _currentImageIndex;
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              margin: const EdgeInsets.symmetric(horizontal: 3),
+              width: active ? 10 : 8,
+              height: active ? 10 : 8,
+              decoration: BoxDecoration(
+                color: active
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(
+                        context,
+                      ).colorScheme.outline.withValues(alpha: 0.6),
+                shape: BoxShape.circle,
+              ),
+            );
+          }),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -334,21 +586,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               AddToCartAnimation(
                 key: widget._animationKey,
                 cartIconKey: widget.cartIconKey,
-                child: MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: GestureDetector(
-                    onTap: () => _showFullScreenImage(product.thumbnail),
-                    child: Hero(
-                      tag: product.thumbnail,
-                      child: SafeNetworkImage(
-                        imageUrl: product.thumbnail,
-                        height: 200,
-                        fit: BoxFit.cover,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ),
+                child: _buildImageCarousel(),
                 onAnimationComplete: () async {},
               ),
               SizedBox(height: 16),
