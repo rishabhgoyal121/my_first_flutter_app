@@ -1125,7 +1125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             borderRadius: BorderRadius.circular(8),
                             child: SafeNetworkImage(
                               imageUrl: product.thumbnail,
-                              fit: BoxFit.cover,
+                              fit: BoxFit.contain,
                             ),
                           ),
                         ),
@@ -1353,7 +1353,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               cartIconKey: cartIconKey,
                                               child: SafeNetworkImage(
                                                 imageUrl: product.thumbnail,
-                                                fit: BoxFit.cover,
+                                                fit: BoxFit.contain,
                                               ),
                                             ),
                                           ),
